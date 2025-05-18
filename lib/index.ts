@@ -167,7 +167,7 @@ export function renderScene(
     // faces
     for (const idx of FACES) {
       const p4: Proj[] = []
-      let zSum = 0
+      let zMax = -Infinity
       let behind = false
       for (const i of idx) {
         const p = vp[i]
@@ -176,7 +176,7 @@ export function renderScene(
           break
         }
         p4.push(p)
-        zSum += vc[i]!.z
+        zMax = Math.max(zMax, vc[i]!.z)
       }
       if (behind) continue
       const [a, b, c] = idx
@@ -184,7 +184,7 @@ export function renderScene(
       if (n.z >= 0) continue
       faces.push({
         pts: p4,
-        depth: zSum / 4,
+        depth: zMax,
         fill: colorToCss(box.color),
       })
     }
@@ -205,7 +205,8 @@ export function renderScene(
           const vN = scale(v, 1 / lv)
           const cx = pts.reduce((s, p) => s + (p as Proj).x, 0) / 4
           const cy = pts.reduce((s, p) => s + (p as Proj).y, 0) / 4
-          const cz = vc[TOP[0]!]!.z
+          // use furthest top-face vertex so the label follows the face order
+          const cz = Math.max(...TOP.map((i) => vc[i]!.z))
           // SVG transform matrix: [a b c d e f] where
           // x' = a*x + c*y + e ; y' = b*x + d*y + f
           const m = `matrix(${uN.x} ${uN.y} ${vN.x} ${vN.y} ${cx} ${cy})`
