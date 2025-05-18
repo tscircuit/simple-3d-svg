@@ -1,0 +1,45 @@
+# @tscircuit/simple-3d-svg
+
+An extremely simple 3D SVG renderer.
+
+![simple svg](./tests/__snapshots__/scene1.snap.svg)
+
+## Usage
+
+```ts
+import { renderScene } from "@tscircuit/simple-3d-svg"
+
+renderScene({
+  boxes: [
+    {
+      center: { x: -1.5, y: 0, z: 6 },
+      topLabel: "Hello World",
+      topLabelColor: [255, 255, 255, 1],
+      size: { x: 2, y: 2, z: 2 },
+      color: [255, 0, 0, 0.9],
+    },
+    {
+      center: { x: 1.5, y: 0, z: 8 },
+      size: { x: 2, y: 2, z: 2 },
+      color: [0, 128, 255, 0.9],
+    },
+  ],
+  camera: { position: { x: -3, y: 4, z: 0 }, lookAt: { x: 0, y: 0, z: 6 } },
+})
+// "<svg>...</svg>"
+```
+
+## Motivation
+
+[tscircuit](https://github.com/tscircuit/tscircuit) projects often need to check
+the position of 3D objects relative to each other or see "3D Previews" of
+printed circuit boards for visual snapshot testing. However, 3D viewers are often reliant on heavy
+dependencies or browser features making them less portable and consistent.
+
+`@tscircuit/simple-3d-svg` is a fully-typescript, zero-dependency SVG 3d
+renderer that allows checking the positions and sizes of 3D objects in a scene
+for visual snapshot testing.
+
+## Notes
+
+- To correctly transform text for 3D, you need a perspective transform. However, the SVG spec only provides affine transforms. As a result, the text on the top of boxes will always look slighly "off".
