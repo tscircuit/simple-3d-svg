@@ -235,7 +235,9 @@ export function renderScene(
         `fill="${colorToCss(opt.backgroundColor)}" />\n`,
     )
   }
-  out.push('  <g stroke="#000" stroke-width="1">\n')
+  out.push(
+    '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n',
+  )
   for (const f of faces) {
     out.push(
       `    <polygon fill="${f.fill}" points="${f.pts.map((p) => `${p.x},${p.y}`).join(" ")}" />\n`,
