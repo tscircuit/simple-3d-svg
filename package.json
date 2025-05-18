@@ -1,7 +1,7 @@
 {
   "name": "@tscircuit/simple-3d-svg",
   "main": "./dist/index.js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An extremely simple 3D SVG renderer",
   "scripts": {
     "build": "tsup-node --dts --sourcemap inline --format esm ./lib/index.ts",
