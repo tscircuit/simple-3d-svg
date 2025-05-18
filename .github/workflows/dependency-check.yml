@@ -1,0 +1,31 @@
+name: Dependency Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Run Dependency Check
+        run: bunx @tscircuit/dependency-check
+        env:
+          # You should usually use internal_lib
+          # Other options:
+          #  - bundled_lib: No peer dependencies, no dependencies
+          INPUT_PACKAGE_TYPE: internal_lib
+
+          # INPUT_PEER_DEPS_SHOULD_BE_ASTERISK: false
+          # INPUT_IGNORE_PACKAGES: "circuit-json,..."
+          # INPUT_ADDITIONAL_INTERNAL_PACKAGES: "circuit-json,..."
