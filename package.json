@@ -2,7 +2,11 @@
   "name": "@tscircuit/simple-3d-svg",
   "main": "./dist/index.js",
   "version": "0.0.2",
+  "type": "module",
   "description": "An extremely simple 3D SVG renderer",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup-node --dts --sourcemap inline --format esm ./lib/index.ts",
     "format": "biome format --write .",
