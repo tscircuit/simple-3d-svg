@@ -19,12 +19,12 @@ export interface Box {
   topLabel?: string
   topLabelColor?: Color
 }
-interface Camera {
+export interface Camera {
   position: Point3
   lookAt: Point3
   focalLength?: number
 }
-interface Scene {
+export interface Scene {
   boxes: Box[]
   camera: Camera
 }
