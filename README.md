@@ -43,3 +43,44 @@ for visual snapshot testing.
 ## Notes
 
 - To correctly transform text for 3D, you need a perspective transform. However, the SVG spec only provides affine transforms. As a result, the text on the top of boxes will always look slighly "off".
+
+## Advanced Configuration
+
+You can customize the rendering behavior by providing an options object as the second argument to `renderScene`.
+
+### `focalLength`
+
+The `focalLength` option (default: `2`) controls the perspective effect. Smaller values create a more pronounced perspective (wide-angle lens), while larger values create a flatter perspective (telephoto lens).
+
+```ts
+renderScene(
+  {
+    /* ... scene definition ... */
+    camera: {
+      position: { x: -3, y: 4, z: 0 },
+      lookAt: { x: 0, y: 0, z: 6 },
+      focalLength: 1.5, // Closer to a wide-angle lens
+    },
+  },
+  {
+    /* ... other options ... */
+  },
+)
+```
+
+### `backgroundColor`
+
+The `backgroundColor` option allows you to set the background color of the SVG. It accepts a color string (e.g., `"white"`, `"#FF0000"`) or an RGBA tuple (e.g., `[255, 255, 255, 1]`).
+
+```ts
+renderScene(
+  {
+    /* ... scene definition ... */
+  },
+  {
+    backgroundColor: "lightblue",
+    // or
+    // backgroundColor: [173, 216, 230, 1]
+  },
+)
+```
