@@ -14,9 +14,9 @@ renderScene({
     {
       center: { x: -1.5, y: 0, z: 6 },
       topLabel: "Hello World",
-      topLabelColor: [255, 255, 255, 1],
+      topLabelColor: "white",
       size: { x: 2, y: 2, z: 2 },
-      color: [255, 0, 0, 0.9],
+      color: "rgba(255, 0, 0, 0.9)",
     },
     {
       center: { x: 1.5, y: 0, z: 8 },
