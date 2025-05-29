@@ -18,6 +18,9 @@ export interface Box {
   rotation?: Point3 // Euler radians
   topLabel?: string
   topLabelColor?: Color
+  faceImages?: {
+    top?: string
+  }
 }
 export interface Camera {
   position: Point3
@@ -156,7 +159,9 @@ export function renderScene(
   const focal = scene.camera.focalLength ?? FOCAL
   type Face = { pts: Proj[]; depth: number; fill: string }
   type Label = { matrix: string; depth: number; text: string; fill: string }
+  type Img = { matrix: string; depth: number; href: string }
   const faces: Face[] = []
+  const images: Img[] = []
   const labels: Label[] = []
 
   for (const box of scene.boxes) {
@@ -187,6 +192,21 @@ export function renderScene(
         depth: zMax,
         fill: colorToCss(box.color),
       })
+    }
+
+    // top face image
+    if (box.faceImages?.top) {
+      const pts = TOP.map((i) => vp[i])
+      if (pts.every(Boolean)) {
+        const p0 = pts[0] as Proj
+        const p1 = pts[1] as Proj
+        const p3 = pts[3] as Proj
+        const u = sub(p1, p0)
+        const v = sub(p3, p0)
+        const cz = Math.max(...TOP.map((i) => vc[i]!.z))
+        const m = `matrix(${u.x} ${u.y} ${v.x} ${v.y} ${p0.x} ${p0.y})`
+        images.push({ matrix: m, depth: cz, href: box.faceImages.top })
+      }
     }
 
     // top label
@@ -223,6 +243,7 @@ export function renderScene(
   }
 
   faces.sort((a, b) => b.depth - a.depth)
+  images.sort((a, b) => b.depth - a.depth)
   labels.sort((a, b) => b.depth - a.depth)
 
   const out: string[] = []
@@ -244,6 +265,15 @@ export function renderScene(
     )
   }
   out.push("  </g>\n")
+  if (images.length) {
+    out.push("  <g>\n")
+    for (const img of images) {
+      out.push(
+        `    <g transform="${img.matrix}"><image href="${img.href}" x="0" y="0" width="1" height="1" preserveAspectRatio="none" /></g>\n`,
+      )
+    }
+    out.push("  </g>\n")
+  }
   out.push(
     '  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central">\n',
   )
