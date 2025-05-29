@@ -15,6 +15,7 @@ renderScene({
       center: { x: -1.5, y: 0, z: 6 },
       topLabel: "Hello World",
       topLabelColor: "white",
+      faceImages: { top: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" },
       size: { x: 2, y: 2, z: 2 },
       color: "rgba(255, 0, 0, 0.9)",
     },
@@ -43,6 +44,7 @@ for visual snapshot testing.
 ## Notes
 
 - To correctly transform text for 3D, you need a perspective transform. However, the SVG spec only provides affine transforms. As a result, the text on the top of boxes will always look slighly "off".
+- You can project an image onto the top face of a box by providing `faceImages.top` with a data URI. The renderer uses two clipped images to achieve a perspective-correct mapping.
 
 ## Advanced Configuration
 
