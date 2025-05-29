@@ -15,6 +15,7 @@ renderScene({
       center: { x: -1.5, y: 0, z: 6 },
       topLabel: "Hello World",
       topLabelColor: "white",
+      faceImages: { top: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" },
       size: { x: 2, y: 2, z: 2 },
       color: "rgba(255, 0, 0, 0.9)",
     },
