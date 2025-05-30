@@ -155,15 +155,15 @@ interface Point2 {
 }
 
 function inv3(m: [number, number, number][]): [number, number, number][] {
-  const a = m[0][0],
-    d = m[0][1],
-    g = m[0][2]
-  const b = m[1][0],
-    e = m[1][1],
-    h = m[1][2]
-  const c = m[2][0],
-    f = m[2][1],
-    i = m[2][2]
+  const a = m[0]![0],
+    d = m[0]![1],
+    g = m[0]![2]
+  const b = m[1]![0],
+    e = m[1]![1],
+    h = m[1]![2]
+  const c = m[2]![0],
+    f = m[2]![1],
+    i = m[2]![2]
   const A = e * i - f * h
   const B = -(d * i - f * g)
   const C = d * h - e * g
@@ -193,7 +193,7 @@ function mul3(
   ]
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      r[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j]
+      r[i]![j] = a[i]![0]! * b[0]![j]! + a[i]![1]! * b[1]![j]! + a[i]![2]! * b[2]![j]!
     }
   }
   return r
@@ -214,7 +214,7 @@ function affineMatrix(
     [1, 1, 1],
   ]
   const M = mul3(D, inv3(S))
-  return `matrix(${M[0][0]} ${M[1][0]} ${M[0][1]} ${M[1][1]} ${M[0][2]} ${M[1][2]})`
+  return `matrix(${M[0]![0]} ${M[1]![0]} ${M[0]![1]} ${M[1]![1]} ${M[0]![2]} ${M[1]![2]})`
 }
 
 /*────────────── Render ─────────────*/
@@ -233,11 +233,13 @@ export function renderScene(
     href: string
     clip: string
     points: string
+    sym?: string
   }
   const faces: Face[] = []
   const images: Img[] = []
   const labels: Label[] = []
   let clipSeq = 0
+  const texId = new Map<string, string>()
 
   for (const box of scene.boxes) {
     const vw = verts(box)
@@ -277,6 +279,12 @@ export function renderScene(
         const cz = Math.max(...TOP.map((i) => vc[i]!.z))
         const href = box.faceImages.top
 
+        // Assign unique texture ID
+        if (!texId.has(href)) {
+          texId.set(href, `tex${texId.size}`)
+        }
+        const sym = texId.get(href)!
+
         // first half of the square — v3 v2 v6
         const tri0Mat = affineMatrix(
           [
@@ -293,6 +301,7 @@ export function renderScene(
           href,
           clip: id0,
           points: "0,0 1,0 1,1",
+          sym,
         })
 
         // second half of the square — v3 v6 v7
@@ -311,6 +320,7 @@ export function renderScene(
           href,
           clip: id1,
           points: "0,0 1,1 0,1",
+          sym,
         })
       }
     }
@@ -373,15 +383,26 @@ export function renderScene(
   out.push("  </g>\n")
   if (images.length) {
     out.push("  <defs>\n")
+
+    // Write one <image> per unique texture
+    for (const [href, id] of texId) {
+      out.push(
+        `    <image id="${id}" href="${href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>\n`,
+      )
+    }
+
+    // Write clip paths
     for (const img of images) {
       out.push(
         `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>\n`,
       )
     }
     out.push("  </defs>\n  <g>\n")
+
+    // Emit <use> instead of <image>
     for (const img of images) {
       out.push(
-        `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><image href="${img.href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering: pixelated"/></g>\n`,
+        `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>\n`,
       )
     }
     out.push("  </g>\n")
