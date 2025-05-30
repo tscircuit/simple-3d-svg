@@ -277,41 +277,21 @@ export function renderScene(
         const cz = Math.max(...TOP.map((i) => vc[i]!.z))
         const href = box.faceImages.top
 
+        // first half of the square ─ dst[3]  dst[2]  dst[1]
         const tri0Mat = affineMatrix(
-          [
-            { x: 0, y: 0 },
-            { x: 1, y: 0 },
-            { x: 1, y: 1 },
-          ],
-          [dst[0], dst[1], dst[2]],
+          [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }], // ↖, ↗, ↙   (counter-clockwise)
+          [dst[3], dst[2], dst[1]],
         )
         const id0 = `clip${clipSeq++}`
-        const pts0 = `${dst[0].x},${dst[0].y} ${dst[1].x},${dst[1].y} ${dst[2].x},${dst[2].y}`
-        images.push({
-          matrix: tri0Mat,
-          depth: cz,
-          href,
-          clip: id0,
-          points: pts0,
-        })
+        images.push({ matrix: tri0Mat, depth: cz, href, clip: id0, points: "0,0 1,0 1,1" })
 
+        // second half of the square ─ dst[3]  dst[1]  dst[0]
         const tri1Mat = affineMatrix(
-          [
-            { x: 0, y: 0 },
-            { x: 1, y: 1 },
-            { x: 0, y: 1 },
-          ],
-          [dst[0], dst[2], dst[3]],
+          [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }], // ↖, ↘, ↙   (counter-clockwise)
+          [dst[3], dst[1], dst[0]],
         )
         const id1 = `clip${clipSeq++}`
-        const pts1 = `${dst[0].x},${dst[0].y} ${dst[2].x},${dst[2].y} ${dst[3].x},${dst[3].y}`
-        images.push({
-          matrix: tri1Mat,
-          depth: cz,
-          href,
-          clip: id1,
-          points: pts1,
-        })
+        images.push({ matrix: tri1Mat, depth: cz, href, clip: id1, points: "0,0 1,1 0,1" })
       }
     }
 
@@ -375,13 +355,13 @@ export function renderScene(
     out.push("  <defs>\n")
     for (const img of images) {
       out.push(
-        `    <clipPath id="${img.clip}"><polygon points="${img.points}" /></clipPath>\n`,
+        `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>\n`,
       )
     }
     out.push("  </defs>\n  <g>\n")
     for (const img of images) {
       out.push(
-        `    <image href="${img.href}" width="1" height="1" preserveAspectRatio="none" transform="${img.matrix}" clip-path="url(#${img.clip})" />\n`,
+        `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><image href="${img.href}" width="1" height="1" preserveAspectRatio="none"/></g>\n`,
       )
     }
     out.push("  </g>\n")

@@ -1,7 +1,8 @@
 import { test, expect } from "bun:test"
 import { renderScene } from "lib"
+import { CHECKER_2x2 } from "./fixtures/checkerboard"
 
-test("top image", () => {
+test("topimage1", () => {
   const svg = renderScene({
     boxes: [
       {
@@ -9,7 +10,7 @@ test("top image", () => {
         size: { x: 2, y: 2, z: 2 },
         color: "gray",
         faceImages: {
-          top: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
+          top: CHECKER_2x2,
         },
       },
     ],
