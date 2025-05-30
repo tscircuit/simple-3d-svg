@@ -18,6 +18,9 @@ export interface Box {
   rotation?: Point3 // Euler radians
   topLabel?: string
   topLabelColor?: Color
+  faceImages?: {
+    top?: string
+  }
 }
 export interface Camera {
   position: Point3
@@ -118,6 +121,7 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
 }
 
 /*────────────── Geometry ─────────────*/
+const NUM_FACE_QUADS = 4 // Number of quads per face (each quad = 2 triangles)
 const FACES: [number, number, number, number][] = [
   [0, 1, 2, 3],
   [4, 5, 6, 7],
@@ -146,6 +150,75 @@ function verts(b: Box): Point3[] {
   return offs.map((o) => add(center, rotLocal(o, rotation)))
 }
 
+interface Point2 {
+  x: number
+  y: number
+}
+
+function inv3(m: [number, number, number][]): [number, number, number][] {
+  const a = m[0]![0],
+    d = m[0]![1],
+    g = m[0]![2]
+  const b = m[1]![0],
+    e = m[1]![1],
+    h = m[1]![2]
+  const c = m[2]![0],
+    f = m[2]![1],
+    i = m[2]![2]
+  const A = e * i - f * h
+  const B = -(d * i - f * g)
+  const C = d * h - e * g
+  const D = -(b * i - c * h)
+  const E = a * i - c * g
+  const F = -(a * h - b * g)
+  const G = b * f - c * e
+  const H = -(a * f - c * d)
+  const I = a * e - b * d
+  const det = a * A + d * D + g * G
+  const invDet = det ? 1 / det : 0
+  return [
+    [A * invDet, B * invDet, C * invDet],
+    [D * invDet, E * invDet, F * invDet],
+    [G * invDet, H * invDet, I * invDet],
+  ]
+}
+
+function mul3(
+  a: [number, number, number][],
+  b: [number, number, number][],
+): [number, number, number][] {
+  const r: [number, number, number][] = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ]
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      r[i]![j] =
+        a[i]![0]! * b[0]![j]! + a[i]![1]! * b[1]![j]! + a[i]![2]! * b[2]![j]!
+    }
+  }
+  return r
+}
+
+function affineMatrix(
+  src: [Point2, Point2, Point2],
+  dst: [Point2, Point2, Point2],
+): string {
+  const S: [number, number, number][] = [
+    [src[0].x, src[1].x, src[2].x],
+    [src[0].y, src[1].y, src[2].y],
+    [1, 1, 1],
+  ]
+  const D: [number, number, number][] = [
+    [dst[0].x, dst[1].x, dst[2].x],
+    [dst[0].y, dst[1].y, dst[2].y],
+    [1, 1, 1],
+  ]
+  const M = mul3(D, inv3(S))
+  return `matrix(${M[0]![0]} ${M[1]![0]} ${M[0]![1]} ${M[1]![1]} ${M[0]![2]} ${M[1]![2]})`
+}
+
 /*────────────── Render ─────────────*/
 export function renderScene(
   scene: Scene,
@@ -156,8 +229,19 @@ export function renderScene(
   const focal = scene.camera.focalLength ?? FOCAL
   type Face = { pts: Proj[]; depth: number; fill: string }
   type Label = { matrix: string; depth: number; text: string; fill: string }
+  type Img = {
+    matrix: string
+    depth: number
+    href: string
+    clip: string
+    points: string
+    sym?: string
+  }
   const faces: Face[] = []
+  const images: Img[] = []
   const labels: Label[] = []
+  let clipSeq = 0
+  const texId = new Map<string, string>()
 
   for (const box of scene.boxes) {
     const vw = verts(box)
@@ -187,6 +271,99 @@ export function renderScene(
         depth: zMax,
         fill: colorToCss(box.color),
       })
+    }
+
+    // top face image
+    if (box.faceImages?.top) {
+      const pts = TOP.map((i) => vp[i])
+      if (pts.every(Boolean)) {
+        const dst = pts as [Proj, Proj, Proj, Proj]
+        const cz = Math.max(...TOP.map((i) => vc[i]!.z))
+        const href = box.faceImages.top
+
+        // Assign unique texture ID
+        if (!texId.has(href)) {
+          texId.set(href, `tex${texId.size}`)
+        }
+        const sym = texId.get(href)!
+
+        // Subdivide the face into NUM_FACE_QUADS x NUM_FACE_QUADS grid
+        const quadsPerSide = Math.sqrt(NUM_FACE_QUADS)
+        for (let row = 0; row < quadsPerSide; row++) {
+          for (let col = 0; col < quadsPerSide; col++) {
+            const u0 = col / quadsPerSide
+            const u1 = (col + 1) / quadsPerSide
+            const v0 = row / quadsPerSide
+            const v1 = (row + 1) / quadsPerSide
+
+            // Bilinear interpolation for quad corners in 3D space
+            const lerp = (a: Proj, b: Proj, t: number): Proj => ({
+              x: a.x * (1 - t) + b.x * t,
+              y: a.y * (1 - t) + b.y * t,
+              z: a.z * (1 - t) + b.z * t,
+            })
+
+            const p00 = lerp(
+              lerp(dst[0], dst[1], u0),
+              lerp(dst[3], dst[2], u0),
+              v0,
+            )
+            const p10 = lerp(
+              lerp(dst[0], dst[1], u1),
+              lerp(dst[3], dst[2], u1),
+              v0,
+            )
+            const p01 = lerp(
+              lerp(dst[0], dst[1], u0),
+              lerp(dst[3], dst[2], u0),
+              v1,
+            )
+            const p11 = lerp(
+              lerp(dst[0], dst[1], u1),
+              lerp(dst[3], dst[2], u1),
+              v1,
+            )
+
+            // First triangle: p00, p10, p11
+            const tri0Mat = affineMatrix(
+              [
+                { x: u0, y: v0 },
+                { x: u1, y: v0 },
+                { x: u1, y: v1 },
+              ],
+              [p00, p10, p11],
+            )
+            const id0 = `clip${clipSeq++}`
+            images.push({
+              matrix: tri0Mat,
+              depth: cz,
+              href,
+              clip: id0,
+              points: `${u0},${v0} ${u1},${v0} ${u1},${v1}`,
+              sym,
+            })
+
+            // Second triangle: p00, p11, p01
+            const tri1Mat = affineMatrix(
+              [
+                { x: u0, y: v0 },
+                { x: u1, y: v1 },
+                { x: u0, y: v1 },
+              ],
+              [p00, p11, p01],
+            )
+            const id1 = `clip${clipSeq++}`
+            images.push({
+              matrix: tri1Mat,
+              depth: cz,
+              href,
+              clip: id1,
+              points: `${u0},${v0} ${u1},${v1} ${u0},${v1}`,
+              sym,
+            })
+          }
+        }
+      }
     }
 
     // top label
@@ -223,6 +400,7 @@ export function renderScene(
   }
 
   faces.sort((a, b) => b.depth - a.depth)
+  images.sort((a, b) => b.depth - a.depth)
   labels.sort((a, b) => b.depth - a.depth)
 
   const out: string[] = []
@@ -244,6 +422,32 @@ export function renderScene(
     )
   }
   out.push("  </g>\n")
+  if (images.length) {
+    out.push("  <defs>\n")
+
+    // Write one <image> per unique texture
+    for (const [href, id] of texId) {
+      out.push(
+        `    <image id="${id}" href="${href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>\n`,
+      )
+    }
+
+    // Write clip paths
+    for (const img of images) {
+      out.push(
+        `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>\n`,
+      )
+    }
+    out.push("  </defs>\n  <g>\n")
+
+    // Emit <use> instead of <image>
+    for (const img of images) {
+      out.push(
+        `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>\n`,
+      )
+    }
+    out.push("  </g>\n")
+  }
   out.push(
     '  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central">\n',
   )
