@@ -45,7 +45,7 @@ test("Binary STL rendering with bear clip and additional boxes", async () => {
       },
     ],
     camera: {
-      position: { x: -60, y: 60, z: 60 },
+      position: { x: -20, y: 10, z: 60 },
       lookAt: { x: 0, y: 0, z: 0 },
     },
   }
