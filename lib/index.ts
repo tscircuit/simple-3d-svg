@@ -279,19 +279,39 @@ export function renderScene(
 
         // first half of the square — v3 v2 v6
         const tri0Mat = affineMatrix(
-          [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }], // ↖ ↗ ↘ (counter-clockwise)
+          [
+            { x: 0, y: 0 },
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+          ], // ↖ ↗ ↘ (counter-clockwise)
           [dst[0], dst[1], dst[2]],
         )
         const id0 = `clip${clipSeq++}`
-        images.push({ matrix: tri0Mat, depth: cz, href, clip: id0, points: "0,0 1,0 1,1" })
+        images.push({
+          matrix: tri0Mat,
+          depth: cz,
+          href,
+          clip: id0,
+          points: "0,0 1,0 1,1",
+        })
 
         // second half of the square — v3 v6 v7
         const tri1Mat = affineMatrix(
-          [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }], // ↖ ↘ ↙ (counter-clockwise)
+          [
+            { x: 0, y: 0 },
+            { x: 1, y: 1 },
+            { x: 0, y: 1 },
+          ], // ↖ ↘ ↙ (counter-clockwise)
           [dst[0], dst[2], dst[3]],
         )
         const id1 = `clip${clipSeq++}`
-        images.push({ matrix: tri1Mat, depth: cz, href, clip: id1, points: "0,0 1,1 0,1" })
+        images.push({
+          matrix: tri1Mat,
+          depth: cz,
+          href,
+          clip: id1,
+          points: "0,0 1,1 0,1",
+        })
       }
     }
 
@@ -361,7 +381,7 @@ export function renderScene(
     out.push("  </defs>\n  <g>\n")
     for (const img of images) {
       out.push(
-        `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><image href="${img.href}" width="1" height="1" preserveAspectRatio="none"/></g>\n`,
+        `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><image href="${img.href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering: pixelated"/></g>\n`,
       )
     }
     out.push("  </g>\n")
