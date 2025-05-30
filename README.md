@@ -9,7 +9,9 @@ An extremely simple 3D SVG renderer.
 ```ts
 import { renderScene } from "@tscircuit/simple-3d-svg"
 
-renderScene({
+// renderScene is async
+
+const svg = await renderScene({
   boxes: [
     {
       center: { x: -1.5, y: 0, z: 6 },

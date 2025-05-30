@@ -92,7 +92,7 @@ const scene = {
   },
 }
 
-test("render scene", () => {
-  const svg = renderScene(scene, { backgroundColor: "gray" })
-  expect(svg).toMatchSvgSnapshot(import.meta.path)
+test("render scene", async () => {
+  const svg = await renderScene(scene, { backgroundColor: "gray" })
+  await expect(svg).toMatchSvgSnapshot(import.meta.path)
 })

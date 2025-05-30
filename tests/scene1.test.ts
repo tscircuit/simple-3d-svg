@@ -1,8 +1,8 @@
 import { test, expect } from "bun:test"
 import { renderScene } from "lib"
 
-test("scene1", () => {
-  const svg = renderScene({
+test("scene1", async () => {
+  const svg = await renderScene({
     boxes: [
       {
         center: { x: -1.5, y: 0, z: 6 },
@@ -20,5 +20,5 @@ test("scene1", () => {
     camera: { position: { x: -3, y: 4, z: 0 }, lookAt: { x: 0, y: 0, z: 6 } },
   })
 
-  expect(svg).toMatchSvgSnapshot(import.meta.path)
+  await expect(svg).toMatchSvgSnapshot(import.meta.path)
 })
