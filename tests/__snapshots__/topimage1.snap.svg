@@ -9,8 +9,8 @@
     <clipPath id="clip1" clipPathUnits="objectBoundingBox"><polygon points="0,0 1,1 0,1" /></clipPath>
   </defs>
   <g>
-    <g transform="matrix(-129.57670877434003 0 -154.49530661555926 58.11965811965811 64.78835438717002 -88.88888888888889)" clip-path="url(#clip0)"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEklEQVR4nGP4//8/AwT8//8fACnkBftaqoeuAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none"/></g>
-    <g transform="matrix(-179.41390445677848 0 24.918597841219224 58.11965811965811 64.78835438717002 -88.88888888888889)" clip-path="url(#clip1)"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEklEQVR4nGP4//8/AwT8//8fACnkBftaqoeuAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none"/></g>
+    <g transform="matrix(-179.41390445677848 0 24.918597841219224 -58.11965811965811 89.70695222838924 -30.76923076923077)" clip-path="url(#clip0)"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEklEQVR4nGP4//8/AwT8//8fACnkBftaqoeuAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none"/></g>
+    <g transform="matrix(-129.57670877434003 0 -24.918597841219224 -58.11965811965811 89.70695222838924 -30.76923076923077)" clip-path="url(#clip1)"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEklEQVR4nGP4//8/AwT8//8fACnkBftaqoeuAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none"/></g>
   </g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central">
   </g>

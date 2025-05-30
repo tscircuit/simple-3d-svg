@@ -277,18 +277,18 @@ export function renderScene(
         const cz = Math.max(...TOP.map((i) => vc[i]!.z))
         const href = box.faceImages.top
 
-        // first half of the square ─ dst[3]  dst[2]  dst[1]
+        // first half of the square — v3 v2 v6
         const tri0Mat = affineMatrix(
-          [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }], // ↖, ↗, ↙   (counter-clockwise)
-          [dst[3], dst[2], dst[1]],
+          [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }], // ↖ ↗ ↘ (counter-clockwise)
+          [dst[0], dst[1], dst[2]],
         )
         const id0 = `clip${clipSeq++}`
         images.push({ matrix: tri0Mat, depth: cz, href, clip: id0, points: "0,0 1,0 1,1" })
 
-        // second half of the square ─ dst[3]  dst[1]  dst[0]
+        // second half of the square — v3 v6 v7
         const tri1Mat = affineMatrix(
-          [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }], // ↖, ↘, ↙   (counter-clockwise)
-          [dst[3], dst[1], dst[0]],
+          [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }], // ↖ ↘ ↙ (counter-clockwise)
+          [dst[0], dst[2], dst[3]],
         )
         const id1 = `clip${clipSeq++}`
         images.push({ matrix: tri1Mat, depth: cz, href, clip: id1, points: "0,0 1,1 0,1" })
