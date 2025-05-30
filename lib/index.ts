@@ -121,6 +121,7 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
 }
 
 /*────────────── Geometry ─────────────*/
+const NUM_FACE_QUADS = 4 // Number of quads per face (each quad = 2 triangles)
 const FACES: [number, number, number, number][] = [
   [0, 1, 2, 3],
   [4, 5, 6, 7],
@@ -193,7 +194,8 @@ function mul3(
   ]
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      r[i]![j] = a[i]![0]! * b[0]![j]! + a[i]![1]! * b[1]![j]! + a[i]![2]! * b[2]![j]!
+      r[i]![j] =
+        a[i]![0]! * b[0]![j]! + a[i]![1]! * b[1]![j]! + a[i]![2]! * b[2]![j]!
     }
   }
   return r
@@ -285,43 +287,82 @@ export function renderScene(
         }
         const sym = texId.get(href)!
 
-        // first half of the square — v3 v2 v6
-        const tri0Mat = affineMatrix(
-          [
-            { x: 0, y: 0 },
-            { x: 1, y: 0 },
-            { x: 1, y: 1 },
-          ], // ↖ ↗ ↘ (counter-clockwise)
-          [dst[0], dst[1], dst[2]],
-        )
-        const id0 = `clip${clipSeq++}`
-        images.push({
-          matrix: tri0Mat,
-          depth: cz,
-          href,
-          clip: id0,
-          points: "0,0 1,0 1,1",
-          sym,
-        })
+        // Subdivide the face into NUM_FACE_QUADS x NUM_FACE_QUADS grid
+        const quadsPerSide = Math.sqrt(NUM_FACE_QUADS)
+        for (let row = 0; row < quadsPerSide; row++) {
+          for (let col = 0; col < quadsPerSide; col++) {
+            const u0 = col / quadsPerSide
+            const u1 = (col + 1) / quadsPerSide
+            const v0 = row / quadsPerSide
+            const v1 = (row + 1) / quadsPerSide
 
-        // second half of the square — v3 v6 v7
-        const tri1Mat = affineMatrix(
-          [
-            { x: 0, y: 0 },
-            { x: 1, y: 1 },
-            { x: 0, y: 1 },
-          ], // ↖ ↘ ↙ (counter-clockwise)
-          [dst[0], dst[2], dst[3]],
-        )
-        const id1 = `clip${clipSeq++}`
-        images.push({
-          matrix: tri1Mat,
-          depth: cz,
-          href,
-          clip: id1,
-          points: "0,0 1,1 0,1",
-          sym,
-        })
+            // Bilinear interpolation for quad corners in 3D space
+            const lerp = (a: Proj, b: Proj, t: number): Proj => ({
+              x: a.x * (1 - t) + b.x * t,
+              y: a.y * (1 - t) + b.y * t,
+              z: a.z * (1 - t) + b.z * t,
+            })
+
+            const p00 = lerp(
+              lerp(dst[0], dst[1], u0),
+              lerp(dst[3], dst[2], u0),
+              v0,
+            )
+            const p10 = lerp(
+              lerp(dst[0], dst[1], u1),
+              lerp(dst[3], dst[2], u1),
+              v0,
+            )
+            const p01 = lerp(
+              lerp(dst[0], dst[1], u0),
+              lerp(dst[3], dst[2], u0),
+              v1,
+            )
+            const p11 = lerp(
+              lerp(dst[0], dst[1], u1),
+              lerp(dst[3], dst[2], u1),
+              v1,
+            )
+
+            // First triangle: p00, p10, p11
+            const tri0Mat = affineMatrix(
+              [
+                { x: u0, y: v0 },
+                { x: u1, y: v0 },
+                { x: u1, y: v1 },
+              ],
+              [p00, p10, p11],
+            )
+            const id0 = `clip${clipSeq++}`
+            images.push({
+              matrix: tri0Mat,
+              depth: cz,
+              href,
+              clip: id0,
+              points: `${u0},${v0} ${u1},${v0} ${u1},${v1}`,
+              sym,
+            })
+
+            // Second triangle: p00, p11, p01
+            const tri1Mat = affineMatrix(
+              [
+                { x: u0, y: v0 },
+                { x: u1, y: v1 },
+                { x: u0, y: v1 },
+              ],
+              [p00, p11, p01],
+            )
+            const id1 = `clip${clipSeq++}`
+            images.push({
+              matrix: tri1Mat,
+              depth: cz,
+              href,
+              clip: id1,
+              points: `${u0},${v0} ${u1},${v1} ${u0},${v1}`,
+              sym,
+            })
+          }
+        }
       }
     }
 

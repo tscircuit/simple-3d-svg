@@ -6,12 +6,24 @@
   </g>
   <defs>
     <image id="tex0" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEklEQVR4nGP4//8/AwT8//8fACnkBftaqoeuAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>
-    <clipPath id="clip0" clipPathUnits="objectBoundingBox"><polygon points="0,0 1,0 1,1" /></clipPath>
-    <clipPath id="clip1" clipPathUnits="objectBoundingBox"><polygon points="0,0 1,1 0,1" /></clipPath>
+    <clipPath id="clip0" clipPathUnits="objectBoundingBox"><polygon points="0,0 0.5,0 0.5,0.5" /></clipPath>
+    <clipPath id="clip1" clipPathUnits="objectBoundingBox"><polygon points="0,0 0.5,0.5 0,0.5" /></clipPath>
+    <clipPath id="clip2" clipPathUnits="objectBoundingBox"><polygon points="0.5,0 1,0 1,0.5" /></clipPath>
+    <clipPath id="clip3" clipPathUnits="objectBoundingBox"><polygon points="0.5,0 1,0.5 0.5,0.5" /></clipPath>
+    <clipPath id="clip4" clipPathUnits="objectBoundingBox"><polygon points="0,0.5 0.5,0.5 0.5,1" /></clipPath>
+    <clipPath id="clip5" clipPathUnits="objectBoundingBox"><polygon points="0,0.5 0.5,1 0,1" /></clipPath>
+    <clipPath id="clip6" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,0.5 1,1" /></clipPath>
+    <clipPath id="clip7" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,1 0.5,1" /></clipPath>
   </defs>
   <g>
-    <g transform="matrix(-179.41390445677848 0 24.918597841219224 -58.11965811965811 89.70695222838924 -30.76923076923077)" clip-path="url(#clip0)"><use href="#tex0"/></g>
-    <g transform="matrix(-129.57670877434003 0 -24.918597841219224 -58.11965811965811 89.70695222838924 -30.76923076923077)" clip-path="url(#clip1)"><use href="#tex0"/></g>
+    <g transform="matrix(-179.41390445677848 0 0 -58.11965811965812 89.70695222838924 -30.76923076923077)" clip-path="url(#clip0)"><use href="#tex0"/></g>
+    <g transform="matrix(-154.49530661555926 0 -24.918597841219224 -58.11965811965812 89.70695222838924 -30.76923076923077)" clip-path="url(#clip1)"><use href="#tex0"/></g>
+    <g transform="matrix(-179.41390445677848 0 24.918597841219224 -58.11965811965812 89.70695222838924 -30.76923076923077)" clip-path="url(#clip2)"><use href="#tex0"/></g>
+    <g transform="matrix(-154.49530661555926 0 0 -58.11965811965812 77.24765330777963 -30.76923076923077)" clip-path="url(#clip3)"><use href="#tex0"/></g>
+    <g transform="matrix(-154.49530661555926 0 0 -58.11965811965811 77.24765330777963 -30.769230769230774)" clip-path="url(#clip4)"><use href="#tex0"/></g>
+    <g transform="matrix(-129.57670877434003 0 -24.918597841219224 -58.11965811965811 89.70695222838924 -30.769230769230774)" clip-path="url(#clip5)"><use href="#tex0"/></g>
+    <g transform="matrix(-154.49530661555926 0 24.918597841219224 -58.11965811965811 64.78835438717002 -30.769230769230774)" clip-path="url(#clip6)"><use href="#tex0"/></g>
+    <g transform="matrix(-129.57670877434003 0 0 -58.11965811965811 64.78835438717002 -30.769230769230774)" clip-path="url(#clip7)"><use href="#tex0"/></g>
   </g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central">
   </g>
