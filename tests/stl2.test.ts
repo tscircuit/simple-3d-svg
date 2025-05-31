@@ -36,12 +36,12 @@ test("Binary STL rendering with bear clip and additional boxes", async () => {
       {
         center: { x: 0, y: 0, z: -30 },
         size: { x: 8, y: 8, z: 8 },
-        color: [1, 0, 1, 1] as const, // magenta
+        color: [1, 0, 1, 1] as [number, number, number, number], // magenta
       },
       {
         center: { x: 0, y: 0, z: 30 },
         size: { x: 8, y: 8, z: 8 },
-        color: [0, 1, 1, 1] as const, // cyan
+        color: [0, 1, 1, 1] as [number, number, number, number], // cyan
       },
     ],
     camera: {
