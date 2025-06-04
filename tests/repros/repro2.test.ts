@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test"
+import { test, expect } from "bun:test"
 import { renderScene } from "lib"
 
 const scene = {
@@ -13,6 +13,9 @@ const scene = {
         x: 12,
         y: 1.4,
         z: 30,
+      },
+      faceImages: {
+        top: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0icmVkIiAvPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiA8L3N2Zz4",
       },
       color: "rgba(0,140,0,0.8)",
     },
@@ -39,7 +42,7 @@ const scene = {
       },
       size: {
         x: 2.7,
-        y: 2,
+        y: 1,
         z: 1,
       },
       color: "rgba(128,128,128,0.9)",
@@ -69,7 +72,7 @@ const scene = {
       },
       size: {
         x: 2.7,
-        y: 2,
+        y: 1,
         z: 1,
       },
       color: "rgba(128,128,128,0.9)",
@@ -92,7 +95,7 @@ const scene = {
   },
 }
 
-test("repro1", () => {
+test("repro2", () => {
   const svg = renderScene(scene, { backgroundColor: "gray" })
   expect(svg).toMatchSvgSnapshot(import.meta.path)
 })
