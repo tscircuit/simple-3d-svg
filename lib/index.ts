@@ -19,3 +19,5 @@ export { renderScene } from "./render"
 
 // Re-export STL loader
 export { loadSTL } from "./loaders/stl"
+// Re-export OBJ loader
+export { loadOBJ } from "./loaders/obj"

@@ -1,5 +1,6 @@
 import type { Point3, RGBA, Color, Box, Camera, Scene, STLMesh } from "./types"
 import { loadSTL } from "./loaders/stl"
+import { loadOBJ } from "./loaders/obj"
 
 /*────────────── Color Utility ─────────────*/
 function colorToCss(c: Color): string {
@@ -215,14 +216,20 @@ function scaleAndPositionMesh(mesh: STLMesh, box: Box): Point3[] {
       // Apply uniform scaling
       transformed = scale(transformed, uniformScale)
 
-      // Apply STL-specific rotation if provided
+      // Apply STL or OBJ specific rotation if provided
       if (box.stlRotation) {
         transformed = rotLocal(transformed, box.stlRotation)
       }
+      if (box.objRotation) {
+        transformed = rotLocal(transformed, box.objRotation)
+      }
 
-      // Apply STL-specific position offset if provided
+      // Apply STL or OBJ specific position offset if provided
       if (box.stlPosition) {
         transformed = add(transformed, box.stlPosition)
+      }
+      if (box.objPosition) {
+        transformed = add(transformed, box.objPosition)
       }
 
       // Apply box rotation
@@ -266,6 +273,7 @@ export async function renderScene(
 
   // Load STL meshes for boxes that have stlUrl
   const stlMeshes = new Map<string, STLMesh>()
+  const objMeshes = new Map<string, STLMesh>()
   for (const box of scene.boxes) {
     if (box.stlUrl && !stlMeshes.has(box.stlUrl)) {
       try {
@@ -273,6 +281,14 @@ export async function renderScene(
         stlMeshes.set(box.stlUrl, mesh)
       } catch (error) {
         console.warn(`Failed to load STL from ${box.stlUrl}:`, error)
+      }
+    }
+    if (box.objUrl && !objMeshes.has(box.objUrl)) {
+      try {
+        const mesh = await loadOBJ(box.objUrl)
+        objMeshes.set(box.objUrl, mesh)
+      } catch (error) {
+        console.warn(`Failed to load OBJ from ${box.objUrl}:`, error)
       }
     }
   }
@@ -307,6 +323,41 @@ export async function renderScene(
           const faceNormal = cross(edge1, edge2)
 
           // Only render if facing towards camera (normal.z < 0 in camera space)
+          if (faceNormal.z < 0) {
+            const depth = Math.max(v0c.z, v1c.z, v2c.z)
+            faces.push({
+              pts: [v0p, v1p, v2p],
+              depth,
+              fill: colorToCss(box.color),
+            })
+          }
+        }
+      }
+    } else if (box.objUrl && objMeshes.has(box.objUrl)) {
+      const mesh = objMeshes.get(box.objUrl)!
+      const transformedVertices = scaleAndPositionMesh(mesh, box)
+
+      for (let i = 0; i < mesh.triangles.length; i++) {
+        const vertexStart = i * 3
+        const triangle = mesh.triangles[i]
+
+        const v0w = transformedVertices[vertexStart]!
+        const v1w = transformedVertices[vertexStart + 1]!
+        const v2w = transformedVertices[vertexStart + 2]!
+
+        const v0c = toCam(v0w, scene.camera)
+        const v1c = toCam(v1w, scene.camera)
+        const v2c = toCam(v2w, scene.camera)
+
+        const v0p = proj(v0c, W, H, focal)
+        const v1p = proj(v1c, W, H, focal)
+        const v2p = proj(v2c, W, H, focal)
+
+        if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const faceNormal = cross(edge1, edge2)
+
           if (faceNormal.z < 0) {
             const depth = Math.max(v0c.z, v1c.z, v2c.z)
             faces.push({
