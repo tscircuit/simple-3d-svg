@@ -521,30 +521,47 @@ export async function renderScene(
     out.push("  </defs>\n")
   }
 
-  // Render all elements in depth order
-  out.push(
-    '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n',
-  )
-
+  // Render all elements in depth order with proper grouping
+  let inStrokeGroup = false
+  
   for (const element of allElements) {
-    if (element.type === "face") {
-      const f = element.data
-      out.push(
-        `    <polygon fill="${f.fill}" points="${f.pts.map((p) => `${p.x},${p.y}`).join(" ")}" />\n`,
-      )
-    } else if (element.type === "image") {
-      const img = element.data
-      out.push(
-        `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>\n`,
-      )
+    if (element.type === "face" || element.type === "image") {
+      // Start stroke group if not already in one
+      if (!inStrokeGroup) {
+        out.push('  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n')
+        inStrokeGroup = true
+      }
+      
+      if (element.type === "face") {
+        const f = element.data
+        out.push(
+          `    <polygon fill="${f.fill}" points="${f.pts.map((p) => `${p.x},${p.y}`).join(" ")}" />\n`,
+        )
+      } else {
+        const img = element.data
+        out.push(
+          `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>\n`,
+        )
+      }
     } else if (element.type === "label") {
+      // Close stroke group if we're in one
+      if (inStrokeGroup) {
+        out.push("  </g>\n")
+        inStrokeGroup = false
+      }
+      
       const l = element.data
       out.push(
-        `    <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>\n`,
+        `  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>\n`,
       )
     }
   }
+  
+  // Close stroke group if still open
+  if (inStrokeGroup) {
+    out.push("  </g>\n")
+  }
 
-  out.push("  </g>\n</svg>")
+  out.push("</svg>")
   return out.join("")
 }
