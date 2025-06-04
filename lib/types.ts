@@ -18,6 +18,7 @@ export interface Box {
   faceImages?: {
     top?: string
   }
+  projectionSubdivision?: number // Number of subdivisions per side for face projection (default: 2)
   // STL support
   stlUrl?: string
   stlRotation?: Point3
