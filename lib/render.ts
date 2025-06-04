@@ -90,7 +90,6 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
 }
 
 /*────────────── Geometry ─────────────*/
-const NUM_FACE_QUADS = 4 // Number of quads per face (each quad = 2 triangles)
 const FACES: [number, number, number, number][] = [
   [0, 1, 2, 3],
   [4, 5, 6, 7],
@@ -363,8 +362,9 @@ export async function renderScene(
           }
           const sym = texId.get(href)!
 
-          // Subdivide the face into NUM_FACE_QUADS x NUM_FACE_QUADS grid
-          const quadsPerSide = Math.sqrt(NUM_FACE_QUADS)
+          // Subdivide the face into projectionSubdivision x projectionSubdivision grid
+          const subdivisions = box.projectionSubdivision ?? 2
+          const quadsPerSide = subdivisions
           for (let row = 0; row < quadsPerSide; row++) {
             for (let col = 0; col < quadsPerSide; col++) {
               const u0 = col / quadsPerSide
