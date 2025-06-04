@@ -15,7 +15,10 @@ const scene = {
         z: 30,
       },
       faceImages: {
-        top: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0icmVkIiAvPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiA8L3N2Zz4",
+        top: `data:image/svg+xml;base64,${btoa(`<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">                                       
+            <circle cx="50" cy="10" r="20" fill="blue" />
+            <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />                                            
+          </svg>`)}`,
       },
       color: "rgba(0,140,0,0.8)",
     },
