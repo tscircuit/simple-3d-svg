@@ -1,10 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="gray" points="55.53287518900287,19.04761904761905 -55.53287518900287,19.04761904761905 -64.78835438717002,-88.88888888888889 64.78835438717002,-88.88888888888889" />
-    <polygon fill="gray" points="72.88689868556627,99.99999999999999 -72.88689868556627,99.99999999999999 -55.53287518900287,19.04761904761905 55.53287518900287,19.04761904761905" />
-    <polygon fill="gray" points="89.70695222838924,-30.76923076923077 -89.70695222838924,-30.76923076923077 -64.78835438717002,-88.88888888888889 64.78835438717002,-88.88888888888889" />
-    <polygon fill="gray" points="72.88689868556627,99.99999999999999 -72.88689868556627,99.99999999999999 -89.70695222838924,-30.76923076923077 89.70695222838924,-30.76923076923077" />
-  </g>
-  <defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <defs>
     <image id="tex0" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEklEQVR4nGP4//8/AwT8//8fACnkBftaqoeuAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>
     <clipPath id="clip0" clipPathUnits="objectBoundingBox"><polygon points="0,0 0.5,0 0.5,0.5" /></clipPath>
     <clipPath id="clip1" clipPathUnits="objectBoundingBox"><polygon points="0,0 0.5,0.5 0,0.5" /></clipPath>
@@ -15,7 +9,10 @@
     <clipPath id="clip6" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,0.5 1,1" /></clipPath>
     <clipPath id="clip7" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,1 0.5,1" /></clipPath>
   </defs>
-  <g>
+  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <polygon fill="gray" points="55.53287518900287,19.04761904761905 -55.53287518900287,19.04761904761905 -64.78835438717002,-88.88888888888889 64.78835438717002,-88.88888888888889" />
+    <polygon fill="gray" points="72.88689868556627,99.99999999999999 -72.88689868556627,99.99999999999999 -55.53287518900287,19.04761904761905 55.53287518900287,19.04761904761905" />
+    <polygon fill="gray" points="89.70695222838924,-30.76923076923077 -89.70695222838924,-30.76923076923077 -64.78835438717002,-88.88888888888889 64.78835438717002,-88.88888888888889" />
     <g transform="matrix(-179.41390445677848 0 0 -58.11965811965812 89.70695222838924 -30.76923076923077)" clip-path="url(#clip0)"><use href="#tex0"/></g>
     <g transform="matrix(-154.49530661555926 0 -24.918597841219224 -58.11965811965812 89.70695222838924 -30.76923076923077)" clip-path="url(#clip1)"><use href="#tex0"/></g>
     <g transform="matrix(-179.41390445677848 0 24.918597841219224 -58.11965811965812 89.70695222838924 -30.76923076923077)" clip-path="url(#clip2)"><use href="#tex0"/></g>
@@ -24,7 +21,6 @@
     <g transform="matrix(-129.57670877434003 0 -24.918597841219224 -58.11965811965811 89.70695222838924 -30.769230769230774)" clip-path="url(#clip5)"><use href="#tex0"/></g>
     <g transform="matrix(-154.49530661555926 0 24.918597841219224 -58.11965811965811 64.78835438717002 -30.769230769230774)" clip-path="url(#clip6)"><use href="#tex0"/></g>
     <g transform="matrix(-129.57670877434003 0 0 -58.11965811965811 64.78835438717002 -30.769230769230774)" clip-path="url(#clip7)"><use href="#tex0"/></g>
-  </g>
-  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central">
+    <polygon fill="gray" points="72.88689868556627,99.99999999999999 -72.88689868556627,99.99999999999999 -89.70695222838924,-30.76923076923077 89.70695222838924,-30.76923076923077" />
   </g>
 </svg>

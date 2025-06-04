@@ -476,9 +476,19 @@ export async function renderScene(
     }
   }
 
-  faces.sort((a, b) => b.depth - a.depth)
-  images.sort((a, b) => b.depth - a.depth)
-  labels.sort((a, b) => b.depth - a.depth)
+  // Combine all renderable elements and sort by depth
+  type RenderElement =
+    | { type: "face"; data: Face }
+    | { type: "image"; data: Img }
+    | { type: "label"; data: Label }
+
+  const allElements: RenderElement[] = [
+    ...faces.map((f) => ({ type: "face" as const, data: f })),
+    ...images.map((i) => ({ type: "image" as const, data: i })),
+    ...labels.map((l) => ({ type: "label" as const, data: l })),
+  ]
+
+  allElements.sort((a, b) => b.data.depth - a.data.depth)
 
   const out: string[] = []
   out.push(
@@ -490,15 +500,8 @@ export async function renderScene(
         `fill="${colorToCss(opt.backgroundColor)}" />\n`,
     )
   }
-  out.push(
-    '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n',
-  )
-  for (const f of faces) {
-    out.push(
-      `    <polygon fill="${f.fill}" points="${f.pts.map((p) => `${p.x},${p.y}`).join(" ")}" />\n`,
-    )
-  }
-  out.push("  </g>\n")
+
+  // Write defs section if we have images
   if (images.length) {
     out.push("  <defs>\n")
 
@@ -515,24 +518,33 @@ export async function renderScene(
         `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>\n`,
       )
     }
-    out.push("  </defs>\n  <g>\n")
+    out.push("  </defs>\n")
+  }
 
-    // Emit <use> instead of <image>
-    for (const img of images) {
+  // Render all elements in depth order
+  out.push(
+    '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n',
+  )
+
+  for (const element of allElements) {
+    if (element.type === "face") {
+      const f = element.data
+      out.push(
+        `    <polygon fill="${f.fill}" points="${f.pts.map((p) => `${p.x},${p.y}`).join(" ")}" />\n`,
+      )
+    } else if (element.type === "image") {
+      const img = element.data
       out.push(
         `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>\n`,
       )
+    } else if (element.type === "label") {
+      const l = element.data
+      out.push(
+        `    <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>\n`,
+      )
     }
-    out.push("  </g>\n")
   }
-  out.push(
-    '  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central">\n',
-  )
-  for (const l of labels) {
-    out.push(
-      `    <g transform="${l.matrix}"><text x=\"0\" y=\"0\" fill=\"${l.fill}\">${l.text}</text></g>\n`,
-    )
-  }
+
   out.push("  </g>\n</svg>")
   return out.join("")
 }
