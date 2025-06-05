@@ -92,7 +92,7 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
 /*────────────── Geometry ─────────────*/
 const FACES: [number, number, number, number][] = [
   [0, 1, 2, 3],
-  [4, 5, 6, 7],
+  [4, 7, 6, 5],   // corrected order for the z-positive (camera-facing) side
   [0, 1, 5, 4],
   [3, 2, 6, 7],
   [1, 2, 6, 5],
@@ -301,20 +301,12 @@ export async function renderScene(
         const v2p = proj(v2c, W, H, focal)
 
         if (v0p && v1p && v2p) {
-          // Back-face culling using the triangle's normal
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const faceNormal = cross(edge1, edge2)
-
-          // Only render if facing towards camera (normal.z < 0 in camera space)
-          if (faceNormal.z < 0) {
-            const depth = Math.max(v0c.z, v1c.z, v2c.z)
-            faces.push({
-              pts: [v0p, v1p, v2p],
-              depth,
-              fill: colorToCss(box.color),
-            })
-          }
+          const depth = Math.max(v0c.z, v1c.z, v2c.z)
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            depth,
+            fill: colorToCss(box.color),
+          })
         }
       }
     } else {
@@ -338,9 +330,6 @@ export async function renderScene(
           zMax = Math.max(zMax, vc[i]!.z)
         }
         if (behind) continue
-        const [a, b, c] = idx
-        const n = cross(sub(vc[b]!, vc[a]!), sub(vc[c]!, vc[a]!))
-        if (n.z >= 0) continue
         faces.push({
           pts: p4,
           depth: zMax,
