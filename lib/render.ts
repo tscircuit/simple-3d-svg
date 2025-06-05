@@ -92,7 +92,7 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
 /*────────────── Geometry ─────────────*/
 const FACES: [number, number, number, number][] = [
   [0, 1, 2, 3],
-  [4, 7, 6, 5],   // corrected order for the z-positive (camera-facing) side
+  [4, 7, 6, 5], // corrected order for the z-positive (camera-facing) side
   [0, 1, 5, 4],
   [3, 2, 6, 7],
   [1, 2, 6, 5],
