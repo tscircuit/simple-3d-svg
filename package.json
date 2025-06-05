@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsup-node --dts --sourcemap inline --format esm ./lib/index.ts",
     "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "example": "bun examples/animatedsubdivision.html"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
