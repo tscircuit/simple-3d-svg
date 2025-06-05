@@ -39,7 +39,8 @@ async function renderFrame(
         },
       ],
       camera: {
-        position: camPos,
+        // position: camPos,
+        position: { x: initialX, y: initialY, z: initialZ },
         lookAt: cameraLookAt,
         focalLength: cameraFocalLength,
       },
