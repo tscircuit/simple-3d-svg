@@ -339,9 +339,9 @@ export async function renderScene(
 
       // top face image
       if (box.faceImages?.top) {
-        const pts = TOP.map((i) => vp[i])
+        const pts = TOP.map((i) => vw[i])
         if (pts.every(Boolean)) {
-          const dst = pts as [Proj, Proj, Proj, Proj]
+          const dst = pts as [Point3, Point3, Point3, Point3]
           const cz = Math.max(...TOP.map((i) => vc[i]!.z))
           const href = box.faceImages.top
 
@@ -362,32 +362,48 @@ export async function renderScene(
               const v1 = (row + 1) / quadsPerSide
 
               // Bilinear interpolation for quad corners in 3D space
-              const lerp = (a: Proj, b: Proj, t: number): Proj => ({
+              const lerp = (a: Point3, b: Point3, t: number): Point3 => ({
                 x: a.x * (1 - t) + b.x * t,
                 y: a.y * (1 - t) + b.y * t,
                 z: a.z * (1 - t) + b.z * t,
               })
 
-              const p00 = lerp(
-                lerp(dst[0], dst[1], u0),
-                lerp(dst[3], dst[2], u0),
-                v0,
-              )
-              const p10 = lerp(
-                lerp(dst[0], dst[1], u1),
-                lerp(dst[3], dst[2], u1),
-                v0,
-              )
-              const p01 = lerp(
-                lerp(dst[0], dst[1], u0),
-                lerp(dst[3], dst[2], u0),
-                v1,
-              )
-              const p11 = lerp(
-                lerp(dst[0], dst[1], u1),
-                lerp(dst[3], dst[2], u1),
-                v1,
-              )
+              const p00 = proj(
+                toCam(
+                  lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v0),
+                  scene.camera,
+                ),
+                W,
+                H,
+                focal,
+              )!
+              const p10 = proj(
+                toCam(
+                  lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v0),
+                  scene.camera,
+                ),
+                W,
+                H,
+                focal,
+              )!
+              const p01 = proj(
+                toCam(
+                  lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v1),
+                  scene.camera,
+                ),
+                W,
+                H,
+                focal,
+              )!
+              const p11 = proj(
+                toCam(
+                  lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v1),
+                  scene.camera,
+                ),
+                W,
+                H,
+                focal,
+              )!
 
               // First triangle: p00, p10, p11
               const tri0Mat = affineMatrix(
