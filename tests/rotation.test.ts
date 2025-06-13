@@ -60,7 +60,7 @@ test("stl and obj rotation with bounding boxes", async () => {
       {
         center: { x: 2, y: 0, z: 0 },
         size: { x: 2, y: 2, z: 2 },
-        color: "gray" as const,
+        color: "green" as const,
         objUrl: simpleOBJ,
         objRotation: { y: Math.PI / 4, x: 0, z: 0 },
         drawBoundingBox: true,
@@ -68,7 +68,7 @@ test("stl and obj rotation with bounding boxes", async () => {
       {
         center: { x: 5, y: 0, z: 0 },
         size: { x: 2, y: 2, z: 2 },
-        color: "gray" as const,
+        color: "green" as const,
         objUrl: simpleOBJ,
         drawBoundingBox: true,
       },
