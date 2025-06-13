@@ -4,7 +4,9 @@ import { loadOBJ } from "./loaders/obj"
 
 /*────────────── Color Utility ─────────────*/
 function colorToCss(c: Color): string {
-  return typeof c === "string" ? c : `rgba(${c[0]},${c[1]},${c[2]},${c[3]})`
+  if (typeof c === "string") return c
+  const [r, g, b, a] = c
+  return `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${a})`
 }
 
 const NAMED_COLORS: Record<string, [number, number, number]> = {
