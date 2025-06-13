@@ -282,6 +282,7 @@ function scaleAndPositionMesh(
 ): Point3[] {
   const { boundingBox } = mesh
   const meshCenter = scale(add(boundingBox.min, boundingBox.max), 0.5)
+  const centerModel = box.centerModel !== false
 
   // Rotate vertices around the mesh center
   const rotatedVerts: Point3[] = []
@@ -290,7 +291,7 @@ function scaleAndPositionMesh(
       let p = sub(v, meshCenter)
       if (box.stlRotation) p = rotLocal(p, box.stlRotation)
       if (box.objRotation) p = rotLocal(p, box.objRotation)
-      p = add(p, meshCenter)
+      if (!centerModel) p = add(p, meshCenter)
       rotatedVerts.push(p)
     }
   }
@@ -325,6 +326,7 @@ function scaleAndPositionMesh(
     if (scaleToBox) {
       t = sub(t, rotatedCenter)
       t = scale(t, uniformScale)
+      if (!centerModel) t = add(t, rotatedCenter)
     }
     if (box.stlPosition) t = add(t, box.stlPosition)
     if (box.objPosition) t = add(t, box.objPosition)
