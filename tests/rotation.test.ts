@@ -48,6 +48,7 @@ test("stl and obj rotation with bounding boxes", async () => {
         color: "orange" as const,
         stlUrl: pyramidSTL,
         stlRotation: { x: Math.PI / 2, y: 0, z: 0 },
+        scaleStlToBox: true,
         drawBoundingBox: true,
       },
       {
@@ -55,6 +56,7 @@ test("stl and obj rotation with bounding boxes", async () => {
         size: { x: 2, y: 2, z: 2 },
         color: "orange" as const,
         stlUrl: pyramidSTL,
+        scaleStlToBox: true,
         drawBoundingBox: true,
       },
       {
@@ -63,6 +65,7 @@ test("stl and obj rotation with bounding boxes", async () => {
         color: "green" as const,
         objUrl: simpleOBJ,
         objRotation: { y: Math.PI / 4, x: 0, z: 0 },
+        scaleObjToBox: true,
         drawBoundingBox: true,
       },
       {
@@ -70,6 +73,7 @@ test("stl and obj rotation with bounding boxes", async () => {
         size: { x: 2, y: 2, z: 2 },
         color: "green" as const,
         objUrl: simpleOBJ,
+        scaleObjToBox: true,
         drawBoundingBox: true,
       },
     ],

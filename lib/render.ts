@@ -273,45 +273,57 @@ function affineMatrix(
 }
 
 /*────────────── STL Mesh Processing ─────────────*/
-function scaleAndPositionMesh(mesh: STLMesh, box: Box): Point3[] {
+function scaleAndPositionMesh(
+  mesh: STLMesh,
+  box: Box,
+  scaleToBox: boolean,
+): Point3[] {
   const { boundingBox } = mesh
   const meshCenter = scale(add(boundingBox.min, boundingBox.max), 0.5)
 
-  // First apply rotation to all vertices centered at the mesh origin
+  // Rotate vertices around the mesh center
   const rotatedVerts: Point3[] = []
   for (const tri of mesh.triangles) {
     for (const v of tri.vertices) {
       let p = sub(v, meshCenter)
       if (box.stlRotation) p = rotLocal(p, box.stlRotation)
       if (box.objRotation) p = rotLocal(p, box.objRotation)
+      p = add(p, meshCenter)
       rotatedVerts.push(p)
     }
   }
 
-  // Compute bounding box after rotation
-  let min = { x: Infinity, y: Infinity, z: Infinity }
-  let max = { x: -Infinity, y: -Infinity, z: -Infinity }
-  for (const v of rotatedVerts) {
-    if (v.x < min.x) min.x = v.x
-    if (v.y < min.y) min.y = v.y
-    if (v.z < min.z) min.z = v.z
-    if (v.x > max.x) max.x = v.x
-    if (v.y > max.y) max.y = v.y
-    if (v.z > max.z) max.z = v.z
-  }
-  const rotatedSize = sub(max, min)
-  const boxSize = box.size
-  const scaleX = boxSize.x / rotatedSize.x
-  const scaleY = boxSize.y / rotatedSize.y
-  const scaleZ = boxSize.z / rotatedSize.z
-  const uniformScale = Math.min(scaleX, scaleY, scaleZ)
-  const rotatedCenter = scale(add(min, max), 0.5)
+  let uniformScale = 1
+  let rotatedCenter = { x: 0, y: 0, z: 0 }
 
-  // Transform vertices with scaling and centering
+  if (scaleToBox) {
+    // Compute bounding box after rotation
+    let min = { x: Infinity, y: Infinity, z: Infinity }
+    let max = { x: -Infinity, y: -Infinity, z: -Infinity }
+    for (const v of rotatedVerts) {
+      if (v.x < min.x) min.x = v.x
+      if (v.y < min.y) min.y = v.y
+      if (v.z < min.z) min.z = v.z
+      if (v.x > max.x) max.x = v.x
+      if (v.y > max.y) max.y = v.y
+      if (v.z > max.z) max.z = v.z
+    }
+    const rotatedSize = sub(max, min)
+    const boxSize = box.size
+    const scaleX = boxSize.x / rotatedSize.x
+    const scaleY = boxSize.y / rotatedSize.y
+    const scaleZ = boxSize.z / rotatedSize.z
+    uniformScale = Math.min(scaleX, scaleY, scaleZ)
+    rotatedCenter = scale(add(min, max), 0.5)
+  }
+
   const transformedVertices: Point3[] = []
   for (const p of rotatedVerts) {
-    let t = scale(p, uniformScale)
-    t = sub(t, scale(rotatedCenter, uniformScale))
+    let t = p
+    if (scaleToBox) {
+      t = sub(t, rotatedCenter)
+      t = scale(t, uniformScale)
+    }
     if (box.stlPosition) t = add(t, box.stlPosition)
     if (box.objPosition) t = add(t, box.objPosition)
     if (box.rotation) t = rotLocal(t, box.rotation)
@@ -389,7 +401,11 @@ export async function renderScene(
     // Handle STL rendering
     if (box.stlUrl && stlMeshes.has(box.stlUrl)) {
       const mesh = stlMeshes.get(box.stlUrl)!
-      const transformedVertices = scaleAndPositionMesh(mesh, box)
+      const transformedVertices = scaleAndPositionMesh(
+        mesh,
+        box,
+        box.scaleStlToBox ?? false,
+      )
 
       // Render STL triangles
       for (let i = 0; i < mesh.triangles.length; i++) {
@@ -424,7 +440,11 @@ export async function renderScene(
       }
     } else if (box.objUrl && objMeshes.has(box.objUrl)) {
       const mesh = objMeshes.get(box.objUrl)!
-      const transformedVertices = scaleAndPositionMesh(mesh, box)
+      const transformedVertices = scaleAndPositionMesh(
+        mesh,
+        box,
+        box.scaleObjToBox ?? false,
+      )
 
       for (let i = 0; i < mesh.triangles.length; i++) {
         const vertexStart = i * 3
