@@ -7,6 +7,75 @@ function colorToCss(c: Color): string {
   return typeof c === "string" ? c : `rgba(${c[0]},${c[1]},${c[2]},${c[3]})`
 }
 
+const NAMED_COLORS: Record<string, [number, number, number]> = {
+  black: [0, 0, 0],
+  silver: [192, 192, 192],
+  gray: [128, 128, 128],
+  grey: [128, 128, 128],
+  white: [255, 255, 255],
+  maroon: [128, 0, 0],
+  red: [255, 0, 0],
+  purple: [128, 0, 128],
+  fuchsia: [255, 0, 255],
+  green: [0, 128, 0],
+  lime: [0, 255, 0],
+  olive: [128, 128, 0],
+  yellow: [255, 255, 0],
+  navy: [0, 0, 128],
+  blue: [0, 0, 255],
+  teal: [0, 128, 128],
+  aqua: [0, 255, 255],
+  orange: [255, 165, 0],
+}
+
+function colorToRGBA(c: Color): RGBA {
+  if (Array.isArray(c)) return c
+  const s = c.trim().toLowerCase()
+  if (s.startsWith("#")) {
+    const hex = s.slice(1)
+    if (hex.length === 3) {
+      const r = parseInt(hex[0] + hex[0], 16)
+      const g = parseInt(hex[1] + hex[1], 16)
+      const b = parseInt(hex[2] + hex[2], 16)
+      return [r, g, b, 1]
+    }
+    if (hex.length === 6) {
+      const r = parseInt(hex.slice(0, 2), 16)
+      const g = parseInt(hex.slice(2, 4), 16)
+      const b = parseInt(hex.slice(4, 6), 16)
+      return [r, g, b, 1]
+    }
+  }
+  const rgbm = s.match(/^rgba?\(([^)]+)\)$/)
+  if (rgbm) {
+    const parts = rgbm[1].split(/\s*,\s*/).map(Number)
+    const [r, g, b, a] = parts
+    return [r, g, b, a ?? 1]
+  }
+  const named = NAMED_COLORS[s]
+  if (named) return [named[0], named[1], named[2], 1]
+  return [0, 0, 0, 1]
+}
+
+function lightenColor(c: Color, f: number): RGBA {
+  const [r, g, b, a] = colorToRGBA(c)
+  return [r + (255 - r) * f, g + (255 - g) * f, b + (255 - b) * f, a]
+}
+
+function darkenColor(c: Color, f: number): RGBA {
+  const [r, g, b, a] = colorToRGBA(c)
+  return [r * (1 - f), g * (1 - f), b * (1 - f), a]
+}
+
+function shadeByNormal(base: Color, normal: Point3): string {
+  const n = norm(normal)
+  if (n.z >= 0) {
+    return colorToCss(lightenColor(base, n.z * 0.4))
+  } else {
+    return colorToCss(darkenColor(base, -n.z * 0.4))
+  }
+}
+
 /*────────────── Vec3 ─────────────*/
 function add(a: Point3, b: Point3): Point3 {
   return { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z }
@@ -255,7 +324,7 @@ export async function renderScene(
   const W = opt.width ?? W_DEF
   const H = opt.height ?? H_DEF
   const focal = scene.camera.focalLength ?? FOCAL
-  type Face = { pts: Proj[]; depth: number; fill: string }
+  type Face = { pts: Proj[]; depth: number; fill: string; stroke: boolean }
   type Label = { matrix: string; depth: number; text: string; fill: string }
   type Img = {
     matrix: string
@@ -317,11 +386,15 @@ export async function renderScene(
         const v2p = proj(v2c, W, H, focal)
 
         if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const normal = cross(edge1, edge2)
           const depth = Math.max(v0c.z, v1c.z, v2c.z)
           faces.push({
             pts: [v0p, v1p, v2p],
             depth,
-            fill: colorToCss(box.color),
+            fill: shadeByNormal(box.color, normal),
+            stroke: false,
           })
         }
       }
@@ -355,7 +428,8 @@ export async function renderScene(
             faces.push({
               pts: [v0p, v1p, v2p],
               depth,
-              fill: colorToCss(box.color),
+              fill: shadeByNormal(box.color, faceNormal),
+              stroke: false,
             })
           }
         }
@@ -385,6 +459,7 @@ export async function renderScene(
           pts: p4,
           depth: zMax,
           fill: colorToCss(box.color),
+          stroke: true,
         })
       }
 
@@ -592,8 +667,11 @@ export async function renderScene(
 
       if (element.type === "face") {
         const f = element.data
+        const strokeAttr = f.stroke ? "" : ' stroke="none"'
         out.push(
-          `    <polygon fill="${f.fill}" points="${f.pts.map((p) => `${p.x},${p.y}`).join(" ")}" />\n`,
+          `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
+            .map((p) => `${p.x},${p.y}`)
+            .join(" ")}" />\n`,
         )
       } else {
         const img = element.data
