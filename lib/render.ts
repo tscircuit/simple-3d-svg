@@ -169,6 +169,20 @@ const FACES: [number, number, number, number][] = [
   [1, 2, 6, 5],
   [0, 3, 7, 4],
 ] // front,back,bottom,top,right,left
+const EDGES: [number, number][] = [
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [3, 0],
+  [4, 5],
+  [5, 6],
+  [6, 7],
+  [7, 4],
+  [0, 4],
+  [1, 5],
+  [2, 6],
+  [3, 7],
+]
 const TOP = [3, 2, 6, 7]
 function verts(b: Box): Point3[] {
   const {
@@ -261,57 +275,48 @@ function affineMatrix(
 /*────────────── STL Mesh Processing ─────────────*/
 function scaleAndPositionMesh(mesh: STLMesh, box: Box): Point3[] {
   const { boundingBox } = mesh
-  const meshSize = sub(boundingBox.max, boundingBox.min)
-  const boxSize = box.size
-
-  // Calculate scale factors for each axis
-  const scaleX = boxSize.x / meshSize.x
-  const scaleY = boxSize.y / meshSize.y
-  const scaleZ = boxSize.z / meshSize.z
-
-  // Use uniform scaling (smallest scale factor to fit within box)
-  const uniformScale = Math.min(scaleX, scaleY, scaleZ)
-
-  // Calculate mesh center
   const meshCenter = scale(add(boundingBox.min, boundingBox.max), 0.5)
 
-  // Transform all vertices
-  const transformedVertices: Point3[] = []
-
-  for (const triangle of mesh.triangles) {
-    for (const vertex of triangle.vertices) {
-      // Center the mesh at origin
-      let transformed = sub(vertex, meshCenter)
-
-      // Apply uniform scaling
-      transformed = scale(transformed, uniformScale)
-
-      // Apply STL or OBJ specific rotation if provided
-      if (box.stlRotation) {
-        transformed = rotLocal(transformed, box.stlRotation)
-      }
-      if (box.objRotation) {
-        transformed = rotLocal(transformed, box.objRotation)
-      }
-
-      // Apply STL or OBJ specific position offset if provided
-      if (box.stlPosition) {
-        transformed = add(transformed, box.stlPosition)
-      }
-      if (box.objPosition) {
-        transformed = add(transformed, box.objPosition)
-      }
-
-      // Apply box rotation
-      if (box.rotation) {
-        transformed = rotLocal(transformed, box.rotation)
-      }
-
-      // Position at box center
-      transformed = add(transformed, box.center)
-
-      transformedVertices.push(transformed)
+  // First apply rotation to all vertices centered at the mesh origin
+  const rotatedVerts: Point3[] = []
+  for (const tri of mesh.triangles) {
+    for (const v of tri.vertices) {
+      let p = sub(v, meshCenter)
+      if (box.stlRotation) p = rotLocal(p, box.stlRotation)
+      if (box.objRotation) p = rotLocal(p, box.objRotation)
+      rotatedVerts.push(p)
     }
+  }
+
+  // Compute bounding box after rotation
+  let min = { x: Infinity, y: Infinity, z: Infinity }
+  let max = { x: -Infinity, y: -Infinity, z: -Infinity }
+  for (const v of rotatedVerts) {
+    if (v.x < min.x) min.x = v.x
+    if (v.y < min.y) min.y = v.y
+    if (v.z < min.z) min.z = v.z
+    if (v.x > max.x) max.x = v.x
+    if (v.y > max.y) max.y = v.y
+    if (v.z > max.z) max.z = v.z
+  }
+  const rotatedSize = sub(max, min)
+  const boxSize = box.size
+  const scaleX = boxSize.x / rotatedSize.x
+  const scaleY = boxSize.y / rotatedSize.y
+  const scaleZ = boxSize.z / rotatedSize.z
+  const uniformScale = Math.min(scaleX, scaleY, scaleZ)
+  const rotatedCenter = scale(add(min, max), 0.5)
+
+  // Transform vertices with scaling and centering
+  const transformedVertices: Point3[] = []
+  for (const p of rotatedVerts) {
+    let t = scale(p, uniformScale)
+    t = sub(t, scale(rotatedCenter, uniformScale))
+    if (box.stlPosition) t = add(t, box.stlPosition)
+    if (box.objPosition) t = add(t, box.objPosition)
+    if (box.rotation) t = rotLocal(t, box.rotation)
+    t = add(t, box.center)
+    transformedVertices.push(t)
   }
 
   return transformedVertices
@@ -335,9 +340,11 @@ export async function renderScene(
     points: string
     sym?: string
   }
+  type Edge = { pts: [Proj, Proj]; depth: number; color: string }
   const faces: Face[] = []
   const images: Img[] = []
   const labels: Label[] = []
+  const edges: Edge[] = []
   let clipSeq = 0
   const texId = new Map<string, string>()
 
@@ -364,6 +371,21 @@ export async function renderScene(
   }
 
   for (const box of scene.boxes) {
+    const bw = verts(box)
+    const bc = bw.map((v) => toCam(v, scene.camera))
+    const bp = bc.map((v) => proj(v, W, H, focal))
+
+    if (box.drawBoundingBox) {
+      for (const [a, b] of EDGES) {
+        const pa = bp[a]
+        const pb = bp[b]
+        if (pa && pb) {
+          const depth = Math.max(bc[a]!.z, bc[b]!.z)
+          edges.push({ pts: [pa, pb], depth, color: "rgba(0,0,0,0.5)" })
+        }
+      }
+    }
+
     // Handle STL rendering
     if (box.stlUrl && stlMeshes.has(box.stlUrl)) {
       const mesh = stlMeshes.get(box.stlUrl)!
@@ -617,11 +639,13 @@ export async function renderScene(
     | { type: "face"; data: Face }
     | { type: "image"; data: Img }
     | { type: "label"; data: Label }
+    | { type: "edge"; data: Edge }
 
   const allElements: RenderElement[] = [
     ...faces.map((f) => ({ type: "face" as const, data: f })),
     ...images.map((i) => ({ type: "image" as const, data: i })),
     ...labels.map((l) => ({ type: "label" as const, data: l })),
+    ...edges.map((e) => ({ type: "edge" as const, data: e })),
   ]
 
   allElements.sort((a, b) => b.data.depth - a.data.depth)
@@ -694,6 +718,17 @@ export async function renderScene(
       const l = element.data
       out.push(
         `  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>\n`,
+      )
+    } else if (element.type === "edge") {
+      if (inStrokeGroup) {
+        out.push("  </g>\n")
+        inStrokeGroup = false
+      }
+      const e = element.data
+      out.push(
+        `  <polyline fill="none" stroke="${e.color}" points="${e.pts
+          .map((p) => `${p.x},${p.y}`)
+          .join(" ")}" />\n`,
       )
     }
   }
