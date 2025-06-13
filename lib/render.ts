@@ -599,9 +599,10 @@ export async function renderScene(
                 [p00, p10, p11],
               )
               const id0 = `clip${clipSeq++}`
+              const tri0Depth = Math.max(p00.z, p10.z, p11.z)
               images.push({
                 matrix: tri0Mat,
-                depth: cz,
+                depth: tri0Depth,
                 href,
                 clip: id0,
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
@@ -618,9 +619,10 @@ export async function renderScene(
                 [p00, p11, p01],
               )
               const id1 = `clip${clipSeq++}`
+              const tri1Depth = Math.max(p00.z, p11.z, p01.z)
               images.push({
                 matrix: tri1Mat,
-                depth: cz,
+                depth: tri1Depth,
                 href,
                 clip: id1,
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
