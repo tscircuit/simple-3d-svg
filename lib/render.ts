@@ -80,7 +80,7 @@ function shadeByNormal(base: Color, normal: Point3): string {
 }
 
 function fmt(n: number): string {
-  return (Math.round(n * 100) / 100).toString()
+  return Math.round(n).toString()
 }
 
 /*────────────── Vec3 ─────────────*/

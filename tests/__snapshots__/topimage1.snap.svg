@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <defs>
     <image id="tex0" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEklEQVR4nGP4//8/AwT8//8fACnkBftaqoeuAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>
-    <clipPath id="clip0" clipPathUnits="objectBoundingBox"><polygon points="0,0 0.5,0 0.5,0.5" /></clipPath>
-    <clipPath id="clip1" clipPathUnits="objectBoundingBox"><polygon points="0,0 0.5,0.5 0,0.5" /></clipPath>
-    <clipPath id="clip2" clipPathUnits="objectBoundingBox"><polygon points="0.5,0 1,0 1,0.5" /></clipPath>
-    <clipPath id="clip3" clipPathUnits="objectBoundingBox"><polygon points="0.5,0 1,0.5 0.5,0.5" /></clipPath>
-    <clipPath id="clip4" clipPathUnits="objectBoundingBox"><polygon points="0,0.5 0.5,0.5 0.5,1" /></clipPath>
-    <clipPath id="clip5" clipPathUnits="objectBoundingBox"><polygon points="0,0.5 0.5,1 0,1" /></clipPath>
-    <clipPath id="clip6" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,0.5 1,1" /></clipPath>
-    <clipPath id="clip7" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,1 0.5,1" /></clipPath>
+    <clipPath id="clip0" clipPathUnits="objectBoundingBox"><polygon points="0,0 1,0 1,1" /></clipPath>
+    <clipPath id="clip1" clipPathUnits="objectBoundingBox"><polygon points="0,0 1,1 0,1" /></clipPath>
+    <clipPath id="clip2" clipPathUnits="objectBoundingBox"><polygon points="1,0 1,0 1,1" /></clipPath>
+    <clipPath id="clip3" clipPathUnits="objectBoundingBox"><polygon points="1,0 1,1 1,1" /></clipPath>
+    <clipPath id="clip4" clipPathUnits="objectBoundingBox"><polygon points="0,1 1,1 1,1" /></clipPath>
+    <clipPath id="clip5" clipPathUnits="objectBoundingBox"><polygon points="0,1 1,1 0,1" /></clipPath>
+    <clipPath id="clip6" clipPathUnits="objectBoundingBox"><polygon points="1,1 1,1 1,1" /></clipPath>
+    <clipPath id="clip7" clipPathUnits="objectBoundingBox"><polygon points="1,1 1,1 1,1" /></clipPath>
   </defs>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="gray" points="55.53,19.05 64.79,-88.89 -64.79,-88.89 -55.53,19.05" />
-    <polygon fill="gray" points="72.89,100 -72.89,100 -55.53,19.05 55.53,19.05" />
-    <polygon fill="gray" points="-72.89,100 -89.71,-30.77 -64.79,-88.89 -55.53,19.05" />
-    <polygon fill="gray" points="72.89,100 89.71,-30.77 64.79,-88.89 55.53,19.05" />
-    <polygon fill="gray" points="89.71,-30.77 -89.71,-30.77 -64.79,-88.89 64.79,-88.89" />
+    <polygon fill="gray" points="56,19 65,-89 -65,-89 -56,19" />
+    <polygon fill="gray" points="73,100 -73,100 -56,19 56,19" />
+    <polygon fill="gray" points="-73,100 -90,-31 -65,-89 -56,19" />
+    <polygon fill="gray" points="73,100 90,-31 65,-89 56,19" />
+    <polygon fill="gray" points="90,-31 -90,-31 -65,-89 65,-89" />
     <g transform="matrix(-179.41390445677848 0 0 -67.49379652605461 89.70695222838924 -30.76923076923077)" clip-path="url(#clip0)"><use href="#tex0"/></g>
     <g transform="matrix(-150.47617793149166 0 -28.93772652528682 -67.49379652605461 89.70695222838924 -30.76923076923077)" clip-path="url(#clip1)"><use href="#tex0"/></g>
     <g transform="matrix(-179.41390445677848 0 28.93772652528682 -67.49379652605461 89.70695222838924 -30.76923076923077)" clip-path="url(#clip2)"><use href="#tex0"/></g>
@@ -23,6 +23,6 @@
     <g transform="matrix(-129.57670877434003 0 -20.89946915715163 -48.745519713261615 85.68782354432165 -40.14336917562727)" clip-path="url(#clip5)"><use href="#tex0"/></g>
     <g transform="matrix(-150.47617793149166 0 20.89946915715163 -48.745519713261615 64.78835438717002 -40.14336917562727)" clip-path="url(#clip6)"><use href="#tex0"/></g>
     <g transform="matrix(-129.57670877434003 0 0 -48.745519713261615 64.78835438717002 -40.14336917562727)" clip-path="url(#clip7)"><use href="#tex0"/></g>
-    <polygon fill="gray" points="72.89,100 -72.89,100 -89.71,-30.77 89.71,-30.77" />
+    <polygon fill="gray" points="73,100 -73,100 -90,-31 90,-31" />
   </g>
 </svg>
