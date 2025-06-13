@@ -22,15 +22,25 @@ function parseOBJ(text: string): STLMesh {
   for (const line of lines) {
     const trimmed = line.trim()
     if (trimmed.startsWith("v ")) {
-      const [, x, y, z] = trimmed.split(/\s+/)
+      const [, x, y, z] = trimmed.split(/\s+/) as [
+        string,
+        string,
+        string,
+        string,
+      ]
       vertices.push({ x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) })
     } else if (trimmed.startsWith("vn ")) {
-      const [, x, y, z] = trimmed.split(/\s+/)
+      const [, x, y, z] = trimmed.split(/\s+/) as [
+        string,
+        string,
+        string,
+        string,
+      ]
       normals.push({ x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) })
     } else if (trimmed.startsWith("f ")) {
       const parts = trimmed.slice(2).trim().split(/\s+/)
       const idxs = parts.map((p) => {
-        const [vi, , ni] = p.split("/")
+        const [vi, , ni] = p.split("/") as [string, string, string]
         return {
           v: parseInt(vi) - 1,
           n: ni ? parseInt(ni) - 1 : undefined,
@@ -45,11 +55,11 @@ function parseOBJ(text: string): STLMesh {
         const v2 = vertices[c.v]!
         let normal: Point3
         if (a.n !== undefined && normals[a.n]) {
-          normal = normals[a.n]
+          normal = normals[a.n]!
         } else if (b.n !== undefined && normals[b.n]) {
-          normal = normals[b.n]
+          normal = normals[b.n]!
         } else if (c.n !== undefined && normals[c.n]) {
-          normal = normals[c.n]
+          normal = normals[c.n]!
         } else {
           const edge1 = {
             x: v1.x - v0.x,
@@ -86,12 +96,12 @@ function calculateBoundingBox(triangles: Triangle[]): {
     return { min: { x: 0, y: 0, z: 0 }, max: { x: 0, y: 0, z: 0 } }
   }
 
-  let minX = Infinity,
-    minY = Infinity,
-    minZ = Infinity
-  let maxX = -Infinity,
-    maxY = -Infinity,
-    maxZ = -Infinity
+  let minX = Infinity
+  let minY = Infinity
+  let minZ = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  let maxZ = -Infinity
 
   for (const tri of triangles) {
     for (const v of tri.vertices) {
