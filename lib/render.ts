@@ -364,10 +364,15 @@ export async function renderScene(
     sym?: string
   }
   type Edge = { pts: [Proj, Proj]; depth: number; color: string }
-  const faces: Face[] = []
-  const images: Img[] = []
-  const labels: Label[] = []
-  const edges: Edge[] = []
+
+  type RenderElement =
+    | { type: "face"; data: Face }
+    | { type: "image"; data: Img }
+    | { type: "label"; data: Label }
+    | { type: "edge"; data: Edge }
+
+  const elements: RenderElement[] = []
+  const imageDefs: Img[] = []
   let clipSeq = 0
   const texId = new Map<string, string>()
 
@@ -404,7 +409,8 @@ export async function renderScene(
         const pb = bp[b]
         if (pa && pb) {
           const depth = Math.max(bc[a]!.z, bc[b]!.z)
-          edges.push({ pts: [pa, pb], depth, color: "rgba(0,0,0,0.5)" })
+          const edge: Edge = { pts: [pa, pb], depth, color: "rgba(0,0,0,0.5)" }
+          elements.push({ type: "edge", data: edge })
         }
       }
     }
@@ -441,12 +447,13 @@ export async function renderScene(
           const normal = cross(edge1, edge2)
           const depth = Math.max(v0c.z, v1c.z, v2c.z)
           const baseColor = box.color ?? "gray"
-          faces.push({
+          const face: Face = {
             pts: [v0p, v1p, v2p],
             depth,
             fill: shadeByNormal(baseColor, normal),
             stroke: false,
-          })
+          }
+          elements.push({ type: "face", data: face })
         }
       }
     } else if (box.objUrl && objMeshes.has(box.objUrl)) {
@@ -480,7 +487,7 @@ export async function renderScene(
 
           if (faceNormal.z < 0) {
             const depth = Math.max(v0c.z, v1c.z, v2c.z)
-            faces.push({
+            const face: Face = {
               pts: [v0p, v1p, v2p],
               depth,
               fill: shadeByNormal(
@@ -488,7 +495,8 @@ export async function renderScene(
                 faceNormal,
               ),
               stroke: false,
-            })
+            }
+            elements.push({ type: "face", data: face })
           }
         }
       }
@@ -513,12 +521,13 @@ export async function renderScene(
           zMax = Math.max(zMax, vc[i]!.z)
         }
         if (behind) continue
-        faces.push({
+        const face: Face = {
           pts: p4,
           depth: zMax,
           fill: colorToCss(box.color ?? "gray"),
           stroke: true,
-        })
+        }
+        elements.push({ type: "face", data: face })
       }
 
       // top face image
@@ -599,14 +608,16 @@ export async function renderScene(
                 [p00, p10, p11],
               )
               const id0 = `clip${clipSeq++}`
-              images.push({
+              const img0: Img = {
                 matrix: tri0Mat,
                 depth: cz,
                 href,
                 clip: id0,
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
                 sym,
-              })
+              }
+              imageDefs.push(img0)
+              elements.push({ type: "image", data: img0 })
 
               // Second triangle: p00, p11, p01
               const tri1Mat = affineMatrix(
@@ -618,14 +629,16 @@ export async function renderScene(
                 [p00, p11, p01],
               )
               const id1 = `clip${clipSeq++}`
-              images.push({
+              const img1: Img = {
                 matrix: tri1Mat,
                 depth: cz,
                 href,
                 clip: id1,
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
                 sym,
-              })
+              }
+              imageDefs.push(img1)
+              elements.push({ type: "image", data: img1 })
             }
           }
         }
@@ -653,12 +666,13 @@ export async function renderScene(
             // x' = a*x + c*y + e ; y' = b*x + d*y + f
             const m = `matrix(${uN.x} ${uN.y} ${vN.x} ${vN.y} ${cx} ${cy})`
             const fillCol = box.topLabelColor ?? [0, 0, 0, 1]
-            labels.push({
+            const label: Label = {
               matrix: m,
               depth: cz,
               text: box.topLabel,
               fill: colorToCss(fillCol),
-            })
+            }
+            elements.push({ type: "label", data: label })
           }
         }
       }
@@ -666,18 +680,7 @@ export async function renderScene(
   }
 
   // Combine all renderable elements and sort by depth
-  type RenderElement =
-    | { type: "face"; data: Face }
-    | { type: "image"; data: Img }
-    | { type: "label"; data: Label }
-    | { type: "edge"; data: Edge }
-
-  const allElements: RenderElement[] = [
-    ...faces.map((f) => ({ type: "face" as const, data: f })),
-    ...images.map((i) => ({ type: "image" as const, data: i })),
-    ...labels.map((l) => ({ type: "label" as const, data: l })),
-    ...edges.map((e) => ({ type: "edge" as const, data: e })),
-  ]
+  const allElements = elements.slice()
 
   allElements.sort((a, b) => b.data.depth - a.data.depth)
 
@@ -693,7 +696,7 @@ export async function renderScene(
   }
 
   // Write defs section if we have images
-  if (images.length) {
+  if (imageDefs.length) {
     out.push("  <defs>\n")
 
     // Write one <image> per unique texture
@@ -704,7 +707,7 @@ export async function renderScene(
     }
 
     // Write clip paths
-    for (const img of images) {
+    for (const img of imageDefs) {
       out.push(
         `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>\n`,
       )
