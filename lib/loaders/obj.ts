@@ -1,4 +1,4 @@
-import type { Point3, STLMesh, Triangle } from "../types"
+import type { Point3, STLMesh, Triangle, Color } from "../types"
 
 const objCache = new Map<string, STLMesh>()
 
@@ -16,27 +16,58 @@ export async function loadOBJ(url: string): Promise<STLMesh> {
 function parseOBJ(text: string): STLMesh {
   const lines = text.split(/\r?\n/)
   const vertices: Point3[] = []
+  const vertexColors: (Color | undefined)[] = []
   const normals: Point3[] = []
   const triangles: Triangle[] = []
+  const materialColors: Record<string, Color> = {}
+  let activeMaterial: string | undefined
 
   for (const line of lines) {
     const trimmed = line.trim()
     if (trimmed.startsWith("v ")) {
-      const [, x, y, z] = trimmed.split(/\s+/) as [
-        string,
-        string,
-        string,
-        string,
-      ]
+      const parts = trimmed.split(/\s+/)
+      const x = parts[1]!
+      const y = parts[2]!
+      const z = parts[3]!
       vertices.push({ x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) })
+      if (parts.length >= 7) {
+        const [rStr, gStr, bStr] = parts.slice(4, 7) as [string, string, string]
+        let r = Number(rStr)
+        let g = Number(gStr)
+        let b = Number(bStr)
+        if (r <= 1 && g <= 1 && b <= 1) {
+          r *= 255
+          g *= 255
+          b *= 255
+        }
+        vertexColors.push([r, g, b, 1])
+      } else {
+        vertexColors.push(undefined)
+      }
     } else if (trimmed.startsWith("vn ")) {
-      const [, x, y, z] = trimmed.split(/\s+/) as [
-        string,
-        string,
-        string,
-        string,
-      ]
+      const parts = trimmed.split(/\s+/)
+      const x = parts[1]!
+      const y = parts[2]!
+      const z = parts[3]!
       normals.push({ x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) })
+    } else if (trimmed.startsWith("newmtl ")) {
+      activeMaterial = trimmed.split(/\s+/)[1]!
+    } else if (trimmed.startsWith("Kd ") && activeMaterial) {
+      const parts = trimmed.split(/\s+/)
+      const rStr = parts[1]!
+      const gStr = parts[2]!
+      const bStr = parts[3]!
+      let r = parseFloat(rStr)
+      let g = parseFloat(gStr)
+      let b = parseFloat(bStr)
+      if (r <= 1 && g <= 1 && b <= 1) {
+        r *= 255
+        g *= 255
+        b *= 255
+      }
+      materialColors[activeMaterial] = [r, g, b, 1]
+    } else if (trimmed.startsWith("usemtl ")) {
+      activeMaterial = trimmed.split(/\s+/)[1]!
     } else if (trimmed.startsWith("f ")) {
       const parts = trimmed.slice(2).trim().split(/\s+/)
       const idxs = parts.map((p) => {
@@ -77,7 +108,13 @@ function parseOBJ(text: string): STLMesh {
             z: edge1.x * edge2.y - edge1.y * edge2.x,
           }
         }
-        triangles.push({ vertices: [v0, v1, v2], normal })
+        let color: Color | undefined
+        if (activeMaterial && materialColors[activeMaterial]) {
+          color = materialColors[activeMaterial]
+        } else {
+          color = vertexColors[a.v] ?? vertexColors[b.v] ?? vertexColors[c.v]
+        }
+        triangles.push({ vertices: [v0, v1, v2], normal, color })
       }
     }
   }
