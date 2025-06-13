@@ -412,7 +412,7 @@ export async function renderScene(
           const edge1 = sub(v1c, v0c)
           const edge2 = sub(v2c, v0c)
           const normal = cross(edge1, edge2)
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
+          const depth = (v0c.z + v1c.z + v2c.z) / 3
           const baseColor = box.color ?? "gray"
           faces.push({
             pts: [v0p, v1p, v2p],
@@ -448,7 +448,7 @@ export async function renderScene(
           const faceNormal = cross(edge1, edge2)
 
           if (faceNormal.z < 0) {
-            const depth = Math.max(v0c.z, v1c.z, v2c.z)
+            const depth = (v0c.z + v1c.z + v2c.z) / 3
             faces.push({
               pts: [v0p, v1p, v2p],
               depth,
@@ -470,7 +470,7 @@ export async function renderScene(
       // faces
       for (const idx of FACES) {
         const p4: Proj[] = []
-        let zMax = -Infinity
+        let zSum = 0
         let behind = false
         for (const i of idx) {
           const p = vp[i]
@@ -479,12 +479,12 @@ export async function renderScene(
             break
           }
           p4.push(p)
-          zMax = Math.max(zMax, vc[i]!.z)
+          zSum += vc[i]!.z
         }
         if (behind) continue
         faces.push({
           pts: p4,
-          depth: zMax,
+          depth: zSum / 4, // average of 4 vertices
           fill: colorToCss(box.color ?? "gray"),
           stroke: true,
         })
