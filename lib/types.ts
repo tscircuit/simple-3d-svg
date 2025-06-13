@@ -27,6 +27,8 @@ export interface Box {
   stlPosition?: Point3
   /** When true, fit/normalize STL mesh to the box dimensions */
   scaleStlToBox?: boolean
+  /** When true (default), center the STL/OBJ model on the box center */
+  centerModel?: boolean
   // OBJ support
   objUrl?: string
   objRotation?: Point3
