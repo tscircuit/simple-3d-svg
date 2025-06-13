@@ -390,10 +390,11 @@ export async function renderScene(
           const edge2 = sub(v2c, v0c)
           const normal = cross(edge1, edge2)
           const depth = Math.max(v0c.z, v1c.z, v2c.z)
+          const baseColor = box.color ?? "gray"
           faces.push({
             pts: [v0p, v1p, v2p],
             depth,
-            fill: shadeByNormal(box.color, normal),
+            fill: shadeByNormal(baseColor, normal),
             stroke: false,
           })
         }
@@ -428,7 +429,10 @@ export async function renderScene(
             faces.push({
               pts: [v0p, v1p, v2p],
               depth,
-              fill: shadeByNormal(box.color, faceNormal),
+              fill: shadeByNormal(
+                box.color ?? triangle.color ?? "gray",
+                faceNormal,
+              ),
               stroke: false,
             })
           }
@@ -458,7 +462,7 @@ export async function renderScene(
         faces.push({
           pts: p4,
           depth: zMax,
-          fill: colorToCss(box.color),
+          fill: colorToCss(box.color ?? "gray"),
           stroke: true,
         })
       }

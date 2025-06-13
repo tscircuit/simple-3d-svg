@@ -11,7 +11,7 @@ export type Color = RGBA | string
 export interface Box {
   center: Point3
   size: Point3
-  color: Color
+  color?: Color
   rotation?: Point3 // Euler radians
   topLabel?: string
   topLabelColor?: Color
@@ -43,6 +43,7 @@ export interface Scene {
 export interface Triangle {
   vertices: [Point3, Point3, Point3]
   normal: Point3
+  color?: Color
 }
 
 export interface STLMesh {
