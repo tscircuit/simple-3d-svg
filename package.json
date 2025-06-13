@@ -1,7 +1,7 @@
 {
   "name": "@tscircuit/simple-3d-svg",
   "main": "./dist/index.js",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "type": "module",
   "description": "An extremely simple 3D SVG renderer",
   "files": [
