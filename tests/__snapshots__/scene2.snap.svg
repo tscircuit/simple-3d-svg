@@ -1,18 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(0,128,255,0.9)" points="-68.57,-15.36 -76.03,-90.05 -165.59,-76.85 -148.04,2.37" />
-    <polygon fill="rgba(0,128,255,0.9)" points="-40.21,23.17 -132.01,47.89 -148.04,2.37 -68.57,-15.36" />
-    <polygon fill="rgba(0,128,255,0.9)" points="-40.21,23.17 -45.44,-61.08 -76.03,-90.05 -68.57,-15.36" />
-    <polygon fill="rgba(255,0,0,0.9)" points="71.19,-6.84 79.27,-83.73 0,-69.34 0,12.34" />
-    <polygon fill="rgba(255,0,0,0.9)" points="126.06,34.97 46.19,62.09 0,12.34 71.19,-6.84" />
-    <polygon fill="rgba(255,0,0,0.9)" points="126.06,34.97 143.3,-51.98 79.27,-83.73 71.19,-6.84" />
-    <polygon fill="rgba(0,128,255,0.9)" points="-132.01,47.89 -151.04,-41.9 -165.59,-76.85 -148.04,2.37" />
-    <polygon fill="rgba(0,128,255,0.9)" points="-45.44,-61.08 -151.04,-41.9 -165.59,-76.85 -76.03,-90.05" />
-    <polygon fill="rgba(255,0,0,0.9)" points="46.19,62.09 53.22,-30.67 0,-69.34 0,12.34" />
-    <polygon fill="rgba(255,0,0,0.9)" points="143.3,-51.98 53.22,-30.67 0,-69.34 79.27,-83.73" />
+    <polygon fill="rgba(0,128,255,0.9)" points="-69,-15 -76,-90 -166,-77 -148,2" />
+    <polygon fill="rgba(0,128,255,0.9)" points="-40,23 -132,48 -148,2 -69,-15" />
+    <polygon fill="rgba(0,128,255,0.9)" points="-40,23 -45,-61 -76,-90 -69,-15" />
+    <polygon fill="rgba(255,0,0,0.9)" points="71,-7 79,-84 0,-69 0,12" />
+    <polygon fill="rgba(255,0,0,0.9)" points="126,35 46,62 0,12 71,-7" />
+    <polygon fill="rgba(255,0,0,0.9)" points="126,35 143,-52 79,-84 71,-7" />
+    <polygon fill="rgba(0,128,255,0.9)" points="-132,48 -151,-42 -166,-77 -148,2" />
+    <polygon fill="rgba(0,128,255,0.9)" points="-45,-61 -151,-42 -166,-77 -76,-90" />
+    <polygon fill="rgba(255,0,0,0.9)" points="46,62 53,-31 0,-69 0,12" />
+    <polygon fill="rgba(255,0,0,0.9)" points="143,-52 53,-31 0,-69 79,-84" />
   </g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.9730833959144812 0.23030376598700678 -0.8956886238704018 -0.44416201805060834 68.94778328279955 -58.92973205170688)"><text x="0" y="0" fill="rgba(255,255,255,1)">Hello World</text></g>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(0,128,255,0.9)" points="-40.21,23.17 -132.01,47.89 -151.04,-41.9 -45.44,-61.08" />
-    <polygon fill="rgba(255,0,0,0.9)" points="126.06,34.97 46.19,62.09 53.22,-30.67 143.3,-51.98" />
+    <polygon fill="rgba(0,128,255,0.9)" points="-40,23 -132,48 -151,-42 -45,-61" />
+    <polygon fill="rgba(255,0,0,0.9)" points="126,35 46,62 53,-31 143,-52" />
   </g>
 </svg>

@@ -80,6 +80,9 @@ function shadeByNormal(base: Color, normal: Point3): string {
 }
 
 function fmt(n: number): string {
+  return Math.round(n).toString()
+}
+function fmtPrecise(n: number): string {
   return (Math.round(n * 100) / 100).toString()
 }
 
@@ -601,7 +604,7 @@ export async function renderScene(
                 depth: cz,
                 href,
                 clip: id0,
-                points: `${fmt(u0)},${fmt(v0)} ${fmt(u1)},${fmt(v0)} ${fmt(u1)},${fmt(v1)}`,
+                points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
                 sym,
               })
 
@@ -620,7 +623,7 @@ export async function renderScene(
                 depth: cz,
                 href,
                 clip: id1,
-                points: `${fmt(u0)},${fmt(v0)} ${fmt(u1)},${fmt(v1)} ${fmt(u0)},${fmt(v1)}`,
+                points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
                 sym,
               })
             }
