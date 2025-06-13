@@ -23,6 +23,10 @@ export interface Box {
   stlUrl?: string
   stlRotation?: Point3
   stlPosition?: Point3
+  // OBJ support
+  objUrl?: string
+  objRotation?: Point3
+  objPosition?: Point3
 }
 
 export interface Camera {
