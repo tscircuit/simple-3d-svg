@@ -79,6 +79,10 @@ function shadeByNormal(base: Color, normal: Point3): string {
   }
 }
 
+function fmt(n: number): string {
+  return (Math.round(n * 100) / 100).toString()
+}
+
 /*────────────── Vec3 ─────────────*/
 function add(a: Point3, b: Point3): Point3 {
   return { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z }
@@ -597,7 +601,7 @@ export async function renderScene(
                 depth: cz,
                 href,
                 clip: id0,
-                points: `${u0},${v0} ${u1},${v0} ${u1},${v1}`,
+                points: `${fmt(u0)},${fmt(v0)} ${fmt(u1)},${fmt(v0)} ${fmt(u1)},${fmt(v1)}`,
                 sym,
               })
 
@@ -616,7 +620,7 @@ export async function renderScene(
                 depth: cz,
                 href,
                 clip: id1,
-                points: `${u0},${v0} ${u1},${v1} ${u0},${v1}`,
+                points: `${fmt(u0)},${fmt(v0)} ${fmt(u1)},${fmt(v1)} ${fmt(u0)},${fmt(v1)}`,
                 sym,
               })
             }
@@ -723,7 +727,7 @@ export async function renderScene(
         const strokeAttr = f.stroke ? "" : ' stroke="none"'
         out.push(
           `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
-            .map((p) => `${p.x},${p.y}`)
+            .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
             .join(" ")}" />\n`,
         )
       } else {
