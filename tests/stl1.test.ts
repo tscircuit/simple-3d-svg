@@ -41,6 +41,7 @@ test("STL rendering", async () => {
         size: { x: 2, y: 2, z: 2 },
         color: "red" as const,
         stlUrl: pyramidSTL,
+        scaleStlToBox: true,
       },
     ],
     camera: {

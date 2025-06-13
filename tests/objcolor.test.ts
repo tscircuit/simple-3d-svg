@@ -10,6 +10,7 @@ test("OBJ colors override box color", async () => {
         center: { x: 0, y: 0, z: 0 },
         size: { x: 2, y: 2, z: 2 },
         objUrl: coloredOBJ,
+        scaleObjToBox: true,
       },
     ],
     camera: {

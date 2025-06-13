@@ -11,6 +11,7 @@ test("Binary STL rendering with bear clip and additional boxes", async () => {
         color: "orange" as const,
         stlUrl:
           "https://raw.githubusercontent.com/skalnik/secret-bear-clip/master/stl/clip.stl",
+        scaleStlToBox: true,
       },
       // Additional boxes to test face rendering order
       {

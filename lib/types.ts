@@ -25,10 +25,14 @@ export interface Box {
   stlUrl?: string
   stlRotation?: Point3
   stlPosition?: Point3
+  /** When true, fit/normalize STL mesh to the box dimensions */
+  scaleStlToBox?: boolean
   // OBJ support
   objUrl?: string
   objRotation?: Point3
   objPosition?: Point3
+  /** When true, fit/normalize OBJ mesh to the box dimensions */
+  scaleObjToBox?: boolean
 }
 
 export interface Camera {
