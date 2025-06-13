@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <rect x="-200" y="-200" width="400" height="400" fill="gray" />
   <defs>
     <image id="tex0" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgPGNpcmNsZSBjeD0iNTAiIGN5PSIxMCIgcj0iMjAiIGZpbGw9ImJsdWUiIC8+CiAgICAgICAgICAgIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjQwIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9InJlZCIgLz4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgPC9zdmc+" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>
-    <clipPath id="clip0" clipPathUnits="objectBoundingBox"><polygon points="0,0 1,0 1,1" /></clipPath>
-    <clipPath id="clip1" clipPathUnits="objectBoundingBox"><polygon points="0,0 1,1 0,1" /></clipPath>
-    <clipPath id="clip2" clipPathUnits="objectBoundingBox"><polygon points="1,0 1,0 1,1" /></clipPath>
-    <clipPath id="clip3" clipPathUnits="objectBoundingBox"><polygon points="1,0 1,1 1,1" /></clipPath>
-    <clipPath id="clip4" clipPathUnits="objectBoundingBox"><polygon points="0,1 1,1 1,1" /></clipPath>
-    <clipPath id="clip5" clipPathUnits="objectBoundingBox"><polygon points="0,1 1,1 0,1" /></clipPath>
-    <clipPath id="clip6" clipPathUnits="objectBoundingBox"><polygon points="1,1 1,1 1,1" /></clipPath>
-    <clipPath id="clip7" clipPathUnits="objectBoundingBox"><polygon points="1,1 1,1 1,1" /></clipPath>
+    <clipPath id="clip0" clipPathUnits="objectBoundingBox"><polygon points="0,0 0.5,0 0.5,0.5" /></clipPath>
+    <clipPath id="clip1" clipPathUnits="objectBoundingBox"><polygon points="0,0 0.5,0.5 0,0.5" /></clipPath>
+    <clipPath id="clip2" clipPathUnits="objectBoundingBox"><polygon points="0.5,0 1,0 1,0.5" /></clipPath>
+    <clipPath id="clip3" clipPathUnits="objectBoundingBox"><polygon points="0.5,0 1,0.5 0.5,0.5" /></clipPath>
+    <clipPath id="clip4" clipPathUnits="objectBoundingBox"><polygon points="0,0.5 0.5,0.5 0.5,1" /></clipPath>
+    <clipPath id="clip5" clipPathUnits="objectBoundingBox"><polygon points="0,0.5 0.5,1 0,1" /></clipPath>
+    <clipPath id="clip6" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,0.5 1,1" /></clipPath>
+    <clipPath id="clip7" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,1 0.5,1" /></clipPath>
   </defs>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <polygon fill="rgba(0,140,0,0.8)" points="71,-15 72,-21 28,-41 28,-35" />
