@@ -34,9 +34,9 @@ function colorToRGBA(c: Color): RGBA {
   if (s.startsWith("#")) {
     const hex = s.slice(1)
     if (hex.length === 3) {
-      const r = parseInt(hex[0] + hex[0], 16)
-      const g = parseInt(hex[1] + hex[1], 16)
-      const b = parseInt(hex[2] + hex[2], 16)
+      const r = parseInt(hex.charAt(0) + hex.charAt(0), 16)
+      const g = parseInt(hex.charAt(1) + hex.charAt(1), 16)
+      const b = parseInt(hex.charAt(2) + hex.charAt(2), 16)
       return [r, g, b, 1]
     }
     if (hex.length === 6) {
@@ -48,9 +48,10 @@ function colorToRGBA(c: Color): RGBA {
   }
   const rgbm = s.match(/^rgba?\(([^)]+)\)$/)
   if (rgbm) {
-    const parts = rgbm[1].split(/\s*,\s*/).map(Number)
-    const [r, g, b, a] = parts
-    return [r, g, b, a ?? 1]
+    const content = rgbm[1]!
+    const parts = content.split(/\s*,\s*/).map(Number)
+    const [r = 0, g = 0, b = 0, a = 1] = parts
+    return [r, g, b, a]
   }
   const named = NAMED_COLORS[s]
   if (named) return [named[0], named[1], named[2], 1]
@@ -405,7 +406,7 @@ export async function renderScene(
 
       for (let i = 0; i < mesh.triangles.length; i++) {
         const vertexStart = i * 3
-        const triangle = mesh.triangles[i]
+        const triangle = mesh.triangles[i]!
 
         const v0w = transformedVertices[vertexStart]!
         const v1w = transformedVertices[vertexStart + 1]!

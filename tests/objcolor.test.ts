@@ -20,9 +20,11 @@ test("OBJ colors override box color", async () => {
 
   const svg = await renderScene(scene)
   const fills = Array.from(svg.matchAll(/fill="rgba\(([^)]+)\)"/g)).map(
-    (m) => m[1],
+    (m) => m[1]!,
   )
-  const colors = fills.map((f) => f.split(/,\s*/).slice(0, 3).map(Number))
+  const colors = fills.map(
+    (f) => f.split(/,\s*/).slice(0, 3).map(Number) as [number, number, number],
+  )
   const hasRed = colors.some(([r, g, b]) => r > g && r > b)
   const hasGreen = colors.some(([r, g, b]) => g > r && g > b)
   expect(hasRed && hasGreen).toBe(true)

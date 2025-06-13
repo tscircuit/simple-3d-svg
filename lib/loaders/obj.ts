@@ -1,4 +1,4 @@
-import type { Point3, STLMesh, Triangle } from "../types"
+import type { Point3, STLMesh, Triangle, Color } from "../types"
 
 const objCache = new Map<string, STLMesh>()
 
@@ -26,10 +26,15 @@ function parseOBJ(text: string): STLMesh {
     const trimmed = line.trim()
     if (trimmed.startsWith("v ")) {
       const parts = trimmed.split(/\s+/)
-      const [, x, y, z] = parts as string[]
+      const x = parts[1]!
+      const y = parts[2]!
+      const z = parts[3]!
       vertices.push({ x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) })
       if (parts.length >= 7) {
-        let [r, g, b] = parts.slice(4, 7).map(Number)
+        const [rStr, gStr, bStr] = parts.slice(4, 7) as [string, string, string]
+        let r = Number(rStr)
+        let g = Number(gStr)
+        let b = Number(bStr)
         if (r <= 1 && g <= 1 && b <= 1) {
           r *= 255
           g *= 255
@@ -40,17 +45,18 @@ function parseOBJ(text: string): STLMesh {
         vertexColors.push(undefined)
       }
     } else if (trimmed.startsWith("vn ")) {
-      const [, x, y, z] = trimmed.split(/\s+/) as [
-        string,
-        string,
-        string,
-        string,
-      ]
+      const parts = trimmed.split(/\s+/)
+      const x = parts[1]!
+      const y = parts[2]!
+      const z = parts[3]!
       normals.push({ x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) })
     } else if (trimmed.startsWith("newmtl ")) {
-      activeMaterial = trimmed.split(/\s+/)[1]
+      activeMaterial = trimmed.split(/\s+/)[1]!
     } else if (trimmed.startsWith("Kd ") && activeMaterial) {
-      const [, rStr, gStr, bStr] = trimmed.split(/\s+/)
+      const parts = trimmed.split(/\s+/)
+      const rStr = parts[1]!
+      const gStr = parts[2]!
+      const bStr = parts[3]!
       let r = parseFloat(rStr)
       let g = parseFloat(gStr)
       let b = parseFloat(bStr)
@@ -61,7 +67,7 @@ function parseOBJ(text: string): STLMesh {
       }
       materialColors[activeMaterial] = [r, g, b, 1]
     } else if (trimmed.startsWith("usemtl ")) {
-      activeMaterial = trimmed.split(/\s+/)[1]
+      activeMaterial = trimmed.split(/\s+/)[1]!
     } else if (trimmed.startsWith("f ")) {
       const parts = trimmed.slice(2).trim().split(/\s+/)
       const idxs = parts.map((p) => {
