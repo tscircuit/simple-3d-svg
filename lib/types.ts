@@ -13,6 +13,8 @@ export interface Box {
   size: Point3
   color?: Color
   rotation?: Point3 // Euler radians
+  /** Draw the bounding box edges for debugging */
+  drawBoundingBox?: boolean
   topLabel?: string
   topLabelColor?: Color
   faceImages?: {
