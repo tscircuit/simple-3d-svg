@@ -16,7 +16,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
-    "bun-match-svg": "^0.0.11",
+    "bun-match-svg": "^0.0.12",
     "tsup": "^8.5.0"
   }
 }
