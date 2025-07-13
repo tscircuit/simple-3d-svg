@@ -388,7 +388,7 @@ export async function buildRenderElements(
     focal: number,
   ): Face[] {
     const EPS = 1e-6
-    const AREA_EPS = 1e-4  // tweak if necessary, must be >0
+    const AREA_EPS = 1e-4 // tweak if necessary, must be >0
 
     function area2D(poly: Proj[]): number {
       let a = 0
@@ -406,15 +406,23 @@ export async function buildRenderElements(
       for (let i = 0; i < pts.length; i++) {
         const prev = outPts[outPts.length - 1]
         const cur = pts[i]!
-        if (!prev || Math.abs(prev.x - cur.x) > EPS || Math.abs(prev.y - cur.y) > EPS) {
+        if (
+          !prev ||
+          Math.abs(prev.x - cur.x) > EPS ||
+          Math.abs(prev.y - cur.y) > EPS
+        ) {
           outCam.push(cam[i]!)
           outPts.push(cur)
         }
       }
       /* if first==last after loop, drop duplicate */
       if (outPts.length > 2) {
-        const first = outPts[0]!, last = outPts[outPts.length - 1]!
-        if (Math.abs(first.x - last.x) <= EPS && Math.abs(first.y - last.y) <= EPS) {
+        const first = outPts[0]!,
+          last = outPts[outPts.length - 1]!
+        if (
+          Math.abs(first.x - last.x) <= EPS &&
+          Math.abs(first.y - last.y) <= EPS
+        ) {
           outCam.pop()
           outPts.pop()
         }
@@ -509,7 +517,7 @@ export async function buildRenderElements(
             return { cam: c, pts: p, fill, stroke }
           }
           const f1 = mk(fFrontCam, fFront2D, f.fill, f.stroke)
-          const f2 = mk(fBackCam,  fBack2D,  f.fill, f.stroke)
+          const f2 = mk(fBackCam, fBack2D, f.fill, f.stroke)
           if (f1) front.push(f1)
           if (f2) back.push(f2)
         }
