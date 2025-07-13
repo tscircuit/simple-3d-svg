@@ -12,6 +12,8 @@
     "build": "tsup-node --dts --sourcemap inline --format esm ./lib/index.ts",
     "format": "biome format --write .",
     "format:check": "biome format .",
+    "vercel-build": "bun run build:site",
+    "build:site": "cosmos-export",
     "example": "bun examples/animatedsubdivision.html"
   },
   "devDependencies": {
