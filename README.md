@@ -2,6 +2,8 @@
 
 An extremely simple 3D SVG renderer.
 
+[Online Playground](https://simple-3d-svg.vercel.app/?fixture=%7B%22path%22%3A%22examples%2Finteractive.page.tsx%22%7D) ・ [Blog Post](https://seve.blog/p/i-made-a-3d-svg-renderer-that-projects)
+
 ![simple svg](./tests/__snapshots__/scene1.snap.svg)
 
 ## Usage
