@@ -15,7 +15,7 @@ export type {
 } from "./types"
 
 // Re-export the main render function
-export { renderScene } from "./render"
+export { renderScene } from "./render-svg"
 
 // Re-export STL loader
 export { loadSTL } from "./loaders/stl"

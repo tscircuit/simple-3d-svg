@@ -1,6 +1,9 @@
 import { renderScene } from "../lib"
 
 const svgContainer = document.getElementById("svg-container")!
+function getDim() {
+  return Math.min(window.innerWidth, window.innerHeight)
+}
 
 const objUrl =
   "https://modelcdn.tscircuit.com/easyeda_models/download?uuid=6ef04b62f1e945518af209609f65fa6f&pn=C110153&cachebust_origin="
@@ -13,28 +16,34 @@ let lastX = 0
 let lastY = 0
 
 async function render() {
+  const dim = getDim()
   const camPos = {
     x: radius * Math.cos(pitch) * Math.cos(yaw),
     y: radius * Math.sin(pitch),
     z: radius * Math.cos(pitch) * Math.sin(yaw),
   }
 
-  const svg = await renderScene({
-    boxes: [
-      {
-        center: { x: 0, y: 0, z: 0 },
-        size: { x: 20, y: 20, z: 20 },
-        drawBoundingBox: true,
-        objUrl,
+  const svg = await renderScene(
+    {
+      boxes: [
+        {
+          center: { x: 0, y: 0, z: 0 },
+          size: { x: 20, y: 20, z: 20 },
+          drawBoundingBox: true,
+          objUrl,
+        },
+      ],
+      camera: {
+        position: camPos,
+        lookAt: { x: 0, y: 0, z: 0 },
       },
-    ],
-    camera: {
-      position: camPos,
-      lookAt: { x: 0, y: 0, z: 0 },
     },
-  })
+    { width: dim, height: dim },
+  )
 
   svgContainer.innerHTML = svg.replace(/<\?xml[^>]*\?>\s*/g, "")
+  svgContainer.style.width = `${dim}px`
+  svgContainer.style.height = `${dim}px`
 }
 
 svgContainer.addEventListener("mousedown", (ev) => {
@@ -59,5 +68,8 @@ window.addEventListener("mousemove", (ev) => {
 window.addEventListener("mouseup", () => {
   isDragging = false
 })
+
+// keep SVG square on resize
+window.addEventListener("resize", render)
 
 render()

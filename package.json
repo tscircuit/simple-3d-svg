@@ -8,6 +8,7 @@
     "dist"
   ],
   "scripts": {
+    "start": "cosmos",
     "build": "tsup-node --dts --sourcemap inline --format esm ./lib/index.ts",
     "format": "biome format --write .",
     "format:check": "biome format .",
@@ -16,7 +17,14 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
     "bun-match-svg": "^0.0.12",
-    "tsup": "^8.5.0"
+    "react": "^19.1.0",
+    "react-cosmos": "^7.0.0",
+    "react-cosmos-plugin-vite": "^7.0.0",
+    "react-dom": "^19.1.0",
+    "tsup": "^8.5.0",
+    "vite": "^7.0.4"
   }
 }
