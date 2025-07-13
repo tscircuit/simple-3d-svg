@@ -19,20 +19,25 @@ async function render() {
     z: radius * Math.cos(pitch) * Math.sin(yaw),
   }
 
-  const svg = await renderScene({
-    boxes: [
-      {
-        center: { x: 0, y: 0, z: 0 },
-        size: { x: 20, y: 20, z: 20 },
-        drawBoundingBox: true,
-        objUrl,
+  const svg = await renderScene(
+    {
+      boxes: [
+        {
+          center: { x: 0, y: 0, z: 0 },
+          size: { x: 20, y: 20, z: 20 },
+          drawBoundingBox: true,
+          objUrl,
+        },
+      ],
+      camera: {
+        position: camPos,
+        lookAt: { x: 0, y: 0, z: 0 },
       },
-    ],
-    camera: {
-      position: camPos,
-      lookAt: { x: 0, y: 0, z: 0 },
     },
-  })
+    {
+      faceOutlines: true,
+    },
+  )
 
   svgContainer.innerHTML = svg.replace(/<\?xml[^>]*\?>\s*/g, "")
 }

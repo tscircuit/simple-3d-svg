@@ -348,11 +348,18 @@ function scaleAndPositionMesh(
 /*────────────── Render ─────────────*/
 export async function renderScene(
   scene: Scene,
-  opt: { width?: number; height?: number; backgroundColor?: Color } = {},
+  opt: {
+    width?: number
+    height?: number
+    backgroundColor?: Color
+    /** when true, draw a 1-px outline around every rendered face */
+    faceOutlines?: boolean
+  } = {},
 ): Promise<string> {
   const W = opt.width ?? W_DEF
   const H = opt.height ?? H_DEF
   const focal = scene.camera.focalLength ?? FOCAL
+  const showFaceOutlines = !!opt.faceOutlines
   type Face = { pts: Proj[]; depth: number; fill: string; stroke: boolean }
   type Label = { matrix: string; depth: number; text: string; fill: string }
   type Img = {
@@ -445,7 +452,7 @@ export async function renderScene(
             pts: [v0p, v1p, v2p],
             depth,
             fill: shadeByNormal(baseColor, normal),
-            stroke: false,
+            stroke: showFaceOutlines,
           })
         }
       }
@@ -486,7 +493,7 @@ export async function renderScene(
               box.color ?? triangle.color ?? "gray",
               faceNormal,
             ),
-            stroke: false,
+            stroke: showFaceOutlines,
           })
         }
       }
