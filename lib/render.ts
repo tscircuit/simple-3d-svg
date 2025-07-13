@@ -13,6 +13,8 @@ import {
 } from "./vec3"
 import { colorToCss, shadeByNormal } from "./color"
 import { scaleAndPositionMesh } from "./mesh"
+import { FACES, EDGES, TOP, verts } from "./geometry"
+import { affineMatrix } from "./affine"
 
 function fmt(n: number): string {
   return Math.round(n).toString()
@@ -49,117 +51,6 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
   return { x: (p.x * s * w) / 2, y: (-p.y * s * h) / 2, z: p.z }
 }
 
-/*────────────── Geometry ─────────────*/
-const FACES: [number, number, number, number][] = [
-  [0, 1, 2, 3],
-  [4, 7, 6, 5], // corrected order for the z-positive (camera-facing) side
-  [0, 1, 5, 4],
-  [3, 2, 6, 7],
-  [1, 2, 6, 5],
-  [0, 3, 7, 4],
-] // front,back,bottom,top,right,left
-const EDGES: [number, number][] = [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [3, 0],
-  [4, 5],
-  [5, 6],
-  [6, 7],
-  [7, 4],
-  [0, 4],
-  [1, 5],
-  [2, 6],
-  [3, 7],
-]
-const TOP = [3, 2, 6, 7]
-function verts(b: Box): Point3[] {
-  const {
-    size: { x: sx, y: sy, z: sz },
-    center,
-    rotation,
-  } = b
-  const offs = [
-    { x: -sx / 2, y: -sy / 2, z: -sz / 2 },
-    { x: sx / 2, y: -sy / 2, z: -sz / 2 },
-    { x: sx / 2, y: sy / 2, z: -sz / 2 },
-    { x: -sx / 2, y: sy / 2, z: -sz / 2 },
-    { x: -sx / 2, y: -sy / 2, z: sz / 2 },
-    { x: sx / 2, y: -sy / 2, z: sz / 2 },
-    { x: sx / 2, y: sy / 2, z: sz / 2 },
-    { x: -sx / 2, y: sy / 2, z: sz / 2 },
-  ]
-  return offs.map((o) => add(center, rotLocal(o, rotation)))
-}
-
-interface Point2 {
-  x: number
-  y: number
-}
-
-function inv3(m: [number, number, number][]): [number, number, number][] {
-  const a = m[0]![0],
-    d = m[0]![1],
-    g = m[0]![2]
-  const b = m[1]![0],
-    e = m[1]![1],
-    h = m[1]![2]
-  const c = m[2]![0],
-    f = m[2]![1],
-    i = m[2]![2]
-  const A = e * i - f * h
-  const B = -(d * i - f * g)
-  const C = d * h - e * g
-  const D = -(b * i - c * h)
-  const E = a * i - c * g
-  const F = -(a * h - b * g)
-  const G = b * f - c * e
-  const H = -(a * f - c * d)
-  const I = a * e - b * d
-  const det = a * A + d * D + g * G
-  const invDet = det ? 1 / det : 0
-  return [
-    [A * invDet, B * invDet, C * invDet],
-    [D * invDet, E * invDet, F * invDet],
-    [G * invDet, H * invDet, I * invDet],
-  ]
-}
-
-function mul3(
-  a: [number, number, number][],
-  b: [number, number, number][],
-): [number, number, number][] {
-  const r: [number, number, number][] = [
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-  ]
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      r[i]![j] =
-        a[i]![0]! * b[0]![j]! + a[i]![1]! * b[1]![j]! + a[i]![2]! * b[2]![j]!
-    }
-  }
-  return r
-}
-
-function affineMatrix(
-  src: [Point2, Point2, Point2],
-  dst: [Point2, Point2, Point2],
-): string {
-  const S: [number, number, number][] = [
-    [src[0].x, src[1].x, src[2].x],
-    [src[0].y, src[1].y, src[2].y],
-    [1, 1, 1],
-  ]
-  const D: [number, number, number][] = [
-    [dst[0].x, dst[1].x, dst[2].x],
-    [dst[0].y, dst[1].y, dst[2].y],
-    [1, 1, 1],
-  ]
-  const M = mul3(D, inv3(S))
-  return `matrix(${M[0]![0]} ${M[1]![0]} ${M[0]![1]} ${M[1]![1]} ${M[0]![2]} ${M[1]![2]})`
-}
 
 
 /*────────────── Render ─────────────*/
