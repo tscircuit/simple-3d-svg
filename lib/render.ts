@@ -281,6 +281,64 @@ function affineMatrix(
   return `matrix(${M[0]![0]} ${M[1]![0]} ${M[0]![1]} ${M[1]![1]} ${M[0]![2]} ${M[1]![2]})`
 }
 
+function triangleArea(a: Point3, b: Point3, c: Point3): number {
+  const ab = sub(b, a)
+  const ac = sub(c, a)
+  const cr = cross(ab, ac)
+  return 0.5 * len(cr)
+}
+
+function subdivideTriangle(
+  tri: [Point3, Point3, Point3],
+  maxArea: number,
+): [Point3, Point3, Point3][] {
+  const stack = [tri]
+  const out: [Point3, Point3, Point3][] = []
+  while (stack.length) {
+    const t = stack.pop()!
+    if (triangleArea(t[0], t[1], t[2]) <= maxArea) {
+      out.push(t)
+    } else {
+      const ab = scale(add(t[0], t[1]), 0.5)
+      const bc = scale(add(t[1], t[2]), 0.5)
+      const ca = scale(add(t[2], t[0]), 0.5)
+      stack.push([t[0], ab, ca], [ab, t[1], bc], [ca, bc, t[2]], [ab, bc, ca])
+    }
+  }
+  return out
+}
+
+function subdivideQuad(
+  quad: [Point3, Point3, Point3, Point3],
+  maxArea: number,
+): [Point3, Point3, Point3][] {
+  const [a, b, c, d] = quad
+  const area = len(cross(sub(b, a), sub(d, a)))
+  const n = Math.max(1, Math.ceil(Math.sqrt(area / (2 * maxArea))))
+  const out: [Point3, Point3, Point3][] = []
+  const lerp = (p: Point3, q: Point3, t: number): Point3 => ({
+    x: p.x * (1 - t) + q.x * t,
+    y: p.y * (1 - t) + q.y * t,
+    z: p.z * (1 - t) + q.z * t,
+  })
+  for (let row = 0; row < n; row++) {
+    for (let col = 0; col < n; col++) {
+      const u0 = col / n
+      const u1 = (col + 1) / n
+      const v0 = row / n
+      const v1 = (row + 1) / n
+
+      const p00 = lerp(lerp(a, b, u0), lerp(d, c, u0), v0)
+      const p10 = lerp(lerp(a, b, u1), lerp(d, c, u1), v0)
+      const p01 = lerp(lerp(a, b, u0), lerp(d, c, u0), v1)
+      const p11 = lerp(lerp(a, b, u1), lerp(d, c, u1), v1)
+
+      out.push([p00, p10, p11], [p00, p11, p01])
+    }
+  }
+  return out
+}
+
 /*────────────── STL Mesh Processing ─────────────*/
 function scaleAndPositionMesh(
   mesh: STLMesh,
@@ -420,33 +478,38 @@ export async function renderScene(
 
       // Render STL triangles
       for (let i = 0; i < mesh.triangles.length; i++) {
-        const triangle = mesh.triangles[i]
         const vertexStart = i * 3
 
         const v0w = transformedVertices[vertexStart]!
         const v1w = transformedVertices[vertexStart + 1]!
         const v2w = transformedVertices[vertexStart + 2]!
 
-        const v0c = toCam(v0w, scene.camera)
-        const v1c = toCam(v1w, scene.camera)
-        const v2c = toCam(v2w, scene.camera)
+        const tris = box.maxFaceArea
+          ? subdivideTriangle([v0w, v1w, v2w], box.maxFaceArea)
+          : [[v0w, v1w, v2w]]
 
-        const v0p = proj(v0c, W, H, focal)
-        const v1p = proj(v1c, W, H, focal)
-        const v2p = proj(v2c, W, H, focal)
+        for (const [ta, tb, tc] of tris) {
+          const v0c = toCam(ta, scene.camera)
+          const v1c = toCam(tb, scene.camera)
+          const v2c = toCam(tc, scene.camera)
 
-        if (v0p && v1p && v2p) {
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const normal = cross(edge1, edge2)
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
-          const baseColor = box.color ?? "gray"
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            depth,
-            fill: shadeByNormal(baseColor, normal),
-            stroke: false,
-          })
+          const v0p = proj(v0c, W, H, focal)
+          const v1p = proj(v1c, W, H, focal)
+          const v2p = proj(v2c, W, H, focal)
+
+          if (v0p && v1p && v2p) {
+            const edge1 = sub(v1c, v0c)
+            const edge2 = sub(v2c, v0c)
+            const normal = cross(edge1, edge2)
+            const depth = Math.max(v0c.z, v1c.z, v2c.z)
+            const baseColor = box.color ?? "gray"
+            faces.push({
+              pts: [v0p, v1p, v2p],
+              depth,
+              fill: shadeByNormal(baseColor, normal),
+              stroke: false,
+            })
+          }
         }
       }
     } else if (box.objUrl && objMeshes.has(box.objUrl)) {
@@ -465,29 +528,35 @@ export async function renderScene(
         const v1w = transformedVertices[vertexStart + 1]!
         const v2w = transformedVertices[vertexStart + 2]!
 
-        const v0c = toCam(v0w, scene.camera)
-        const v1c = toCam(v1w, scene.camera)
-        const v2c = toCam(v2w, scene.camera)
+        const tris = box.maxFaceArea
+          ? subdivideTriangle([v0w, v1w, v2w], box.maxFaceArea)
+          : [[v0w, v1w, v2w]]
 
-        const v0p = proj(v0c, W, H, focal)
-        const v1p = proj(v1c, W, H, focal)
-        const v2p = proj(v2c, W, H, focal)
+        for (const [ta, tb, tc] of tris) {
+          const v0c = toCam(ta, scene.camera)
+          const v1c = toCam(tb, scene.camera)
+          const v2c = toCam(tc, scene.camera)
 
-        if (v0p && v1p && v2p) {
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const faceNormal = cross(edge1, edge2)
+          const v0p = proj(v0c, W, H, focal)
+          const v1p = proj(v1c, W, H, focal)
+          const v2p = proj(v2c, W, H, focal)
 
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            depth,
-            fill: shadeByNormal(
-              box.color ?? triangle.color ?? "gray",
-              faceNormal,
-            ),
-            stroke: false,
-          })
+          if (v0p && v1p && v2p) {
+            const edge1 = sub(v1c, v0c)
+            const edge2 = sub(v2c, v0c)
+            const faceNormal = cross(edge1, edge2)
+
+            const depth = Math.max(v0c.z, v1c.z, v2c.z)
+            faces.push({
+              pts: [v0p, v1p, v2p],
+              depth,
+              fill: shadeByNormal(
+                box.color ?? triangle.color ?? "gray",
+                faceNormal,
+              ),
+              stroke: false,
+            })
+          }
         }
       }
     } else {
@@ -498,25 +567,52 @@ export async function renderScene(
 
       // faces
       for (const idx of FACES) {
-        const p4: Proj[] = []
-        let zMax = -Infinity
-        let behind = false
-        for (const i of idx) {
-          const p = vp[i]
-          if (!p) {
-            behind = true
-            break
+        if (box.maxFaceArea) {
+          const vertsWorld = idx.map((i) => vw[i]) as [
+            Point3,
+            Point3,
+            Point3,
+            Point3,
+          ]
+          const tris = subdivideQuad(vertsWorld, box.maxFaceArea)
+          for (const [a, b, c] of tris) {
+            const ac = toCam(a, scene.camera)
+            const bc = toCam(b, scene.camera)
+            const cc = toCam(c, scene.camera)
+            const ap = proj(ac, W, H, focal)
+            const bp = proj(bc, W, H, focal)
+            const cp = proj(cc, W, H, focal)
+            if (ap && bp && cp) {
+              const depth = Math.max(ac.z, bc.z, cc.z)
+              faces.push({
+                pts: [ap, bp, cp],
+                depth,
+                fill: colorToCss(box.color ?? "gray"),
+                stroke: true,
+              })
+            }
           }
-          p4.push(p)
-          zMax = Math.max(zMax, vc[i]!.z)
+        } else {
+          const p4: Proj[] = []
+          let zMax = -Infinity
+          let behind = false
+          for (const i of idx) {
+            const p = vp[i]
+            if (!p) {
+              behind = true
+              break
+            }
+            p4.push(p)
+            zMax = Math.max(zMax, vc[i]!.z)
+          }
+          if (behind) continue
+          faces.push({
+            pts: p4,
+            depth: zMax,
+            fill: colorToCss(box.color ?? "gray"),
+            stroke: true,
+          })
         }
-        if (behind) continue
-        faces.push({
-          pts: p4,
-          depth: zMax,
-          fill: colorToCss(box.color ?? "gray"),
-          stroke: true,
-        })
       }
 
       // top face image

@@ -21,6 +21,8 @@ export interface Box {
     top?: string
   }
   projectionSubdivision?: number // Number of subdivisions per side for face projection (default: 2)
+  /** When set, faces will be subdivided until each triangle area is below this value */
+  maxFaceArea?: number
   // STL support
   stlUrl?: string
   stlRotation?: Point3

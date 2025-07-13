@@ -13,6 +13,7 @@ test("OBJ rendering from remote url", async () => {
           z: 0,
         },
         drawBoundingBox: true,
+        maxFaceArea: 1,
         objUrl:
           "https://modelcdn.tscircuit.com/easyeda_models/download?uuid=6ef04b62f1e945518af209609f65fa6f&pn=C110153&cachebust_origin=",
         // scaleObjToBox: true,
