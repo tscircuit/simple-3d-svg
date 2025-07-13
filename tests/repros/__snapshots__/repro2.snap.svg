@@ -12,8 +12,28 @@
   </defs>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <polygon fill="rgba(0,140,0,0.8)" points="71,-15 72,-21 28,-41 28,-35" />
-    <polygon fill="rgba(0,140,0,0.8)" points="-38,55 -81,23 28,-35 71,-15" />
+    <polygon fill="rgba(128,128,128,0.9)" points="34,-29 34,-33 37,-35 37,-31" />
+    <polygon fill="rgba(128,128,128,0.9)" points="47,-26 47,-31 37,-35 37,-31" />
+    <polygon fill="rgba(128,128,128,0.9)" points="44,-25 34,-29 37,-31 47,-26" />
+    <polygon fill="rgba(128,128,128,0.9)" points="44,-25 34,-29 34,-33 44,-29" />
+    <polygon fill="rgba(128,128,128,0.9)" points="44,-29 34,-33 37,-35 47,-31" />
+  </g>
+  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.8939972146762709 -0.4253761231012752 0.8576742609455895 -0.48870803198861684 40.64003645457515 -32.00987708857844)"><text x="0" y="0" fill="white">LED</text></g>
+  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <polygon fill="rgba(128,128,128,0.9)" points="44,-25 44,-29 47,-31 47,-26" />
+    <polygon fill="rgba(128,128,128,0.9)" points="18,-20 18,-25 21,-26 21,-22" />
     <polygon fill="rgba(0,140,0,0.8)" points="-81,23 -82,17 28,-41 28,-35" />
+    <polygon fill="rgba(128,128,128,0.9)" points="28,-15 18,-20 21,-22 31,-17" />
+    <polygon fill="rgba(128,128,128,0.9)" points="31,-17 31,-21 21,-26 21,-22" />
+    <polygon fill="rgba(128,128,128,0.9)" points="28,-15 18,-20 18,-25 28,-20" />
+    <polygon fill="rgba(128,128,128,0.9)" points="28,-20 18,-25 21,-26 31,-21" />
+  </g>
+  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.8828094558080359 -0.4488630422557134 0.8591280773702258 -0.48953642546631665 24.57196284218722 -23.03687548215092)"><text x="0" y="0" fill="white">R1</text></g>
+  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <polygon fill="rgba(128,128,128,0.9)" points="28,-15 28,-20 31,-21 31,-17" />
+    <polygon fill="rgba(128,128,128,0.9)" points="-27,-5 -28,-14 -4,-26 -3,-18" />
+    <polygon fill="rgba(128,128,128,0.9)" points="28,-1 28,-9 -4,-26 -3,-18" />
+    <polygon fill="rgba(0,140,0,0.8)" points="-38,55 -81,23 28,-35 71,-15" />
     <polygon fill="rgba(0,140,0,0.8)" points="-39,49 -82,17 28,-41 72,-21" />
     <g transform="matrix(-45.36290115505241 -33.3718948836233 123.19311363536525 -70.38413422030013 -38.91510624015642 48.92954249340275)" clip-path="url(#clip0)"><use href="#tex0"/></g>
     <g transform="matrix(-45.82054078472039 -26.178728643746854 123.65075326503323 -77.57730046017656 -38.91510624015642 48.92954249340275)" clip-path="url(#clip1)"><use href="#tex0"/></g>
@@ -23,37 +43,17 @@
     <g transform="matrix(-45.14591215737468 -21.083622050823017 97.76434295134864 -61.33641411122123 -25.971901083314123 40.80909931892508)" clip-path="url(#clip5)"><use href="#tex0"/></g>
     <g transform="matrix(-41.901463882249686 -23.93963567350479 98.68293892422929 -51.75616662832728 -28.390737520989806 34.899429092357074)" clip-path="url(#clip6)"><use href="#tex0"/></g>
     <g transform="matrix(-41.65749653671474 -19.454494783534678 98.43897157869435 -56.24130751829739 -28.390737520989806 34.899429092357074)" clip-path="url(#clip7)"><use href="#tex0"/></g>
-    <polygon fill="rgba(128,128,128,0.9)" points="47,-26 47,-31 37,-35 37,-31" />
-    <polygon fill="rgba(128,128,128,0.9)" points="44,-25 34,-29 37,-31 47,-26" />
-    <polygon fill="rgba(128,128,128,0.9)" points="34,-29 34,-33 37,-35 37,-31" />
-    <polygon fill="rgba(128,128,128,0.9)" points="44,-25 34,-29 34,-33 44,-29" />
-    <polygon fill="rgba(128,128,128,0.9)" points="44,-29 34,-33 37,-35 47,-31" />
-  </g>
-  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.8939972146762709 -0.4253761231012752 0.8576742609455895 -0.48870803198861684 40.64003645457515 -32.00987708857844)"><text x="0" y="0" fill="white">LED</text></g>
-  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(128,128,128,0.9)" points="44,-25 44,-29 47,-31 47,-26" />
-    <polygon fill="rgba(0,140,0,0.8)" points="-38,55 -39,49 72,-21 71,-15" />
-    <polygon fill="rgba(128,128,128,0.9)" points="31,-17 31,-21 21,-26 21,-22" />
-    <polygon fill="rgba(128,128,128,0.9)" points="28,-15 18,-20 21,-22 31,-17" />
-    <polygon fill="rgba(128,128,128,0.9)" points="18,-20 18,-25 21,-26 21,-22" />
-    <polygon fill="rgba(128,128,128,0.9)" points="28,-1 28,-9 -4,-26 -3,-18" />
     <polygon fill="rgba(128,128,128,0.9)" points="4,14 -27,-5 -3,-18 28,-1" />
-    <polygon fill="rgba(128,128,128,0.9)" points="-27,-5 -28,-14 -4,-26 -3,-18" />
-    <polygon fill="rgba(128,128,128,0.9)" points="28,-15 18,-20 18,-25 28,-20" />
-    <polygon fill="rgba(128,128,128,0.9)" points="28,-20 18,-25 21,-26 31,-21" />
-  </g>
-  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.8828094558080359 -0.4488630422557134 0.8591280773702258 -0.48953642546631665 24.57196284218722 -23.03687548215092)"><text x="0" y="0" fill="white">R1</text></g>
-  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(128,128,128,0.9)" points="28,-15 28,-20 31,-21 31,-17" />
     <polygon fill="rgba(128,128,128,0.9)" points="4,5 -28,-14 -4,-26 28,-9" />
   </g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.8563993081751773 -0.4987652390029143 0.8529370163758406 -0.5047738029384726 0.2102567721594779 -11.099528459958387)"><text x="0" y="0" fill="white">SW1</text></g>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <polygon fill="rgba(128,128,128,0.9)" points="4,14 -27,-5 -28,-14 4,5" />
     <polygon fill="rgba(128,128,128,0.9)" points="4,14 4,5 28,-9 28,-1" />
+    <polygon fill="rgba(0,140,0,0.8)" points="-38,55 -39,49 72,-21 71,-15" />
+    <polygon fill="rgba(128,128,128,0.9)" points="-73,17 -74,8 -44,-7 -44,1" />
     <polygon fill="rgba(128,128,128,0.9)" points="-8,24 -8,15 -44,-7 -44,1" />
     <polygon fill="rgba(128,128,128,0.9)" points="-37,42 -73,17 -44,1 -8,24" />
-    <polygon fill="rgba(128,128,128,0.9)" points="-73,17 -74,8 -44,-7 -44,1" />
     <polygon fill="rgba(128,128,128,0.9)" points="-38,33 -74,8 -44,-7 -8,15" />
   </g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.8131930757737726 -0.567681377232868 0.8526841031475978 -0.5101890785787725 -40.9835501392863 12.039070256784061)"><text x="0" y="0" fill="white">USBC</text></g>
