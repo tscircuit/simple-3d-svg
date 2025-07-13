@@ -478,18 +478,16 @@ export async function renderScene(
           const edge2 = sub(v2c, v0c)
           const faceNormal = cross(edge1, edge2)
 
-          if (faceNormal.z < 0) {
-            const depth = Math.max(v0c.z, v1c.z, v2c.z)
-            faces.push({
-              pts: [v0p, v1p, v2p],
-              depth,
-              fill: shadeByNormal(
-                box.color ?? triangle.color ?? "gray",
-                faceNormal,
-              ),
-              stroke: false,
-            })
-          }
+          const depth = Math.max(v0c.z, v1c.z, v2c.z)
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            depth,
+            fill: shadeByNormal(
+              box.color ?? triangle.color ?? "gray",
+              faceNormal,
+            ),
+            stroke: false,
+          })
         }
       }
     } else {
