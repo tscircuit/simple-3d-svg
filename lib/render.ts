@@ -1,144 +1,24 @@
-import type { Point3, RGBA, Color, Box, Camera, Scene, STLMesh } from "./types"
+import type { Point3, Color, Box, Camera, Scene, STLMesh } from "./types"
 import { loadSTL } from "./loaders/stl"
 import { loadOBJ } from "./loaders/obj"
-
-/*────────────── Color Utility ─────────────*/
-function colorToCss(c: Color): string {
-  if (typeof c === "string") return c
-  const [r, g, b, a] = c
-  return `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${a})`
-}
-
-const NAMED_COLORS: Record<string, [number, number, number]> = {
-  black: [0, 0, 0],
-  silver: [192, 192, 192],
-  gray: [128, 128, 128],
-  grey: [128, 128, 128],
-  white: [255, 255, 255],
-  maroon: [128, 0, 0],
-  red: [255, 0, 0],
-  purple: [128, 0, 128],
-  fuchsia: [255, 0, 255],
-  green: [0, 128, 0],
-  lime: [0, 255, 0],
-  olive: [128, 128, 0],
-  yellow: [255, 255, 0],
-  navy: [0, 0, 128],
-  blue: [0, 0, 255],
-  teal: [0, 128, 128],
-  aqua: [0, 255, 255],
-  orange: [255, 165, 0],
-}
-
-function colorToRGBA(c: Color): RGBA {
-  if (Array.isArray(c)) return c
-  const s = c.trim().toLowerCase()
-  if (s.startsWith("#")) {
-    const hex = s.slice(1)
-    if (hex.length === 3) {
-      const r = parseInt(hex.charAt(0) + hex.charAt(0), 16)
-      const g = parseInt(hex.charAt(1) + hex.charAt(1), 16)
-      const b = parseInt(hex.charAt(2) + hex.charAt(2), 16)
-      return [r, g, b, 1]
-    }
-    if (hex.length === 6) {
-      const r = parseInt(hex.slice(0, 2), 16)
-      const g = parseInt(hex.slice(2, 4), 16)
-      const b = parseInt(hex.slice(4, 6), 16)
-      return [r, g, b, 1]
-    }
-  }
-  const rgbm = s.match(/^rgba?\(([^)]+)\)$/)
-  if (rgbm) {
-    const content = rgbm[1]!
-    const parts = content.split(/\s*,\s*/).map(Number)
-    const [r = 0, g = 0, b = 0, a = 1] = parts
-    return [r, g, b, a]
-  }
-  const named = NAMED_COLORS[s]
-  if (named) return [named[0], named[1], named[2], 1]
-  return [0, 0, 0, 1]
-}
-
-function lightenColor(c: Color, f: number): RGBA {
-  const [r, g, b, a] = colorToRGBA(c)
-  return [r + (255 - r) * f, g + (255 - g) * f, b + (255 - b) * f, a]
-}
-
-function darkenColor(c: Color, f: number): RGBA {
-  const [r, g, b, a] = colorToRGBA(c)
-  return [r * (1 - f), g * (1 - f), b * (1 - f), a]
-}
-
-function shadeByNormal(base: Color, normal: Point3): string {
-  const n = norm(normal)
-  if (n.z >= 0) {
-    return colorToCss(lightenColor(base, n.z * 0.4))
-  } else {
-    return colorToCss(darkenColor(base, -n.z * 0.4))
-  }
-}
+import {
+  add,
+  sub,
+  dot,
+  cross,
+  scale,
+  len,
+  norm,
+  rotLocal,
+} from "./vec3"
+import { colorToCss, shadeByNormal } from "./color"
+import { scaleAndPositionMesh } from "./mesh"
 
 function fmt(n: number): string {
   return Math.round(n).toString()
 }
 function fmtPrecise(n: number): string {
   return (Math.round(n * 100) / 100).toString()
-}
-
-/*────────────── Vec3 ─────────────*/
-function add(a: Point3, b: Point3): Point3 {
-  return { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z }
-}
-function sub(a: Point3, b: Point3): Point3 {
-  return { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z }
-}
-function dot(a: Point3, b: Point3): number {
-  return a.x * b.x + a.y * b.y + a.z * b.z
-}
-function cross(a: Point3, b: Point3): Point3 {
-  return {
-    x: a.y * b.z - a.z * b.y,
-    y: a.z * b.x - a.x * b.z,
-    z: a.x * b.y - a.y * b.x,
-  }
-}
-function scale(v: Point3, k: number): Point3 {
-  return { x: v.x * k, y: v.y * k, z: v.z * k }
-}
-function len(v: Point3): number {
-  return Math.sqrt(dot(v, v))
-}
-function norm(v: Point3): Point3 {
-  const l = len(v) || 1
-  return scale(v, 1 / l)
-}
-
-/*────────────── Rotation ─────────────*/
-function rotLocal(p: Point3, r: Point3 = { x: 0, y: 0, z: 0 }): Point3 {
-  let { x, y, z } = p
-  if (r.x) {
-    const c = Math.cos(r.x)
-    const s = Math.sin(r.x)
-    const y2 = y * c - z * s
-    z = y * s + z * c
-    y = y2
-  }
-  if (r.y) {
-    const c = Math.cos(r.y)
-    const s = Math.sin(r.y)
-    const x2 = x * c + z * s
-    z = -x * s + z * c
-    x = x2
-  }
-  if (r.z) {
-    const c = Math.cos(r.z)
-    const s = Math.sin(r.z)
-    const x2 = x * c - y * s
-    y = x * s + y * c
-    x = x2
-  }
-  return { x, y, z }
 }
 
 /*────────────── Camera & Projection ─────────────*/
@@ -281,69 +161,6 @@ function affineMatrix(
   return `matrix(${M[0]![0]} ${M[1]![0]} ${M[0]![1]} ${M[1]![1]} ${M[0]![2]} ${M[1]![2]})`
 }
 
-/*────────────── STL Mesh Processing ─────────────*/
-function scaleAndPositionMesh(
-  mesh: STLMesh,
-  box: Box,
-  scaleToBox: boolean,
-): Point3[] {
-  const { boundingBox } = mesh
-  const meshCenter = scale(add(boundingBox.min, boundingBox.max), 0.5)
-  const centerModel = box.centerModel !== false
-
-  // Rotate vertices around the mesh center
-  const rotatedVerts: Point3[] = []
-  for (const tri of mesh.triangles) {
-    for (const v of tri.vertices) {
-      let p = sub(v, meshCenter)
-      if (box.stlRotation) p = rotLocal(p, box.stlRotation)
-      if (box.objRotation) p = rotLocal(p, box.objRotation)
-      if (!centerModel) p = add(p, meshCenter)
-      rotatedVerts.push(p)
-    }
-  }
-
-  let uniformScale = 1
-  let rotatedCenter = { x: 0, y: 0, z: 0 }
-
-  if (scaleToBox) {
-    // Compute bounding box after rotation
-    let min = { x: Infinity, y: Infinity, z: Infinity }
-    let max = { x: -Infinity, y: -Infinity, z: -Infinity }
-    for (const v of rotatedVerts) {
-      if (v.x < min.x) min.x = v.x
-      if (v.y < min.y) min.y = v.y
-      if (v.z < min.z) min.z = v.z
-      if (v.x > max.x) max.x = v.x
-      if (v.y > max.y) max.y = v.y
-      if (v.z > max.z) max.z = v.z
-    }
-    const rotatedSize = sub(max, min)
-    const boxSize = box.size
-    const scaleX = boxSize.x / rotatedSize.x
-    const scaleY = boxSize.y / rotatedSize.y
-    const scaleZ = boxSize.z / rotatedSize.z
-    uniformScale = Math.min(scaleX, scaleY, scaleZ)
-    rotatedCenter = scale(add(min, max), 0.5)
-  }
-
-  const transformedVertices: Point3[] = []
-  for (const p of rotatedVerts) {
-    let t = p
-    if (scaleToBox) {
-      t = sub(t, rotatedCenter)
-      t = scale(t, uniformScale)
-      if (!centerModel) t = add(t, rotatedCenter)
-    }
-    if (box.stlPosition) t = add(t, box.stlPosition)
-    if (box.objPosition) t = add(t, box.objPosition)
-    if (box.rotation) t = rotLocal(t, box.rotation)
-    t = add(t, box.center)
-    transformedVertices.push(t)
-  }
-
-  return transformedVertices
-}
 
 /*────────────── Render ─────────────*/
 export async function renderScene(
