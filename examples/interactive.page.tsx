@@ -21,7 +21,9 @@ const defaultScene: Scene = {
 }
 
 export default function InteractivePage() {
-  const [sceneText, setSceneText] = useState(JSON.stringify(defaultScene, null, 2))
+  const [sceneText, setSceneText] = useState(
+    JSON.stringify(defaultScene, null, 2),
+  )
   const [scene, setScene] = useState<Scene>(defaultScene)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,14 +40,20 @@ export default function InteractivePage() {
         setScene(parsed)
         setError(null)
       } catch (evalErr) {
-        setError(jsonErr instanceof Error ? jsonErr.message : "Invalid JSON/JavaScript")
+        setError(
+          jsonErr instanceof Error
+            ? jsonErr.message
+            : "Invalid JSON/JavaScript",
+        )
       }
     }
   }
 
   return (
     <div style={{ display: "flex", height: "100vh", fontFamily: "monospace" }}>
-      <div style={{ width: "50%", padding: "20px", borderRight: "1px solid #ccc" }}>
+      <div
+        style={{ width: "50%", padding: "20px", borderRight: "1px solid #ccc" }}
+      >
         <h2>Scene Configuration</h2>
         <p>Paste your scene JSON here:</p>
         <textarea
@@ -69,8 +77,10 @@ export default function InteractivePage() {
         )}
         <div style={{ marginTop: "10px", fontSize: "12px", color: "#666" }}>
           <p>Supports both JSON and JavaScript object syntax:</p>
-          <pre style={{ fontSize: "11px", background: "#f5f5f5", padding: "5px" }}>
-{`{
+          <pre
+            style={{ fontSize: "11px", background: "#f5f5f5", padding: "5px" }}
+          >
+            {`{
   boxes: [{
     center: { x: 0, y: 0, z: 0 },
     size: { x: 2, y: 2, z: 2 },
@@ -85,7 +95,14 @@ export default function InteractivePage() {
           </pre>
         </div>
       </div>
-      <div style={{ width: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          width: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         {!error && <DragRotate scene={scene} />}
         {error && (
           <div style={{ color: "red", textAlign: "center" }}>
