@@ -12,7 +12,7 @@ test("intersecting faces", () => {
       },
       // Blue cube shifted so the two cubes intersect
       {
-        center: { x: 2, y: 2, z: 2 },
+        center: { x: 2, y: 0, z: 0 },
         size: { x: 4, y: 2, z: 2 },
         color: "rgba(0,0,255,0.7)",
       },
