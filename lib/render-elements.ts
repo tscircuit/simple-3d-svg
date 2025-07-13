@@ -464,10 +464,13 @@ export async function buildRenderElements(
             }
           }
 
-          const mk = (cam: Point3[], pts: Proj[]): Face | null =>
-            cam.length >= 3
-              ? { cam, pts, fill: f!.fill, stroke: f!.stroke }
-              : null
+          const mk = (cam: Point3[], pts: Proj[]): Face | null => {
+            if (cam.length < 3) return null
+            const nf: Face = { cam, pts, fill: f!.fill, stroke: false }
+            const img = faceToImg.get(f)
+            if (img) faceToImg.set(nf, img)
+            return nf
+          }
           const f1 = mk(fFrontCam, fFront2D)
           const f2 = mk(fBackCam, fBack2D)
           if (f1) front.push(f1)
