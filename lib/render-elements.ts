@@ -388,6 +388,40 @@ export async function buildRenderElements(
     focal: number,
   ): Face[] {
     const EPS = 1e-6
+    const AREA_EPS = 1e-4  // tweak if necessary, must be >0
+
+    function area2D(poly: Proj[]): number {
+      let a = 0
+      for (let i = 0; i < poly.length; i++) {
+        const p = poly[i]!
+        const q = poly[(i + 1) % poly.length]!
+        a += p.x * q.y - q.x * p.y
+      }
+      return Math.abs(a) * 0.5
+    }
+
+    function dedupe(cam: Point3[], pts: Proj[]) {
+      const outCam: Point3[] = []
+      const outPts: Proj[] = []
+      for (let i = 0; i < pts.length; i++) {
+        const prev = outPts[outPts.length - 1]
+        const cur = pts[i]!
+        if (!prev || Math.abs(prev.x - cur.x) > EPS || Math.abs(prev.y - cur.y) > EPS) {
+          outCam.push(cam[i]!)
+          outPts.push(cur)
+        }
+      }
+      /* if first==last after loop, drop duplicate */
+      if (outPts.length > 2) {
+        const first = outPts[0]!, last = outPts[outPts.length - 1]!
+        if (Math.abs(first.x - last.x) <= EPS && Math.abs(first.y - last.y) <= EPS) {
+          outCam.pop()
+          outPts.pop()
+        }
+      }
+      return { cam: outCam, pts: outPts }
+    }
+
     type Node = {
       face: Face
       normal: Point3
@@ -464,12 +498,18 @@ export async function buildRenderElements(
             }
           }
 
-          const mk = (cam: Point3[], pts: Proj[]): Face | null =>
-            cam.length >= 3
-              ? { cam, pts, fill: f!.fill, stroke: f!.stroke }
-              : null
-          const f1 = mk(fFrontCam, fFront2D)
-          const f2 = mk(fBackCam, fBack2D)
+          const mk = (
+            cam: Point3[],
+            pts: Proj[],
+            fill: string,
+            stroke: boolean,
+          ): Face | null => {
+            const { cam: c, pts: p } = dedupe(cam, pts)
+            if (c.length < 3 || area2D(p) < AREA_EPS) return null
+            return { cam: c, pts: p, fill, stroke }
+          }
+          const f1 = mk(fFrontCam, fFront2D, f.fill, f.stroke)
+          const f2 = mk(fBackCam,  fBack2D,  f.fill, f.stroke)
           if (f1) front.push(f1)
           if (f2) back.push(f2)
         }

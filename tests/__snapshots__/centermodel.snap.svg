@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(54,155,54,1)" stroke="none" points="-59,8 -31,29 -34,-4" />
-    <polygon fill="rgba(54,155,54,1)" stroke="none" points="-59,8 -34,-4 -63,-25" />
     <polygon fill="rgba(255,54,54,1)" stroke="none" points="-52,-75 -36,-66 -46,-90" />
+    <polygon fill="rgba(255,184,54,1)" stroke="none" points="35,79 83,77 38,46" />
+    <polygon fill="rgba(255,184,54,1)" stroke="none" points="35,79 76,110 83,77" />
+    <polygon fill="rgba(54,155,54,1)" stroke="none" points="-59,8 -34,-4 -63,-25" />
+    <polygon fill="rgba(54,155,54,1)" stroke="none" points="-59,8 -31,29 -34,-4" />
     <polygon fill="rgba(255,36,36,1)" stroke="none" points="-52,-75 -66,-72 -36,-66" />
     <polygon fill="rgba(255,3,3,1)" stroke="none" points="-46,-90 -66,-72 -52,-75" />
-    <polygon fill="rgba(255,184,54,1)" stroke="none" points="35,79 76,110 83,77" />
-    <polygon fill="rgba(255,184,54,1)" stroke="none" points="35,79 83,77 38,46" />
     <polygon fill="rgba(166,0,0,1)" stroke="none" points="-36,-66 -66,-72 -46,-90" />
     <polygon fill="rgba(54,54,255,1)" stroke="none" points="70,-3 97,13 87,-18" />
     <polygon fill="rgba(36,36,255,1)" stroke="none" points="70,-3 64,8 97,13" />
