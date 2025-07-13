@@ -392,22 +392,22 @@ export async function buildRenderElements(
 
     function build(list: Face[]): Node | null {
       if (!list.length) return null
-      const face = list[0]
-      const p0 = face.cam[0]
-      const p1 = face.cam[1]
-      const p2 = face.cam[2]
+      const face = list[0]!
+      const p0 = face.cam[0]!
+      const p1 = face.cam[1]!
+      const p2 = face.cam[2]!
       const normal = cross(sub(p1, p0), sub(p2, p0))
       const front: Face[] = []
       const back: Face[] = []
 
       for (let k = 1; k < list.length; k++) {
-        const f = list[k]
+        const f = list[k]!
         // classify each vertex
         let pos = 0,
           neg = 0
         const d: number[] = []
         for (const v of f.cam) {
-          const dist = dot(normal, sub(v, p0))
+          const dist = dot(normal, sub(v!, p0))
           d.push(dist)
           if (dist > EPS) pos++
           else if (dist < -EPS) neg++
@@ -425,12 +425,12 @@ export async function buildRenderElements(
 
           for (let i = 0; i < f.cam.length; i++) {
             const j = (i + 1) % f.cam.length
-            const aCam = f.cam[i]
-            const bCam = f.cam[j]
-            const a2D = f.pts[i]
-            const b2D = f.pts[j]
-            const da = d[i]
-            const db = d[j]
+            const aCam = f.cam[i]!
+            const bCam = f.cam[j]!
+            const a2D = f.pts[i]!
+            const b2D = f.pts[j]!
+            const da = d[i]!
+            const db = d[j]!
 
             const push = (
               arrCam: Point3[],
@@ -442,8 +442,8 @@ export async function buildRenderElements(
               arr2D.push(c2D)
             }
 
-            if (da >= -EPS) push(fFrontCam, fFront2D, aCam, a2D)
-            if (da <= EPS) push(fBackCam, fBack2D, aCam, a2D)
+            if (da >= -EPS) push(fFrontCam, fFront2D, aCam!, a2D!)
+            if (da <= EPS) push(fBackCam, fBack2D, aCam!, a2D!)
 
             if ((da > 0 && db < 0) || (da < 0 && db > 0)) {
               const t = da / (da - db)
@@ -459,7 +459,7 @@ export async function buildRenderElements(
           }
 
           const mk = (cam: Point3[], pts: Proj[]): Face | null =>
-            cam.length >= 3 ? { cam, pts, fill: f.fill, stroke: f.stroke } : null
+            cam.length >= 3 ? { cam, pts, fill: f!.fill, stroke: f!.stroke } : null
           const f1 = mk(fFrontCam, fFront2D)
           const f2 = mk(fBackCam, fBack2D)
           if (f1) front.push(f1)
