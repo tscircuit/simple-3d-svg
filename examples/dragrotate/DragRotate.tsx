@@ -13,7 +13,7 @@ export default function DragRotate({ scene, opt }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   // camera / drag state
-  const yaw   = useRef(0.6)
+  const yaw = useRef(0.6)
   const pitch = useRef(0.3)
   const radius = 30
   const dragging = useRef(false)
@@ -26,8 +26,8 @@ export default function DragRotate({ scene, opt }: Props) {
 
   // helper to (re-)render
   const redraw = async () => {
-    if (!size.width || !size.height) return          // size unknown yet
-    const dim = Math.min(size.width, size.height)    // keep square aspect
+    if (!size.width || !size.height) return // size unknown yet
+    const dim = Math.min(size.width, size.height) // keep square aspect
     const camPos = {
       x: radius * Math.cos(pitch.current) * Math.cos(yaw.current),
       y: radius * Math.sin(pitch.current),
@@ -58,28 +58,30 @@ export default function DragRotate({ scene, opt }: Props) {
       yaw.current += dx * 0.01
       pitch.current += dy * 0.01
       const lim = Math.PI / 2 - 0.01
-      if (pitch.current >  lim) pitch.current =  lim
+      if (pitch.current > lim) pitch.current = lim
       if (pitch.current < -lim) pitch.current = -lim
       redraw()
     }
-    const mu = () => { dragging.current = false }
+    const mu = () => {
+      dragging.current = false
+    }
 
     window.addEventListener("mousedown", md)
     window.addEventListener("mousemove", mm)
-    window.addEventListener("mouseup",   mu)
+    window.addEventListener("mouseup", mu)
     return () => {
       window.removeEventListener("mousedown", md)
       window.removeEventListener("mousemove", mm)
-      window.removeEventListener("mouseup",   mu)
+      window.removeEventListener("mouseup", mu)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene, opt, size])    // also when window size changes
+  }, [scene, opt, size]) // also when window size changes
 
   // track window-resize to keep `size` current
   useEffect(() => {
     const update = () =>
       setSize({ width: window.innerWidth, height: window.innerHeight })
-    update()                       // initialise once mounted
+    update() // initialise once mounted
     window.addEventListener("resize", update)
     return () => window.removeEventListener("resize", update)
   }, [])

@@ -1,16 +1,7 @@
 import type { Point3, Color, Box, Camera, Scene, STLMesh } from "./types"
 import { loadSTL } from "./loaders/stl"
 import { loadOBJ } from "./loaders/obj"
-import {
-  add,
-  sub,
-  dot,
-  cross,
-  scale,
-  len,
-  norm,
-  rotLocal,
-} from "./vec3"
+import { add, sub, dot, cross, scale, len, norm, rotLocal } from "./vec3"
 import { colorToCss, shadeByNormal } from "./color"
 import { scaleAndPositionMesh } from "./mesh"
 import { FACES, EDGES, TOP, verts } from "./geometry"

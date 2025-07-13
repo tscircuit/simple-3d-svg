@@ -10,8 +10,14 @@ export async function renderScene(
   scene: Scene,
   opt: { width?: number; height?: number; backgroundColor?: Color } = {},
 ): Promise<string> {
-  const { width: W, height: H, backgroundColor, elements, images, texId } =
-    await buildRenderElements(scene, opt)
+  const {
+    width: W,
+    height: H,
+    backgroundColor,
+    elements,
+    images,
+    texId,
+  } = await buildRenderElements(scene, opt)
 
   const out: string[] = []
   out.push(
