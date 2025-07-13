@@ -19,10 +19,15 @@ export default function DragRotate({ scene, opt }: Props) {
   const dragging = useRef(false)
   const last = useRef({ x: 0, y: 0 })
 
+  // viewport size – updated on every window resize
+  const [size, setSize] = useState({ width: 0, height: 0 })
+
   const [svg, setSvg] = useState("")
 
   // helper to (re-)render
   const redraw = async () => {
+    if (!size.width || !size.height) return          // size unknown yet
+    const dim = Math.min(size.width, size.height)    // keep square aspect
     const camPos = {
       x: radius * Math.cos(pitch.current) * Math.cos(yaw.current),
       y: radius * Math.sin(pitch.current),
@@ -31,7 +36,7 @@ export default function DragRotate({ scene, opt }: Props) {
 
     const svgText = await renderScene(
       { ...scene, camera: { ...scene.camera, position: camPos } },
-      opt,
+      { ...opt, width: dim, height: dim },
     )
     setSvg(svgText.replace(/<\?xml[^>]*\?>\s*/g, ""))
   }
@@ -68,12 +73,21 @@ export default function DragRotate({ scene, opt }: Props) {
       window.removeEventListener("mouseup",   mu)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene, opt])          // re-run if props change
+  }, [scene, opt, size])    // also when window size changes
+
+  // track window-resize to keep `size` current
+  useEffect(() => {
+    const update = () =>
+      setSize({ width: window.innerWidth, height: window.innerHeight })
+    update()                       // initialise once mounted
+    window.addEventListener("resize", update)
+    return () => window.removeEventListener("resize", update)
+  }, [])
 
   return (
     <div
       ref={containerRef}
-      style={{ cursor: "grab" }}
+      style={{ cursor: "grab", width: "100vmin", height: "100vmin" }}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   )
