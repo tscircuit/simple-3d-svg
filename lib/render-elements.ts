@@ -42,7 +42,12 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
   return { x: (p.x * s * w) / 2, y: (-p.y * s * h) / 2, z: p.z }
 }
 
-type Face = { pts: Proj[]; depth: number; fill: string; stroke: boolean }
+type Face = {
+  pts: Proj[] // 2-D projected points (SVG space)
+  cam: Point3[] // the same vertices in CAMERA space (z>0)
+  fill: string
+  stroke: boolean
+}
 type Label = { matrix: string; depth: number; text: string; fill: string }
 type Img = {
   matrix: string
@@ -75,6 +80,8 @@ export async function buildRenderElements(
   const focal = scene.camera.focalLength ?? FOCAL
   const faces: Face[] = []
   const images: Img[] = []
+  // Map each BSP-sorted Face if it actually represents an <image> triangle
+  const faceToImg = new Map<Face, Img>()
   const labels: Label[] = []
   const edges: Edge[] = []
   let clipSeq = 0
@@ -148,11 +155,10 @@ export async function buildRenderElements(
           const edge1 = sub(v1c, v0c)
           const edge2 = sub(v2c, v0c)
           const normal = cross(edge1, edge2)
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
           const baseColor = box.color ?? "gray"
           faces.push({
             pts: [v0p, v1p, v2p],
-            depth,
+            cam: [v0c, v1c, v2c],
             fill: shadeByNormal(baseColor, normal),
             stroke: false,
           })
@@ -187,10 +193,9 @@ export async function buildRenderElements(
           const edge2 = sub(v2c, v0c)
           const faceNormal = cross(edge1, edge2)
 
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
           faces.push({
             pts: [v0p, v1p, v2p],
-            depth,
+            cam: [v0c, v1c, v2c],
             fill: shadeByNormal(
               box.color ?? triangle.color ?? "gray",
               faceNormal,
@@ -208,7 +213,6 @@ export async function buildRenderElements(
       // faces
       for (const idx of FACES) {
         const p4: Proj[] = []
-        let zMax = -Infinity
         let behind = false
         for (const i of idx) {
           const p = vp[i]
@@ -217,12 +221,12 @@ export async function buildRenderElements(
             break
           }
           p4.push(p)
-          zMax = Math.max(zMax, vc[i]!.z)
         }
         if (behind) continue
+        const cam4 = idx.map((i) => vc[i] as Point3)
         faces.push({
           pts: p4,
-          depth: zMax,
+          cam: cam4,
           fill: colorToCss(box.color ?? "gray"),
           stroke: true,
         })
@@ -259,42 +263,28 @@ export async function buildRenderElements(
                 z: a.z * (1 - t) + b.z * t,
               })
 
-              const p00 = proj(
-                toCam(
-                  lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v0),
-                  scene.camera,
-                ),
-                W,
-                H,
-                focal,
-              )!
-              const p10 = proj(
-                toCam(
-                  lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v0),
-                  scene.camera,
-                ),
-                W,
-                H,
-                focal,
-              )!
-              const p01 = proj(
-                toCam(
-                  lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v1),
-                  scene.camera,
-                ),
-                W,
-                H,
-                focal,
-              )!
-              const p11 = proj(
-                toCam(
-                  lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v1),
-                  scene.camera,
-                ),
-                W,
-                H,
-                focal,
-              )!
+              // --- compute camera-space vertices once ---
+              const c00 = toCam(
+                lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v0),
+                scene.camera,
+              )
+              const c10 = toCam(
+                lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v0),
+                scene.camera,
+              )
+              const c01 = toCam(
+                lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v1),
+                scene.camera,
+              )
+              const c11 = toCam(
+                lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v1),
+                scene.camera,
+              )
+
+              const p00 = proj(c00, W, H, focal)!
+              const p10 = proj(c10, W, H, focal)!
+              const p01 = proj(c01, W, H, focal)!
+              const p11 = proj(c11, W, H, focal)!
 
               // First triangle: p00, p10, p11
               const tri0Mat = affineMatrix(
@@ -314,6 +304,15 @@ export async function buildRenderElements(
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
                 sym,
               })
+              // After pushing img for first triangle (p00,p10,p11)
+              const triFace0: Face = {
+                pts: [p00, p10, p11],
+                cam: [c00, c10, c11],
+                fill: "none",
+                stroke: false,
+              }
+              faces.push(triFace0)
+              faceToImg.set(triFace0, images[images.length - 1]!)
 
               // Second triangle: p00, p11, p01
               const tri1Mat = affineMatrix(
@@ -333,6 +332,15 @@ export async function buildRenderElements(
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
                 sym,
               })
+              // After pushing img for second triangle (p00,p11,p01)
+              const triFace1: Face = {
+                pts: [p00, p11, p01],
+                cam: [c00, c11, c01],
+                fill: "none",
+                stroke: false,
+              }
+              faces.push(triFace1)
+              faceToImg.set(triFace1, images[images.length - 1]!)
             }
           }
         }
@@ -372,21 +380,153 @@ export async function buildRenderElements(
     }
   }
 
-  // Combine all renderable elements and sort by depth
-  const allElements: RenderElement[] = [
-    ...faces.map((f) => ({ type: "face" as const, data: f })),
-    ...images.map((i) => ({ type: "image" as const, data: i })),
-    ...labels.map((l) => ({ type: "label" as const, data: l })),
-    ...edges.map((e) => ({ type: "edge" as const, data: e })),
-  ]
+  // BSP sort faces before merging with other elements
+  function sortFacesBSP(
+    polys: Face[],
+    W: number,
+    H: number,
+    focal: number,
+  ): Face[] {
+    const EPS = 1e-6
+    type Node = {
+      face: Face
+      normal: Point3
+      point: Point3
+      front: Node | null
+      back: Node | null
+    }
 
-  allElements.sort((a, b) => b.data.depth - a.data.depth)
+    function build(list: Face[]): Node | null {
+      if (!list.length) return null
+      const face = list[0]!
+      const p0 = face.cam[0]!
+      const p1 = face.cam[1]!
+      const p2 = face.cam[2]!
+      const normal = cross(sub(p1, p0), sub(p2, p0))
+      const front: Face[] = []
+      const back: Face[] = []
+
+      for (let k = 1; k < list.length; k++) {
+        const f = list[k]!
+        // classify each vertex
+        let pos = 0,
+          neg = 0
+        const d: number[] = []
+        for (const v of f.cam) {
+          const dist = dot(normal, sub(v!, p0))
+          d.push(dist)
+          if (dist > EPS) pos++
+          else if (dist < -EPS) neg++
+        }
+        if (!pos && !neg) {
+          front.push(f) // coplanar – draw after splitter
+        } else if (!pos) back.push(f)
+        else if (!neg) front.push(f)
+        else {
+          // split polygon by plane
+          const fFrontCam: Point3[] = []
+          const fBackCam: Point3[] = []
+          const fFront2D: Proj[] = []
+          const fBack2D: Proj[] = []
+
+          for (let i = 0; i < f.cam.length; i++) {
+            const j = (i + 1) % f.cam.length
+            const aCam = f.cam[i]!
+            const bCam = f.cam[j]!
+            const a2D = f.pts[i]!
+            const b2D = f.pts[j]!
+            const da = d[i]!
+            const db = d[j]!
+
+            const push = (
+              arrCam: Point3[],
+              arr2D: Proj[],
+              cCam: Point3,
+              c2D: Proj,
+            ) => {
+              arrCam.push(cCam)
+              arr2D.push(c2D)
+            }
+
+            if (da >= -EPS) push(fFrontCam, fFront2D, aCam!, a2D!)
+            if (da <= EPS) push(fBackCam, fBack2D, aCam!, a2D!)
+
+            if ((da > 0 && db < 0) || (da < 0 && db > 0)) {
+              const t = da / (da - db)
+              const interCam = {
+                x: aCam.x + (bCam.x - aCam.x) * t,
+                y: aCam.y + (bCam.y - aCam.y) * t,
+                z: aCam.z + (bCam.z - aCam.z) * t,
+              }
+              const inter2D = proj(interCam, W, H, focal)!
+              push(fFrontCam, fFront2D, interCam, inter2D)
+              push(fBackCam, fBack2D, interCam, inter2D)
+            }
+          }
+
+          const mk = (cam: Point3[], pts: Proj[]): Face | null =>
+            cam.length >= 3
+              ? { cam, pts, fill: f!.fill, stroke: f!.stroke }
+              : null
+          const f1 = mk(fFrontCam, fFront2D)
+          const f2 = mk(fBackCam, fBack2D)
+          if (f1) front.push(f1)
+          if (f2) back.push(f2)
+        }
+      }
+
+      return {
+        face,
+        normal,
+        point: p0,
+        front: build(front),
+        back: build(back),
+      }
+    }
+
+    function traverse(node: Node | null, out: Face[]) {
+      if (!node) return
+      const cameraSide = dot(node.normal, scale(node.point, -1))
+      if (cameraSide >= 0) {
+        traverse(node.back, out)
+        out.push(node.face)
+        traverse(node.front, out)
+      } else {
+        traverse(node.front, out)
+        out.push(node.face)
+        traverse(node.back, out)
+      }
+    }
+
+    const root = build(polys)
+    const ordered: Face[] = []
+    traverse(root, ordered)
+    return ordered
+  }
+
+  const orderedFaces = sortFacesBSP(faces, W, H, focal)
+
+  const elements: RenderElement[] = []
+  for (const f of orderedFaces) {
+    const img = faceToImg.get(f)
+    if (img) {
+      elements.push({ type: "image", data: img })
+    } else {
+      elements.push({ type: "face", data: f })
+    }
+  }
+  elements.push(
+    ...labels.map((l) => ({ type: "label" as const, data: l })),
+    ...edges
+      .sort((a, b) => a.depth - b.depth)
+      .map((e) => ({ type: "edge" as const, data: e })),
+  )
 
   return {
     width: W,
     height: H,
     backgroundColor: opt.backgroundColor,
-    elements: allElements,
+    elements,
     images,
     texId,
   }
