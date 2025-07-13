@@ -1,2 +1,5 @@
 [test]
 preload = ["./tests/fixtures/preload.ts"]
+
+[lockfile.install]
+save = false
