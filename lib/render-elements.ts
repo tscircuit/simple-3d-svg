@@ -43,8 +43,8 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
 }
 
 type Face = {
-  pts: Proj[]       // 2-D projected points (SVG space)
-  cam: Point3[]     // the same vertices in CAMERA space (z>0)
+  pts: Proj[] // 2-D projected points (SVG space)
+  cam: Point3[] // the same vertices in CAMERA space (z>0)
   fill: string
   stroke: boolean
 }
@@ -221,7 +221,7 @@ export async function buildRenderElements(
           p4.push(p)
         }
         if (behind) continue
-        const cam4 = idx.map(i => vc[i] as Point3)
+        const cam4 = idx.map((i) => vc[i] as Point3)
         faces.push({
           pts: p4,
           cam: cam4,
@@ -459,7 +459,9 @@ export async function buildRenderElements(
           }
 
           const mk = (cam: Point3[], pts: Proj[]): Face | null =>
-            cam.length >= 3 ? { cam, pts, fill: f!.fill, stroke: f!.stroke } : null
+            cam.length >= 3
+              ? { cam, pts, fill: f!.fill, stroke: f!.stroke }
+              : null
           const f1 = mk(fFrontCam, fFront2D)
           const f2 = mk(fBackCam, fBack2D)
           if (f1) front.push(f1)
