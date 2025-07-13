@@ -353,17 +353,10 @@ export async function renderScene(
   const W = opt.width ?? W_DEF
   const H = opt.height ?? H_DEF
   const focal = scene.camera.focalLength ?? FOCAL
-  type Face = { pts: Proj[]; depth: number; fill: string; stroke: boolean }
-  type Label = { matrix: string; depth: number; text: string; fill: string }
-  type Img = {
-    matrix: string
-    depth: number
-    href: string
-    clip: string
-    points: string
-    sym?: string
-  }
-  type Edge = { pts: [Proj, Proj]; depth: number; color: string }
+  type Face = { pts: Proj[]; depth: number; depthNear: number; fill: string; stroke: boolean }
+  type Label = { matrix: string; depth: number; depthNear: number; text: string; fill: string }
+  type Img  = { matrix: string; depth: number; depthNear: number; href: string; clip: string; points: string; sym?: string }
+  type Edge = { pts: [Proj, Proj]; depth: number; depthNear: number; color: string }
   const faces: Face[] = []
   const images: Img[] = []
   const labels: Label[] = []
@@ -403,8 +396,9 @@ export async function renderScene(
         const pa = bp[a]
         const pb = bp[b]
         if (pa && pb) {
-          const depth = Math.max(bc[a]!.z, bc[b]!.z)
-          edges.push({ pts: [pa, pb], depth, color: "rgba(0,0,0,0.5)" })
+          const depthFar  = Math.max(bc[a]!.z, bc[b]!.z)
+          const depthNear = Math.min(bc[a]!.z, bc[b]!.z)
+          edges.push({ pts: [pa, pb], depth: depthFar, depthNear, color: "rgba(0,0,0,0.5)" })
         }
       }
     }
@@ -439,11 +433,13 @@ export async function renderScene(
           const edge1 = sub(v1c, v0c)
           const edge2 = sub(v2c, v0c)
           const normal = cross(edge1, edge2)
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
+          const depthFar  = Math.max(v0c.z, v1c.z, v2c.z)
+          const depthNear = Math.min(v0c.z, v1c.z, v2c.z)
           const baseColor = box.color ?? "gray"
           faces.push({
             pts: [v0p, v1p, v2p],
-            depth,
+            depth: depthFar,
+            depthNear,
             fill: shadeByNormal(baseColor, normal),
             stroke: false,
           })
@@ -478,10 +474,12 @@ export async function renderScene(
           const edge2 = sub(v2c, v0c)
           const faceNormal = cross(edge1, edge2)
 
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
+          const depthFar  = Math.max(v0c.z, v1c.z, v2c.z)
+          const depthNear = Math.min(v0c.z, v1c.z, v2c.z)
           faces.push({
             pts: [v0p, v1p, v2p],
-            depth,
+            depth: depthFar,
+            depthNear,
             fill: shadeByNormal(
               box.color ?? triangle.color ?? "gray",
               faceNormal,
@@ -499,7 +497,8 @@ export async function renderScene(
       // faces
       for (const idx of FACES) {
         const p4: Proj[] = []
-        let zMax = -Infinity
+        let zFar  = -Infinity
+        let zNear =  Infinity
         let behind = false
         for (const i of idx) {
           const p = vp[i]
@@ -508,12 +507,14 @@ export async function renderScene(
             break
           }
           p4.push(p)
-          zMax = Math.max(zMax, vc[i]!.z)
+          zFar  = Math.max(zFar , vc[i]!.z)
+          zNear = Math.min(zNear, vc[i]!.z)
         }
         if (behind) continue
         faces.push({
           pts: p4,
-          depth: zMax,
+          depth: zFar,
+          depthNear: zNear,
           fill: colorToCss(box.color ?? "gray"),
           stroke: true,
         })
@@ -524,7 +525,9 @@ export async function renderScene(
         const pts = TOP.map((i) => vw[i])
         if (pts.every(Boolean)) {
           const dst = pts as [Point3, Point3, Point3, Point3]
-          const cz = Math.max(...TOP.map((i) => vc[i]!.z))
+          const zs = TOP.map((i) => vc[i]!.z)
+          const czFar  = Math.max(...zs)
+          const czNear = Math.min(...zs)
           const href = box.faceImages.top
 
           // Assign unique texture ID
@@ -599,7 +602,8 @@ export async function renderScene(
               const id0 = `clip${clipSeq++}`
               images.push({
                 matrix: tri0Mat,
-                depth: cz,
+                depth: czFar,
+                depthNear: czNear,
                 href,
                 clip: id0,
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
@@ -618,7 +622,8 @@ export async function renderScene(
               const id1 = `clip${clipSeq++}`
               images.push({
                 matrix: tri1Mat,
-                depth: cz,
+                depth: czFar,
+                depthNear: czNear,
                 href,
                 clip: id1,
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
@@ -640,20 +645,23 @@ export async function renderScene(
           const v = sub(p3, p0)
           const lu = len(u)
           const lv = len(v)
+          const zs = TOP.map((i) => vc[i]!.z)
+          const czFar  = Math.max(...zs)
+          const czNear = Math.min(...zs)
           if (lu && lv) {
             const uN = scale(u, 1 / lu)
             const vN = scale(v, 1 / lv)
             const cx = pts.reduce((s, p) => s + (p as Proj).x, 0) / 4
             const cy = pts.reduce((s, p) => s + (p as Proj).y, 0) / 4
             // use furthest top-face vertex so the label follows the face order
-            const cz = Math.max(...TOP.map((i) => vc[i]!.z))
             // SVG transform matrix: [a b c d e f] where
             // x' = a*x + c*y + e ; y' = b*x + d*y + f
             const m = `matrix(${uN.x} ${uN.y} ${vN.x} ${vN.y} ${cx} ${cy})`
             const fillCol = box.topLabelColor ?? [0, 0, 0, 1]
             labels.push({
               matrix: m,
-              depth: cz,
+              depth: czFar,
+              depthNear: czNear,
               text: box.topLabel,
               fill: colorToCss(fillCol),
             })
@@ -677,7 +685,10 @@ export async function renderScene(
     ...edges.map((e) => ({ type: "edge" as const, data: e })),
   ]
 
-  allElements.sort((a, b) => b.data.depth - a.data.depth)
+  allElements.sort((a, b) => {
+    if (b.data.depth !== a.data.depth) return b.data.depth - a.data.depth   // farthest first
+    return b.data.depthNear - a.data.depthNear                              // then second-farthest
+  })
 
   const out: string[] = []
   out.push(

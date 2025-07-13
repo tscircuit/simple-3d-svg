@@ -8,8 +8,8 @@
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="-27.994168488950628,-16.16244071283538 -59.381569522016434,-9.32345544913243e-15" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="-55.98833697790122,-64.64976285134149 -89.07235428302464,-51.425947722657995" />
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(196,127,0,1)" stroke="none" points="-58,-64 -32,-50 -74,-45" />
     <polygon fill="rgba(255,193,79,1)" stroke="none" points="-58,-64 -58,-15 -32,-50" />
+    <polygon fill="rgba(196,127,0,1)" stroke="none" points="-58,-64 -32,-50 -74,-45" />
     <polygon fill="rgba(186,121,0,1)" stroke="none" points="-32,-50 -58,-15 -74,-45" />
     <polygon fill="rgba(255,176,32,1)" stroke="none" points="-74,-45 -58,-15 -58,-64" />
   </g>
@@ -33,30 +33,30 @@
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <polygon fill="rgba(165,107,0,1)" stroke="none" points="15,6 -33,-3 0,-34" />
   </g>
-  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="31.606319261718408,18.247916933846394 67.57213083539803,39.01278792753368" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="33.786065417698985,-19.506393963766822 31.606319261718408,18.247916933846394" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="31.606319261718408,18.247916933846394 0,39.01278792753365" />
+  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="31.606319261718408,18.247916933846394 67.57213083539803,39.01278792753368" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="-16.32993161855451,28.284271247461902 -17.496355305594115,-10.1015254455221" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="-17.496355305594115,-10.1015254455221 -48.989794855663554,-28.284271247461902" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="16.32993161855451,-28.284271247461888 -17.496355305594115,-10.1015254455221" />
-  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="72.57747386024232,0 33.786065417698985,-19.506393963766822" />
-  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="0,39.01278792753365 36.28873693012118,62.85393610547091" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="0,0 0,39.01278792753365" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="33.786065417698985,-19.506393963766822 0,0" />
+  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="72.57747386024232,0 33.786065417698985,-19.506393963766822" />
+  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="0,39.01278792753365 36.28873693012118,62.85393610547091" />
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <polygon fill="rgba(83,169,83,1)" stroke="none" points="10,39 58,39 62,0" />
     <polygon fill="rgba(83,169,83,1)" stroke="none" points="10,39 62,0 11,0" />
   </g>
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="67.57213083539803,39.01278792753368 72.57747386024232,0" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="67.57213083539803,39.01278792753368 36.28873693012118,62.85393610547091" />
+  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="87.48177652797065,50.50762722761054 56.526686371919496,76.14996105085893" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="87.48177652797065,50.50762722761054 131.8956015344788,76.14996105085898" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="94.21114395319916,10.878565864408428 87.48177652797065,50.50762722761054" />
-  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="87.48177652797065,50.50762722761054 56.526686371919496,76.14996105085893" />
+  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="39.191835884530875,22.627416997969515 0,0" />
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <polygon fill="rgba(59,157,59,1)" stroke="none" points="73,63 118,91 128,49" />
     <polygon fill="rgba(59,157,59,1)" stroke="none" points="73,63 128,49 78,23" />
   </g>
-  <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="39.191835884530875,22.627416997969515 0,0" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="36.28873693012118,62.85393610547091 39.191835884530875,22.627416997969515" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="72.57747386024232,0 39.191835884530875,22.627416997969515" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="56.526686371919496,76.14996105085893 102.06207261596577,106.06601717798215" />

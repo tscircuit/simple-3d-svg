@@ -202,8 +202,8 @@
     <clipPath id="clip199" clipPathUnits="objectBoundingBox"><polygon points="0.9,0.9 1,1 0.9,1" /></clipPath>
   </defs>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="gray" points="-26,-22 26,-22 57,-107 -57,-107" />
     <polygon fill="gray" points="-26,-22 26,-22 37,32 -37,32" />
+    <polygon fill="gray" points="-26,-22 26,-22 57,-107 -57,-107" />
     <polygon fill="gray" points="26,-22 57,-107 196,-22 37,32" />
     <polygon fill="gray" points="-26,-22 -57,-107 -196,-22 -37,32" />
     <polygon fill="gray" points="-37,32 -196,-22 196,-22 37,32" />
