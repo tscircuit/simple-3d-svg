@@ -403,7 +403,7 @@ export async function renderScene(
         const pa = bp[a]
         const pb = bp[b]
         if (pa && pb) {
-          const depth = Math.max(bc[a]!.z, bc[b]!.z)
+          const depth = (bc[a]!.z + bc[b]!.z) / 2 // Changed to average z
           edges.push({ pts: [pa, pb], depth, color: "rgba(0,0,0,0.5)" })
         }
       }
@@ -439,7 +439,7 @@ export async function renderScene(
           const edge1 = sub(v1c, v0c)
           const edge2 = sub(v2c, v0c)
           const normal = cross(edge1, edge2)
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
+          const depth = (v0c.z + v1c.z + v2c.z) / 3 // Changed to average z
           const baseColor = box.color ?? "gray"
           faces.push({
             pts: [v0p, v1p, v2p],
@@ -478,7 +478,7 @@ export async function renderScene(
           const edge2 = sub(v2c, v0c)
           const faceNormal = cross(edge1, edge2)
 
-          const depth = Math.max(v0c.z, v1c.z, v2c.z)
+          const depth = (v0c.z + v1c.z + v2c.z) / 3 // Changed to average z
           faces.push({
             pts: [v0p, v1p, v2p],
             depth,
@@ -499,7 +499,7 @@ export async function renderScene(
       // faces
       for (const idx of FACES) {
         const p4: Proj[] = []
-        let zMax = -Infinity
+        let zSum = 0
         let behind = false
         for (const i of idx) {
           const p = vp[i]
@@ -508,12 +508,13 @@ export async function renderScene(
             break
           }
           p4.push(p)
-          zMax = Math.max(zMax, vc[i]!.z)
+          zSum += vc[i]!.z // Sum z for average calculation
         }
         if (behind) continue
+        const depth = zSum / 4 // Average z for quad faces
         faces.push({
           pts: p4,
-          depth: zMax,
+          depth,
           fill: colorToCss(box.color ?? "gray"),
           stroke: true,
         })
@@ -524,7 +525,11 @@ export async function renderScene(
         const pts = TOP.map((i) => vw[i])
         if (pts.every(Boolean)) {
           const dst = pts as [Point3, Point3, Point3, Point3]
-          const cz = Math.max(...TOP.map((i) => vc[i]!.z))
+          let zSumTop = 0
+          for (const i of TOP) {
+            zSumTop += vc[i]!.z // Sum z for average calculation
+          }
+          const cz = zSumTop / 4 // Average z for top face
           const href = box.faceImages.top
 
           // Assign unique texture ID
@@ -599,7 +604,7 @@ export async function renderScene(
               const id0 = `clip${clipSeq++}`
               images.push({
                 matrix: tri0Mat,
-                depth: cz,
+                depth: cz, // Uses average depth cz
                 href,
                 clip: id0,
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
@@ -618,7 +623,7 @@ export async function renderScene(
               const id1 = `clip${clipSeq++}`
               images.push({
                 matrix: tri1Mat,
-                depth: cz,
+                depth: cz, // Uses average depth cz
                 href,
                 clip: id1,
                 points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
@@ -645,15 +650,18 @@ export async function renderScene(
             const vN = scale(v, 1 / lv)
             const cx = pts.reduce((s, p) => s + (p as Proj).x, 0) / 4
             const cy = pts.reduce((s, p) => s + (p as Proj).y, 0) / 4
-            // use furthest top-face vertex so the label follows the face order
-            const cz = Math.max(...TOP.map((i) => vc[i]!.z))
+            let zSumLabel = 0
+            for (const i of TOP) {
+              zSumLabel += vc[i]!.z // Sum z for average calculation
+            }
+            const cz = zSumLabel / 4 // Average z for label
             // SVG transform matrix: [a b c d e f] where
             // x' = a*x + c*y + e ; y' = b*x + d*y + f
             const m = `matrix(${uN.x} ${uN.y} ${vN.x} ${vN.y} ${cx} ${cy})`
             const fillCol = box.topLabelColor ?? [0, 0, 0, 1]
             labels.push({
               matrix: m,
-              depth: cz,
+              depth: cz, // Uses average depth cz
               text: box.topLabel,
               fill: colorToCss(fillCol),
             })
