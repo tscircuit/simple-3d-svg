@@ -64,5 +64,5 @@ const scene = {
 } as const
 
 export default function Page() {
-  return <DragRotate scene={scene} opt={{ backgroundColor: "gray" }} />
+  return <DragRotate scene={scene as any} opt={{ backgroundColor: "gray" }} />
 }
