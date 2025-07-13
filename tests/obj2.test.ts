@@ -24,7 +24,7 @@ test("OBJ rendering from remote url", async () => {
     },
   }
 
-  const svg = await renderScene(scene)
+  const svg = await renderScene(scene, { maxFaceArea: 20 })
   expect(svg).toContain("<svg")
   expect(svg).toContain("</svg>")
   expect(svg).toContain("polygon")

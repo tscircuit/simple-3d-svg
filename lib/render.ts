@@ -348,7 +348,12 @@ function scaleAndPositionMesh(
 /*────────────── Render ─────────────*/
 export async function renderScene(
   scene: Scene,
-  opt: { width?: number; height?: number; backgroundColor?: Color } = {},
+  opt: {
+    width?: number
+    height?: number
+    backgroundColor?: Color
+    maxFaceArea?: number
+  } = {},
 ): Promise<string> {
   const W = opt.width ?? W_DEF
   const H = opt.height ?? H_DEF
@@ -370,6 +375,52 @@ export async function renderScene(
   const edges: Edge[] = []
   let clipSeq = 0
   const texId = new Map<string, string>()
+
+  function triArea(p0: Proj, p1: Proj, p2: Proj): number {
+    return (
+      Math.abs(
+        p0.x * (p1.y - p2.y) + p1.x * (p2.y - p0.y) + p2.x * (p0.y - p1.y),
+      ) / 2
+    )
+  }
+
+  function midpoint(a: Proj, b: Proj): Proj {
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: (a.z + b.z) / 2 }
+  }
+
+  function pushTri(
+    p0: Proj,
+    p1: Proj,
+    p2: Proj,
+    depth: number,
+    fill: string,
+    stroke: boolean,
+  ) {
+    if (opt.maxFaceArea && triArea(p0, p1, p2) > opt.maxFaceArea) {
+      const m01 = midpoint(p0, p1)
+      const m12 = midpoint(p1, p2)
+      const m20 = midpoint(p2, p0)
+      pushTri(p0, m01, m20, depth, fill, stroke)
+      pushTri(m01, p1, m12, depth, fill, stroke)
+      pushTri(m20, m12, p2, depth, fill, stroke)
+      pushTri(m01, m12, m20, depth, fill, stroke)
+    } else {
+      faces.push({ pts: [p0, p1, p2], depth, fill, stroke })
+    }
+  }
+
+  function pushQuad(
+    p0: Proj,
+    p1: Proj,
+    p2: Proj,
+    p3: Proj,
+    depth: number,
+    fill: string,
+    stroke: boolean,
+  ) {
+    pushTri(p0, p1, p2, depth, fill, stroke)
+    pushTri(p0, p2, p3, depth, fill, stroke)
+  }
 
   // Load STL meshes for boxes that have stlUrl
   const stlMeshes = new Map<string, STLMesh>()
@@ -441,12 +492,7 @@ export async function renderScene(
           const normal = cross(edge1, edge2)
           const depth = Math.max(v0c.z, v1c.z, v2c.z)
           const baseColor = box.color ?? "gray"
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            depth,
-            fill: shadeByNormal(baseColor, normal),
-            stroke: false,
-          })
+          pushTri(v0p, v1p, v2p, depth, shadeByNormal(baseColor, normal), false)
         }
       }
     } else if (box.objUrl && objMeshes.has(box.objUrl)) {
@@ -479,15 +525,14 @@ export async function renderScene(
           const faceNormal = cross(edge1, edge2)
 
           const depth = Math.max(v0c.z, v1c.z, v2c.z)
-          faces.push({
-            pts: [v0p, v1p, v2p],
+          pushTri(
+            v0p,
+            v1p,
+            v2p,
             depth,
-            fill: shadeByNormal(
-              box.color ?? triangle.color ?? "gray",
-              faceNormal,
-            ),
-            stroke: false,
-          })
+            shadeByNormal(box.color ?? triangle.color ?? "gray", faceNormal),
+            false,
+          )
         }
       }
     } else {
@@ -511,12 +556,15 @@ export async function renderScene(
           zMax = Math.max(zMax, vc[i]!.z)
         }
         if (behind) continue
-        faces.push({
-          pts: p4,
-          depth: zMax,
-          fill: colorToCss(box.color ?? "gray"),
-          stroke: true,
-        })
+        pushQuad(
+          p4[0]!,
+          p4[1]!,
+          p4[2]!,
+          p4[3]!,
+          zMax,
+          colorToCss(box.color ?? "gray"),
+          true,
+        )
       }
 
       // top face image
