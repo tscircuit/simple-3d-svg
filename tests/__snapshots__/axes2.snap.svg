@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <polygon fill="rgba(255,0,0,0.8)" points="-37,141 -51,44 -62,-37 -48,65" />
+    <polygon fill="rgba(0,128,255,0.8)" points="123,-17 145,-96 105,-142 91,-68" />
+    <polygon fill="rgba(0,128,255,0.8)" points="36,-5 16,-59 91,-68 123,-17" />
+    <polygon fill="rgba(0,128,255,0.8)" points="16,-59 18,-134 105,-142 91,-68" />
+    <polygon fill="rgba(0,128,255,0.8)" points="36,-5 43,-84 145,-96 123,-17" />
+    <polygon fill="rgba(0,128,255,0.8)" points="43,-84 18,-134 105,-142 145,-96" />
+    <polygon fill="rgba(0,128,255,0.8)" points="36,-5 16,-59 18,-134 43,-84" />
+    <polygon fill="rgba(255,0,0,0.8)" points="83,119 106,40 60,-52 49,29" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-37,141 -51,44 49,29 83,119" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-51,44 -62,-37 60,-52 49,29" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-37,141 -48,65 106,40 83,119" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-48,65 -62,-37 60,-52 106,40" />
+  </g>
+  <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="-168" y1="168" x2="-172" y2="155" stroke="red" />
+    <polygon fill="red" points="-174,147 -168,154 -176,156" />
+    <text x="-177" y="138" fill="red" font-size="12" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">X</text>
+    <line x1="-168" y1="168" x2="-168" y2="152" stroke="green" />
+    <polygon fill="green" points="-168,144 -164,152 -172,152" />
+    <text x="-168" y="134" fill="green" font-size="12" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">Y</text>
+    <line x1="-168" y1="168" x2="-145" y2="165" stroke="blue" />
+    <polygon fill="blue" points="-137,164 -144,169 -145,161" />
+    <text x="-127" y="162" fill="blue" font-size="12" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">Z</text>
+  </g>
+</svg>
