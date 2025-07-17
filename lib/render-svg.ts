@@ -198,8 +198,14 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
   const { r, u, f } = axes(cam)
   const d = sub({ x: 0, y: 0, z: 0 }, cam.position)
   const originCam = { x: dot(d, r), y: dot(d, u), z: dot(d, f) }
-  const origin2D = proj(originCam, W, H, focal)
-  if (!origin2D) return ""
+
+  const project = (p: { x: number; y: number; z: number }) => {
+    const z = p.z === 0 ? 1e-6 : p.z
+    const s = focal / z
+    return { x: (p.x * s * W) / 2, y: (-p.y * s * H) / 2 }
+  }
+
+  const origin2D = project(originCam)
 
   const L = 1000
   const axesData = [
@@ -217,37 +223,23 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
 
   const parts: string[] = []
   for (const { dir, color } of axesData) {
-    const pos = proj(
-      {
-        x: originCam.x + dir.x * L,
-        y: originCam.y + dir.y * L,
-        z: originCam.z + dir.z * L,
-      },
-      W,
-      H,
-      focal,
+    const pos = project({
+      x: originCam.x + dir.x * L,
+      y: originCam.y + dir.y * L,
+      z: originCam.z + dir.z * L,
+    })
+    parts.push(
+      `    <line x1="${fmt(origin2D.x)}" y1="${fmt(origin2D.y)}" x2="${fmt(pos.x)}" y2="${fmt(pos.y)}" stroke="${color}" />`,
     )
-    if (pos) {
-      parts.push(
-        `    <line x1="${fmt(origin2D.x)}" y1="${fmt(origin2D.y)}" x2="${fmt(pos.x)}" y2="${fmt(pos.y)}" stroke="${color}" />`,
-      )
-    }
 
-    const neg = proj(
-      {
-        x: originCam.x - dir.x * L,
-        y: originCam.y - dir.y * L,
-        z: originCam.z - dir.z * L,
-      },
-      W,
-      H,
-      focal,
+    const neg = project({
+      x: originCam.x - dir.x * L,
+      y: originCam.y - dir.y * L,
+      z: originCam.z - dir.z * L,
+    })
+    parts.push(
+      `    <line x1="${fmt(origin2D.x)}" y1="${fmt(origin2D.y)}" x2="${fmt(neg.x)}" y2="${fmt(neg.y)}" stroke="${color}" stroke-dasharray="4 4" />`,
     )
-    if (neg) {
-      parts.push(
-        `    <line x1="${fmt(origin2D.x)}" y1="${fmt(origin2D.y)}" x2="${fmt(neg.x)}" y2="${fmt(neg.y)}" stroke="${color}" stroke-dasharray="4 4" />`,
-      )
-    }
   }
 
   return `  <g stroke-width="1">\n${parts.join("\n")}\n  </g>\n`
