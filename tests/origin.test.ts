@@ -24,7 +24,7 @@ test("origin lines", () => {
       },
     ],
     camera: {
-      position: { x: 12, y: 12, z: 12 },
+      position: { x: -10, y: 10, z: -10 },
       lookAt: { x: 0, y: 0, z: 0 },
     },
   }
