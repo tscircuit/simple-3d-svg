@@ -88,3 +88,18 @@ renderScene(
   },
 )
 ```
+
+### `showAxes`
+
+Set `showAxes` to `true` to draw a small XYZ axis guide in the lower left corner.
+
+```ts
+renderScene(
+  {
+    /* ... scene definition ... */
+  },
+  {
+    showAxes: true,
+  },
+)
+```

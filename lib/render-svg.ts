@@ -1,6 +1,7 @@
-import type { Scene, Color } from "./types"
+import type { Scene, Color, Camera } from "./types"
 import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
+import { sub, cross, dot, len, norm } from "./vec3"
 
 function fmt(n: number) {
   return Math.round(n) + ""
@@ -8,7 +9,12 @@ function fmt(n: number) {
 
 export async function renderScene(
   scene: Scene,
-  opt: { width?: number; height?: number; backgroundColor?: Color } = {},
+  opt: {
+    width?: number
+    height?: number
+    backgroundColor?: Color
+    showAxes?: boolean
+  } = {},
 ): Promise<string> {
   const {
     width: W,
@@ -106,6 +112,85 @@ export async function renderScene(
     out.push("  </g>\n")
   }
 
+  if (opt.showAxes) {
+    out.push(renderAxes(scene.camera, W, H))
+  }
+
   out.push("</svg>")
   return out.join("")
+}
+
+function renderAxes(cam: Camera, W: number, H: number): string {
+  const focal = cam.focalLength ?? 2
+  const baseDist = 3
+  const arrowDist = 1
+  const margin = 40
+
+  const baseProj = proj({ x: 0, y: 0, z: baseDist }, W, H, focal)
+  if (!baseProj) return ""
+  const offsetX = -W / 2 + margin - baseProj.x
+  const offsetY = H / 2 - margin - baseProj.y
+
+  function t(p: { x: number; y: number; z: number }) {
+    const pp = proj(p, W, H, focal)
+    return pp ? { x: pp.x + offsetX, y: pp.y + offsetY } : { x: 0, y: 0 }
+  }
+
+  const { r, u, f } = axes(cam)
+  const start = t({ x: 0, y: 0, z: baseDist })
+  const axesData = [
+    { dir: r, color: "red" },
+    { dir: u, color: "green" },
+    { dir: f, color: "blue" },
+  ]
+
+  const parts: string[] = []
+  for (const { dir, color } of axesData) {
+    const end = t({
+      x: dir.x * arrowDist,
+      y: dir.y * arrowDist,
+      z: baseDist + dir.z * arrowDist,
+    })
+    const dx = end.x - start.x
+    const dy = end.y - start.y
+    const l = Math.sqrt(dx * dx + dy * dy) || 1
+    const nx = dx / l
+    const ny = dy / l
+    const hx = end.x - nx * 8
+    const hy = end.y - ny * 8
+    const b1x = hx + -ny * 4
+    const b1y = hy + nx * 4
+    const b2x = hx - -ny * 4
+    const b2y = hy - nx * 4
+    parts.push(
+      `    <line x1="${fmt(start.x)}" y1="${fmt(start.y)}" x2="${fmt(end.x)}" y2="${fmt(end.y)}" stroke="${color}" />`,
+    )
+    parts.push(
+      `    <polygon fill="${color}" points="${fmt(end.x)},${fmt(end.y)} ${fmt(b1x)},${fmt(b1y)} ${fmt(b2x)},${fmt(b2y)}" />`,
+    )
+  }
+
+  return `  <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n${parts.join(
+    "\n",
+  )}\n  </g>\n`
+}
+
+function axes(cam: Camera) {
+  const f = norm(sub(cam.lookAt, cam.position))
+  const wUp = { x: 0, y: 1, z: 0 }
+  let r = norm(cross(f, wUp))
+  if (!len(r)) r = { x: 1, y: 0, z: 0 }
+  const u = cross(r, f)
+  return { r, u, f }
+}
+
+function proj(
+  p: { x: number; y: number; z: number },
+  w: number,
+  h: number,
+  focal: number,
+): { x: number; y: number } | null {
+  if (p.z <= 0) return null
+  const s = focal / p.z
+  return { x: (p.x * s * w) / 2, y: (-p.y * s * h) / 2 }
 }
