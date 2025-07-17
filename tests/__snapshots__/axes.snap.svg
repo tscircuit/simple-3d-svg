@@ -1,9 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="-160" y1="160" x2="-37" y2="160" stroke="red" />
-    <polygon fill="red" points="-37,160 -45,164 -45,156" />
-    <line x1="-160" y1="160" x2="-223" y2="34" stroke="green" />
-    <polygon fill="green" points="-223,34 -216,39 -223,43" />
-    <line x1="-160" y1="160" x2="-255" y2="255" stroke="blue" />
-    <polygon fill="blue" points="-255,255 -252,247 -247,252" />
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <polygon fill="rgba(0,128,255,0.8)" points="-166,52 -204,-29 -297,78 -229,153" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-65,69 -107,179 -229,153 -166,52" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-65,69 -80,-11 -204,-29 -166,52" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-107,179 -140,108 -297,78 -229,153" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-80,-11 -140,108 -297,78 -204,-29" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-65,69 -107,179 -140,108 -80,-11" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-25,-34 -29,-111 -60,-52 -49,29" />
+    <polygon fill="rgba(255,0,0,0.8)" points="60,-23 51,44 -49,29 -25,-34" />
+    <polygon fill="rgba(255,0,0,0.8)" points="60,-23 71,-101 -29,-111 -25,-34" />
+    <polygon fill="rgba(255,0,0,0.8)" points="51,44 62,-37 -60,-52 -49,29" />
+    <polygon fill="rgba(255,0,0,0.8)" points="71,-101 62,-37 -60,-52 -29,-111" />
+    <polygon fill="rgba(255,0,0,0.8)" points="60,-23 51,44 62,-37 71,-101" />
+  </g>
+  <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="-180" y1="180" x2="-184" y2="194" stroke="red" />
+    <polygon fill="red" points="-184,194 -186,185 -178,188" />
+    <line x1="-180" y1="180" x2="-180" y2="165" stroke="green" />
+    <polygon fill="green" points="-180,165 -176,173 -184,173" />
+    <line x1="-180" y1="180" x2="-199" y2="177" stroke="blue" />
+    <polygon fill="blue" points="-199,177 -191,174 -192,182" />
   </g>
 </svg>

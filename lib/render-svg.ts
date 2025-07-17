@@ -123,8 +123,8 @@ export async function renderScene(
 function renderAxes(cam: Camera, W: number, H: number): string {
   const focal = cam.focalLength ?? 2
   const baseDist = 3
-  const arrowDist = 1
-  const margin = 40
+  const margin = Math.min(W, H) * 0.05
+  const arrowDist = (baseDist * 0.1) / focal
 
   const baseProj = proj({ x: 0, y: 0, z: baseDist }, W, H, focal)
   if (!baseProj) return ""
@@ -139,10 +139,17 @@ function renderAxes(cam: Camera, W: number, H: number): string {
   const { r, u, f } = axes(cam)
   const start = t({ x: 0, y: 0, z: baseDist })
   const axesData = [
-    { dir: r, color: "red" },
-    { dir: u, color: "green" },
-    { dir: f, color: "blue" },
-  ]
+    { w: { x: 1, y: 0, z: 0 }, color: "red" },
+    { w: { x: 0, y: 1, z: 0 }, color: "green" },
+    { w: { x: 0, y: 0, z: 1 }, color: "blue" },
+  ].map(({ w, color }) => ({
+    dir: {
+      x: w.x * r.x + w.y * r.y + w.z * r.z,
+      y: w.x * u.x + w.y * u.y + w.z * u.z,
+      z: w.x * f.x + w.y * f.y + w.z * f.z,
+    },
+    color,
+  }))
 
   const parts: string[] = []
   for (const { dir, color } of axesData) {
