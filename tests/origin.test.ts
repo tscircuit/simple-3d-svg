@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test"
 import { renderScene, type Scene } from "../lib"
 
-test("origin lines", () => {
+test("origin lines", async () => {
   const scene: Scene = {
     boxes: [
       {
@@ -28,7 +28,7 @@ test("origin lines", () => {
       lookAt: { x: 0, y: 0, z: 0 },
     },
   }
-  const svg = renderScene(scene, {
+  const svg = await renderScene(scene, {
     showOrigin: true,
     showGrid: true,
     grid: {
