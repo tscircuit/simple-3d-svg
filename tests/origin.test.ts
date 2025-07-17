@@ -20,6 +20,10 @@ test("origin lines", () => {
       lookAt: { x: 0, y: 0, z: 0 },
     },
   }
-  const svg = renderScene(scene, { showOrigin: true })
+  const svg = renderScene(scene, {
+    showOrigin: true,
+    showGrid: true,
+    backgroundColor: "white",
+  })
   expect(svg).toMatchSvgSnapshot(import.meta.path)
 })
