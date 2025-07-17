@@ -14,6 +14,7 @@ export async function renderScene(
     height?: number
     backgroundColor?: Color
     showAxes?: boolean
+    showOrigin?: boolean
   } = {},
 ): Promise<string> {
   const {
@@ -112,6 +113,10 @@ export async function renderScene(
     out.push("  </g>\n")
   }
 
+  if (opt.showOrigin) {
+    out.push(renderOrigin(scene.camera, W, H))
+  }
+
   if (opt.showAxes) {
     out.push(renderAxes(scene.camera, W, H))
   }
@@ -186,6 +191,66 @@ function renderAxes(cam: Camera, W: number, H: number): string {
   return `  <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n${parts.join(
     "\n",
   )}\n  </g>\n`
+}
+
+function renderOrigin(cam: Camera, W: number, H: number): string {
+  const focal = cam.focalLength ?? 2
+  const { r, u, f } = axes(cam)
+  const d = sub({ x: 0, y: 0, z: 0 }, cam.position)
+  const originCam = { x: dot(d, r), y: dot(d, u), z: dot(d, f) }
+  const origin2D = proj(originCam, W, H, focal)
+  if (!origin2D) return ""
+
+  const L = 1000
+  const axesData = [
+    { w: { x: 1, y: 0, z: 0 }, color: "red" },
+    { w: { x: 0, y: 1, z: 0 }, color: "green" },
+    { w: { x: 0, y: 0, z: 1 }, color: "blue" },
+  ].map(({ w, color }) => ({
+    dir: {
+      x: w.x * r.x + w.y * r.y + w.z * r.z,
+      y: w.x * u.x + w.y * u.y + w.z * u.z,
+      z: w.x * f.x + w.y * f.y + w.z * f.z,
+    },
+    color,
+  }))
+
+  const parts: string[] = []
+  for (const { dir, color } of axesData) {
+    const pos = proj(
+      {
+        x: originCam.x + dir.x * L,
+        y: originCam.y + dir.y * L,
+        z: originCam.z + dir.z * L,
+      },
+      W,
+      H,
+      focal,
+    )
+    if (pos) {
+      parts.push(
+        `    <line x1="${fmt(origin2D.x)}" y1="${fmt(origin2D.y)}" x2="${fmt(pos.x)}" y2="${fmt(pos.y)}" stroke="${color}" />`,
+      )
+    }
+
+    const neg = proj(
+      {
+        x: originCam.x - dir.x * L,
+        y: originCam.y - dir.y * L,
+        z: originCam.z - dir.z * L,
+      },
+      W,
+      H,
+      focal,
+    )
+    if (neg) {
+      parts.push(
+        `    <line x1="${fmt(origin2D.x)}" y1="${fmt(origin2D.y)}" x2="${fmt(neg.x)}" y2="${fmt(neg.y)}" stroke="${color}" stroke-dasharray="4 4" />`,
+      )
+    }
+  }
+
+  return `  <g stroke-width="1">\n${parts.join("\n")}\n  </g>\n`
 }
 
 function axes(cam: Camera) {

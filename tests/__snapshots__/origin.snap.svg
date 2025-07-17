@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <polygon fill="rgba(0,128,255,0.8)" points="-166,52 -204,-29 -297,78 -229,153" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-65,69 -107,179 -229,153 -166,52" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-65,69 -80,-11 -204,-29 -166,52" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-107,179 -140,108 -297,78 -229,153" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-80,-11 -140,108 -297,78 -204,-29" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-65,69 -107,179 -140,108 -80,-11" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-25,-34 -29,-111 -60,-52 -49,29" />
+    <polygon fill="rgba(255,0,0,0.8)" points="60,-23 51,44 -49,29 -25,-34" />
+    <polygon fill="rgba(255,0,0,0.8)" points="60,-23 71,-101 -29,-111 -25,-34" />
+    <polygon fill="rgba(255,0,0,0.8)" points="51,44 62,-37 -60,-52 -49,29" />
+    <polygon fill="rgba(255,0,0,0.8)" points="71,-101 62,-37 -60,-52 -29,-111" />
+    <polygon fill="rgba(255,0,0,0.8)" points="60,-23 51,44 62,-37 71,-101" />
+  </g>
+  <g stroke-width="1">
+    <line x1="373" y1="52" x2="114" y2="-388" stroke="red" stroke-dasharray="4 4" />
+    <line x1="373" y1="52" x2="3" y2="405" stroke="green" stroke-dasharray="4 4" />
+    <line x1="373" y1="52" x2="-2664" y2="-373" stroke="blue" />
+  </g>
+</svg>

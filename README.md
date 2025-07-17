@@ -105,3 +105,19 @@ renderScene(
   },
 )
 ```
+
+### `showOrigin`
+
+Enable `showOrigin` to draw lines extending from the world origin along the X, Y,
+and Z axes. Segments going in the negative direction are dotted.
+
+```ts
+renderScene(
+  {
+    /* ... scene definition ... */
+  },
+  {
+    showOrigin: true,
+  },
+)
+```
