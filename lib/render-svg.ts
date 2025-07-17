@@ -1,4 +1,4 @@
-import type { Scene, Color, Camera } from "./types"
+import type { Scene, Color, Camera, Point3 } from "./types"
 import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm } from "./vec3"
@@ -15,6 +15,11 @@ export async function renderScene(
     backgroundColor?: Color
     showAxes?: boolean
     showOrigin?: boolean
+    showGrid?: boolean
+    grid?: {
+      /** world-space grid cell size (default = 1)            */ cellSize?: number
+      /** plane on which to draw the grid (default = "xz")   */ plane?: "xy" | "yz" | "xz"
+    }
   } = {},
 ): Promise<string> {
   const {
@@ -24,7 +29,11 @@ export async function renderScene(
     elements,
     images,
     texId,
-  } = await buildRenderElements(scene, opt)
+  } = await buildRenderElements(scene, {
+        width:          opt.width,
+        height:         opt.height,
+        backgroundColor: opt.backgroundColor,
+      })
 
   const out: string[] = []
   out.push(
@@ -54,6 +63,19 @@ export async function renderScene(
       )
     }
     out.push("  </defs>\n")
+  }
+
+  // ── grid plane ────────────────────────────────────────────
+  if (opt.showGrid) {
+    out.push(
+      renderGrid(
+        scene,
+        W,
+        H,
+        opt.grid?.cellSize ?? 1,
+        opt.grid?.plane    ?? "xz",
+      ),
+    )
   }
 
   // ---- element rendering loop ----
@@ -191,6 +213,61 @@ function renderAxes(cam: Camera, W: number, H: number): string {
   return `  <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n${parts.join(
     "\n",
   )}\n  </g>\n`
+}
+
+function renderGrid(
+  scene: Scene,
+  W: number,
+  H: number,
+  cellSize: number,
+  plane: "xy" | "yz" | "xz",
+): string {
+  const cam   = scene.camera
+  const focal = cam.focalLength ?? 2
+  const { r, u, f } = axes(cam)
+
+  // helper: world->camera->2D projection ---------------------
+  const toCam = (p: Point3) => {
+    const d = sub(p, cam.position)
+    return { x: dot(d, r), y: dot(d, u), z: dot(d, f) }
+  }
+  const project = (p: Point3) => proj(toCam(p), W, H, focal)
+
+  // grid extent (±R in both directions)
+  const R = cellSize * 10        // 21×21 lines by default
+
+  const lines: string[] = []
+  for (let t = -R; t <= R; t += cellSize) {
+    const pushLine = (a: Point3, b: Point3) => {
+      const p0 = project(a)
+      const p1 = project(b)
+      if (p0 && p1) {
+        lines.push(
+          `    <line x1="${fmt(p0.x)}" y1="${fmt(p0.y)}" ` +
+          `x2="${fmt(p1.x)}" y2="${fmt(p1.y)}" />`,
+        )
+      }
+    }
+
+    switch (plane) {
+      case "xz":
+        pushLine({ x: t, y: 0, z: -R }, { x: t, y: 0, z: R })  // lines ‖ Z
+        pushLine({ x: -R, y: 0, z: t }, { x: R,  y: 0, z: t }) // lines ‖ X
+        break
+      case "xy":
+        pushLine({ x: t, y: -R, z: 0 }, { x: t, y: R,  z: 0 }) // lines ‖ Y
+        pushLine({ x: -R, y: t, z: 0 }, { x: R,  y: t, z: 0 }) // lines ‖ X
+        break
+      case "yz":
+        pushLine({ x: 0, y: t, z: -R }, { x: 0, y: t, z: R })  // lines ‖ Z
+        pushLine({ x: 0, y: -R, z: t }, { x: 0, y: R, z: t })  // lines ‖ Y
+        break
+    }
+  }
+
+  return lines.length
+    ? `  <g stroke="#ccc" stroke-width="0.5">\n${lines.join("\n")}\n  </g>\n`
+    : ""
 }
 
 function renderOrigin(cam: Camera, W: number, H: number): string {
