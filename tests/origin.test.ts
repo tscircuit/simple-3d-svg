@@ -17,7 +17,7 @@ test("origin lines", () => {
     ],
     camera: {
       position: { x: 5, y: 5, z: 5 },
-      lookAt: { x: 0, y: 0, z: 6 },
+      lookAt: { x: 0, y: 0, z: 0 },
     },
   }
   const svg = renderScene(scene, { showOrigin: true })
