@@ -123,8 +123,8 @@ export async function renderScene(
 function renderAxes(cam: Camera, W: number, H: number): string {
   const focal = cam.focalLength ?? 2
   const baseDist = 3
-  const margin = Math.min(W, H) * 0.05
-  const arrowDist = (baseDist * 0.1) / focal
+  const margin = Math.min(W, H) * 0.08
+  const arrowDist = (baseDist * 0.16) / focal
 
   const baseProj = proj({ x: 0, y: 0, z: baseDist }, W, H, focal)
   if (!baseProj) return ""
@@ -139,20 +139,21 @@ function renderAxes(cam: Camera, W: number, H: number): string {
   const { r, u, f } = axes(cam)
   const start = t({ x: 0, y: 0, z: baseDist })
   const axesData = [
-    { w: { x: 1, y: 0, z: 0 }, color: "red" },
-    { w: { x: 0, y: 1, z: 0 }, color: "green" },
-    { w: { x: 0, y: 0, z: 1 }, color: "blue" },
-  ].map(({ w, color }) => ({
+    { w: { x: 1, y: 0, z: 0 }, color: "red", label: "X" },
+    { w: { x: 0, y: 1, z: 0 }, color: "green", label: "Y" },
+    { w: { x: 0, y: 0, z: 1 }, color: "blue", label: "Z" },
+  ].map(({ w, color, label }) => ({
     dir: {
       x: w.x * r.x + w.y * r.y + w.z * r.z,
       y: w.x * u.x + w.y * u.y + w.z * u.z,
       z: w.x * f.x + w.y * f.y + w.z * f.z,
     },
     color,
+    label,
   }))
 
   const parts: string[] = []
-  for (const { dir, color } of axesData) {
+  for (const { dir, color, label } of axesData) {
     const end = t({
       x: dir.x * arrowDist,
       y: dir.y * arrowDist,
@@ -169,11 +170,16 @@ function renderAxes(cam: Camera, W: number, H: number): string {
     const b1y = hy + nx * 4
     const b2x = hx - -ny * 4
     const b2y = hy - nx * 4
+    const tx = end.x + nx * 10
+    const ty = end.y + ny * 10
     parts.push(
-      `    <line x1="${fmt(start.x)}" y1="${fmt(start.y)}" x2="${fmt(end.x)}" y2="${fmt(end.y)}" stroke="${color}" />`,
+      `    <line x1="${fmt(start.x)}" y1="${fmt(start.y)}" x2="${fmt(hx)}" y2="${fmt(hy)}" stroke="${color}" />`,
     )
     parts.push(
       `    <polygon fill="${color}" points="${fmt(end.x)},${fmt(end.y)} ${fmt(b1x)},${fmt(b1y)} ${fmt(b2x)},${fmt(b2y)}" />`,
+    )
+    parts.push(
+      `    <text x="${fmt(tx)}" y="${fmt(ty)}" fill="${color}" font-size="12" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${label}</text>`,
     )
   }
 

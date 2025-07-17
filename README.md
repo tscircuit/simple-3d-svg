@@ -91,8 +91,9 @@ renderScene(
 
 ### `showAxes`
 
-Set `showAxes` to `true` to draw a small XYZ axis guide (about 5% of the SVG size)
-in the lower left corner.
+Set `showAxes` to `true` to draw a small XYZ axis guide (about 8% of the SVG size)
+in the lower left corner. Each arrow is labeled and points toward the positive
+X, Y, or Z direction.
 
 ```ts
 renderScene(
