@@ -51,7 +51,10 @@ test("Binary STL rendering with bear clip and additional boxes", async () => {
     },
   }
 
-  const svg = await renderScene(scene)
+  const svg = await renderScene(scene, {
+    backgroundColor: "white",
+    showOrigin: true,
+  })
   expect(svg).toContain("<svg")
   expect(svg).toContain("</svg>")
   expect(svg).toContain("polygon")

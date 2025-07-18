@@ -84,9 +84,24 @@ function parseASCIISTL(buffer: ArrayBuffer): STLMesh {
     i++
   }
 
+  // Apply Z-up to Y-up rotation (rotate -90 degrees around X-axis)
+  const rotatedTriangles = triangles.map((triangle) => ({
+    ...triangle,
+    vertices: triangle.vertices.map((v) => ({
+      x: v.x,
+      y: -v.z,
+      z: v.y,
+    })) as [Point3, Point3, Point3],
+    normal: {
+      x: triangle.normal.x,
+      y: -triangle.normal.z,
+      z: triangle.normal.y,
+    },
+  }))
+
   return {
-    triangles,
-    boundingBox: calculateBoundingBox(triangles),
+    triangles: rotatedTriangles,
+    boundingBox: calculateBoundingBox(rotatedTriangles),
   }
 }
 
@@ -135,9 +150,24 @@ function parseBinarySTL(view: DataView): STLMesh {
     triangles.push({ vertices, normal })
   }
 
+  // Apply Z-up to Y-up rotation (rotate -90 degrees around X-axis)
+  const rotatedTriangles = triangles.map((triangle) => ({
+    ...triangle,
+    vertices: triangle.vertices.map((v) => ({
+      x: v.x,
+      y: -v.z,
+      z: v.y,
+    })) as [Point3, Point3, Point3],
+    normal: {
+      x: triangle.normal.x,
+      y: -triangle.normal.z,
+      z: triangle.normal.y,
+    },
+  }))
+
   return {
-    triangles,
-    boundingBox: calculateBoundingBox(triangles),
+    triangles: rotatedTriangles,
+    boundingBox: calculateBoundingBox(rotatedTriangles),
   }
 }
 

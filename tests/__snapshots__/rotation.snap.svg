@@ -1,27 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(255,186,59,1)" stroke="none" points="-14,-11 15,6 0,-34" />
-    <polygon fill="rgba(83,169,83,1)" stroke="none" points="29,39 58,39 58,34 39,29" />
+    <polygon fill="rgba(255,197,90,1)" stroke="none" points="-72,-11 -42,-38 -89,-49" />
+    <polygon fill="rgba(244,158,0,1)" stroke="none" points="-63,-34 -42,-38 -72,-11" />
+    <polygon fill="rgba(83,169,83,1)" stroke="none" points="29,39 58,39 60,20 51,17" />
     <polygon fill="rgba(59,157,59,1)" stroke="none" points="73,63 79,61 73,58" />
     <polygon fill="rgba(59,157,59,1)" stroke="none" points="73,63 118,91 119,85 79,61" />
-    <polygon fill="rgba(255,174,26,1)" stroke="none" points="-14,-11 -22,-7 -4,3 15,6" />
-    <polygon fill="rgba(255,169,11,1)" stroke="none" points="0,-34 -4,-30 -22,-7 -14,-11" />
-    <polygon fill="rgba(165,107,0,1)" stroke="none" points="15,6 -4,3 -4,-30 0,-34" />
-    <polygon fill="rgba(83,169,83,1)" stroke="none" points="58,34 61,7 39,29" />
-    <polygon fill="rgba(255,193,79,1)" stroke="none" points="-58,-64 -58,-15 -32,-50" />
-    <polygon fill="rgba(255,176,32,1)" stroke="none" points="-74,-45 -58,-15 -58,-64" />
-    <polygon fill="rgba(186,121,0,1)" stroke="none" points="-32,-50 -58,-15 -74,-45" />
-    <polygon fill="rgba(83,169,83,1)" stroke="none" points="10,39 28,25 10,20" />
-    <polygon fill="rgba(83,169,83,1)" stroke="none" points="10,39 29,39 39,29 28,25" />
-    <polygon fill="rgba(59,157,59,1)" stroke="none" points="79,61 88,59 74,51 73,58" />
-    <polygon fill="rgba(59,157,59,1)" stroke="none" points="119,85 121,78 88,59 79,61" />
-    <polygon fill="rgba(255,174,26,1)" stroke="none" points="-22,-7 -33,-3 -4,3" />
-    <polygon fill="rgba(255,169,11,1)" stroke="none" points="-4,-30 -33,-3 -22,-7" />
-    <polygon fill="rgba(165,107,0,1)" stroke="none" points="-4,3 -33,-3 -4,-30" />
-    <polygon fill="rgba(83,169,83,1)" stroke="none" points="28,25 62,0 11,0 10,20" />
-    <polygon fill="rgba(83,169,83,1)" stroke="none" points="39,29 61,7 62,0 28,25" />
-    <polygon fill="rgba(59,157,59,1)" stroke="none" points="88,59 128,49 78,23 74,51" />
-    <polygon fill="rgba(59,157,59,1)" stroke="none" points="121,78 128,49 88,59" />
-    <polygon fill="rgba(196,127,0,1)" stroke="none" points="-58,-64 -32,-50 -74,-45" />
+    <polygon fill="rgba(255,193,79,1)" stroke="none" points="-17,-20 -17,10 0,-11" />
+    <polygon fill="rgba(255,176,32,1)" stroke="none" points="-30,-17 -17,10 -17,-20" />
+    <polygon fill="rgba(186,121,0,1)" stroke="none" points="0,-11 -17,10 -30,-17" />
+    <polygon fill="rgba(83,169,83,1)" stroke="none" points="10,39 42,15 11,6" />
+    <polygon fill="rgba(83,169,83,1)" stroke="none" points="10,39 29,39 51,17 42,15" />
+    <polygon fill="rgba(59,157,59,1)" stroke="none" points="79,61 108,54 76,36 73,58" />
+    <polygon fill="rgba(59,157,59,1)" stroke="none" points="119,85 124,63 108,54 79,61" />
+    <polygon fill="rgba(229,148,0,1)" stroke="none" points="-89,-49 -42,-38 -63,-34" />
+    <polygon fill="rgba(83,169,83,1)" stroke="none" points="60,20 61,7 51,17" />
+    <polygon fill="rgba(255,193,79,1)" stroke="none" points="-17,-43 -17,-20 0,-11 14,-27" />
+    <polygon fill="rgba(255,176,32,1)" stroke="none" points="-31,-21 -30,-17 -17,-20 -17,-43" />
+    <polygon fill="rgba(186,121,0,1)" stroke="none" points="14,-27 0,-11 -30,-17 -31,-21" />
+    <polygon fill="rgba(83,169,83,1)" stroke="none" points="42,15 62,0 11,0 11,6" />
+    <polygon fill="rgba(83,169,83,1)" stroke="none" points="61,7 62,0 42,15 51,17" />
+    <polygon fill="rgba(59,157,59,1)" stroke="none" points="108,54 128,49 78,23 76,36" />
+    <polygon fill="rgba(59,157,59,1)" stroke="none" points="124,63 128,49 108,54" />
+    <polygon fill="rgba(196,127,0,1)" stroke="none" points="-17,-43 14,-27 -31,-21" />
+    <polygon fill="rgba(196,127,0,1)" stroke="none" points="-89,-49 -63,-34 -72,-11" />
   </g>
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="102.06207261596577,106.06601717798215 111.34044285378084,64.28243465332251" />
   <polyline fill="none" stroke="rgba(0,0,0,0.5)" points="111.34044285378084,64.28243465332251 61.23724356957947,35.35533905932738" />
