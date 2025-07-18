@@ -67,11 +67,8 @@
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.9487998241141593 -0.31468777689794064 0.9487998241141593 -0.31468777689794064 0 -126.86056629599013)"><text x="0" y="0" fill="rgba(0,0,0,1)">Y=5</text></g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.9190519981863499 -0.39279286178535916 0.8652845884681246 -0.499572290077706 71.02955331063693 -49.09180164602293)"><text x="0" y="0" fill="rgba(0,0,0,1)">Z=5</text></g>
   <g stroke-width="1">
-    <line x1="0" y1="0" x2="-476" y2="-275" stroke="red" />
-    <line x1="0" y1="0" x2="-505" y2="-292" stroke="red" stroke-dasharray="4 4" />
-    <line x1="0" y1="0" x2="0" y2="583" stroke="green" />
-    <line x1="0" y1="0" x2="0" y2="549" stroke="green" stroke-dasharray="4 4" />
-    <line x1="0" y1="0" x2="476" y2="-275" stroke="blue" />
-    <line x1="0" y1="0" x2="505" y2="-292" stroke="blue" stroke-dasharray="4 4" />
+    <line x1="0" y1="0" x2="-122" y2="-71" stroke="red" />
+    <line x1="0" y1="0" x2="0" y2="-283" stroke="green" />
+    <line x1="0" y1="0" x2="122" y2="-71" stroke="blue" />
   </g>
 </svg>

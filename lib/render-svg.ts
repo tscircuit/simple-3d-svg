@@ -1,7 +1,7 @@
 import type { Scene, Color, Camera, Point3 } from "./types"
 import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
-import { sub, cross, dot, len, norm } from "./vec3"
+import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
 function fmt(n: number) {
   return Math.round(n) + ""
@@ -18,7 +18,10 @@ export async function renderScene(
     showGrid?: boolean
     grid?: {
       /** world-space grid cell size (default = 1)            */ cellSize?: number
-      /** plane on which to draw the grid (default = "xz")   */ plane?: "xy" | "yz" | "xz"
+      /** plane on which to draw the grid (default = "xz")   */ plane?:
+        | "xy"
+        | "yz"
+        | "xz"
     }
   } = {},
 ): Promise<string> {
@@ -30,10 +33,10 @@ export async function renderScene(
     images,
     texId,
   } = await buildRenderElements(scene, {
-        width:          opt.width,
-        height:         opt.height,
-        backgroundColor: opt.backgroundColor,
-      })
+    width: opt.width,
+    height: opt.height,
+    backgroundColor: opt.backgroundColor,
+  })
 
   const out: string[] = []
   out.push(
@@ -68,13 +71,7 @@ export async function renderScene(
   // ── grid plane ────────────────────────────────────────────
   if (opt.showGrid) {
     out.push(
-      renderGrid(
-        scene,
-        W,
-        H,
-        opt.grid?.cellSize ?? 1,
-        opt.grid?.plane    ?? "xz",
-      ),
+      renderGrid(scene, W, H, opt.grid?.cellSize ?? 1, opt.grid?.plane ?? "xz"),
     )
   }
 
@@ -222,7 +219,7 @@ function renderGrid(
   cellSize: number,
   plane: "xy" | "yz" | "xz",
 ): string {
-  const cam   = scene.camera
+  const cam = scene.camera
   const focal = cam.focalLength ?? 2
   const { r, u, f } = axes(cam)
 
@@ -234,7 +231,7 @@ function renderGrid(
   const project = (p: Point3) => proj(toCam(p), W, H, focal)
 
   // grid extent (±R in both directions)
-  const R = cellSize * 10        // 21×21 lines by default
+  const R = cellSize * 10 // 21×21 lines by default
 
   const lines: string[] = []
   for (let t = -R; t <= R; t += cellSize) {
@@ -244,23 +241,23 @@ function renderGrid(
       if (p0 && p1) {
         lines.push(
           `    <line x1="${fmt(p0.x)}" y1="${fmt(p0.y)}" ` +
-          `x2="${fmt(p1.x)}" y2="${fmt(p1.y)}" />`,
+            `x2="${fmt(p1.x)}" y2="${fmt(p1.y)}" />`,
         )
       }
     }
 
     switch (plane) {
       case "xz":
-        pushLine({ x: t, y: 0, z: -R }, { x: t, y: 0, z: R })  // lines ‖ Z
-        pushLine({ x: -R, y: 0, z: t }, { x: R,  y: 0, z: t }) // lines ‖ X
+        pushLine({ x: t, y: 0, z: -R }, { x: t, y: 0, z: R }) // lines ‖ Z
+        pushLine({ x: -R, y: 0, z: t }, { x: R, y: 0, z: t }) // lines ‖ X
         break
       case "xy":
-        pushLine({ x: t, y: -R, z: 0 }, { x: t, y: R,  z: 0 }) // lines ‖ Y
-        pushLine({ x: -R, y: t, z: 0 }, { x: R,  y: t, z: 0 }) // lines ‖ X
+        pushLine({ x: t, y: -R, z: 0 }, { x: t, y: R, z: 0 }) // lines ‖ Y
+        pushLine({ x: -R, y: t, z: 0 }, { x: R, y: t, z: 0 }) // lines ‖ X
         break
       case "yz":
-        pushLine({ x: 0, y: t, z: -R }, { x: 0, y: t, z: R })  // lines ‖ Z
-        pushLine({ x: 0, y: -R, z: t }, { x: 0, y: R, z: t })  // lines ‖ Y
+        pushLine({ x: 0, y: t, z: -R }, { x: 0, y: t, z: R }) // lines ‖ Z
+        pushLine({ x: 0, y: -R, z: t }, { x: 0, y: R, z: t }) // lines ‖ Y
         break
     }
   }
@@ -271,55 +268,44 @@ function renderGrid(
 }
 
 function renderOrigin(cam: Camera, W: number, H: number): string {
+  // Project the world origin and axes directions into camera space, then to 2D
   const focal = cam.focalLength ?? 2
   const { r, u, f } = axes(cam)
-  const d = sub({ x: 0, y: 0, z: 0 }, cam.position)
-  const originCam = { x: dot(d, r), y: dot(d, u), z: dot(d, f) }
 
-  const project = (p: { x: number; y: number; z: number }) => {
-    const z = p.z === 0 ? 1e-6 : p.z
-    const s = focal / z
-    return { x: (p.x * s * W) / 2, y: (-p.y * s * H) / 2 }
+  // Helper: world -> camera space
+  const toCam = (p: Point3) => {
+    const d = sub(p, cam.position)
+    return { x: dot(d, r), y: dot(d, u), z: dot(d, f) }
   }
+  // Helper: camera -> 2D projection
+  const project = (p: { x: number; y: number; z: number }) =>
+    proj(p, W, H, focal)
 
-  const origin2D = project(originCam)
-
-  const L = 1000
   const axesData = [
-    { w: { x: 1, y: 0, z: 0 }, color: "red" },
-    { w: { x: 0, y: 1, z: 0 }, color: "green" },
-    { w: { x: 0, y: 0, z: 1 }, color: "blue" },
-  ].map(({ w, color }) => ({
-    dir: {
-      x: w.x * r.x + w.y * r.y + w.z * r.z,
-      y: w.x * u.x + w.y * u.y + w.z * u.z,
-      z: w.x * f.x + w.y * f.y + w.z * f.z,
-    },
-    color,
-  }))
+    { dir: { x: 1, y: 0, z: 0 }, color: "red" },
+    { dir: { x: 0, y: 1, z: 0 }, color: "green" },
+    { dir: { x: 0, y: 0, z: 1 }, color: "blue" },
+  ]
 
   const parts: string[] = []
+  const origin = { x: 0, y: 0, z: 0 }
   for (const { dir, color } of axesData) {
-    const pos = project({
-      x: originCam.x + dir.x * L,
-      y: originCam.y + dir.y * L,
-      z: originCam.z + dir.z * L,
-    })
-    parts.push(
-      `    <line x1="${fmt(origin2D.x)}" y1="${fmt(origin2D.y)}" x2="${fmt(pos.x)}" y2="${fmt(pos.y)}" stroke="${color}" />`,
-    )
-
-    const neg = project({
-      x: originCam.x - dir.x * L,
-      y: originCam.y - dir.y * L,
-      z: originCam.z - dir.z * L,
-    })
-    parts.push(
-      `    <line x1="${fmt(origin2D.x)}" y1="${fmt(origin2D.y)}" x2="${fmt(neg.x)}" y2="${fmt(neg.y)}" stroke="${color}" stroke-dasharray="4 4" />`,
-    )
+    const L = 10
+    const end = add(origin, scale(dir, L))
+    const startCam = toCam(origin)
+    const endCam = toCam(end)
+    const start2d = project(startCam)
+    const end2d = project(endCam)
+    if (start2d && end2d) {
+      parts.push(
+        `    <line x1="${fmt(start2d.x)}" y1="${fmt(start2d.y)}" x2="${fmt(end2d.x)}" y2="${fmt(end2d.y)}" stroke="${color}" />`,
+      )
+    }
   }
 
-  return `  <g stroke-width="1">\n${parts.join("\n")}\n  </g>\n`
+  return parts.length
+    ? `  <g stroke-width="1">\n${parts.join("\n")}\n  </g>\n`
+    : ""
 }
 
 function axes(cam: Camera) {
