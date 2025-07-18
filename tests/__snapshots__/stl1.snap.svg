@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(255,59,59,1)" stroke="none" points="0,-4 62,31 32,-51" />
-    <polygon fill="rgba(255,26,26,1)" stroke="none" points="0,-4 -35,15 62,31" />
-    <polygon fill="rgba(255,11,11,1)" stroke="none" points="32,-51 -35,15 0,-4" />
-    <polygon fill="rgba(165,0,0,1)" stroke="none" points="62,31 -35,15 32,-51" />
+    <polygon fill="rgba(255,79,79,1)" stroke="none" points="-4,-69 -4,38 66,-38" />
+    <polygon fill="rgba(255,32,32,1)" stroke="none" points="-32,-24 -4,38 -4,-69" />
+    <polygon fill="rgba(186,0,0,1)" stroke="none" points="66,-38 -4,38 -32,-24" />
+    <polygon fill="rgba(196,0,0,1)" stroke="none" points="-4,-69 66,-38 -32,-24" />
   </g>
 </svg>
