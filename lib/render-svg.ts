@@ -287,18 +287,27 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
     { dir: { x: 0, y: 0, z: 1 }, color: "blue" },
   ]
 
+  const minLineLengthPx = Math.max(W, H) * Math.SQRT2
+
   const parts: string[] = []
   const origin = { x: 0, y: 0, z: 0 }
   for (const { dir, color } of axesData) {
-    const L = 10
+    const L = 1
     const end = add(origin, scale(dir, L))
     const startCam = toCam(origin)
     const endCam = toCam(end)
-    const start2d = project(startCam)
-    const end2d = project(endCam)
-    if (start2d && end2d) {
+    const start2d = project(startCam)!
+    const end2d1 = project(endCam)!
+    const dx = end2d1.x - start2d.x
+    const dy = end2d1.y - start2d.y
+    const len = Math.sqrt(dx * dx + dy * dy)
+    const end2d2 = {
+      x: start2d.x + (dx * minLineLengthPx) / len,
+      y: start2d.y + (dy * minLineLengthPx) / len,
+    }
+    if (start2d && end2d1) {
       parts.push(
-        `    <line x1="${fmt(start2d.x)}" y1="${fmt(start2d.y)}" x2="${fmt(end2d.x)}" y2="${fmt(end2d.y)}" stroke="${color}" />`,
+        `    <line x1="${fmt(start2d.x)}" y1="${fmt(start2d.y)}" x2="${fmt(end2d2.x)}" y2="${fmt(end2d2.y)}" stroke="${color}" />`,
       )
     }
   }
