@@ -281,6 +281,7 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
   const project = (p: { x: number; y: number; z: number }) =>
     proj(p, W, H, focal)
 
+  // Define axes and their base colors
   const axesData = [
     { dir: { x: 1, y: 0, z: 0 }, color: "red" },
     { dir: { x: 0, y: 1, z: 0 }, color: "green" },
@@ -291,7 +292,11 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
 
   const parts: string[] = []
   const origin = { x: 0, y: 0, z: 0 }
-  for (const { dir, color } of axesData) {
+
+  // SVG defs for gradients
+  const gradientDefs: string[] = []
+
+  axesData.forEach(({ dir, color }, i) => {
     const L = 1
     const end = add(origin, scale(dir, L))
     const startCam = toCam(origin)
@@ -306,10 +311,33 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
       y: start2d.y + (dy * minLineLengthPx) / len,
     }
     if (start2d && end2d1) {
+      // Create a unique gradient id for each axis
+      const gradId = `axis-grad-${i}`
+
+      // Calculate gradient vector in SVG user space
+      const x1 = fmt(start2d.x)
+      const y1 = fmt(start2d.y)
+      const x2 = fmt(end2d2.x)
+      const y2 = fmt(end2d2.y)
+
+      // Define the gradient: color at 0%, white at 50% and 100%
+      gradientDefs.push(
+        `    <linearGradient id="${gradId}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="userSpaceOnUse">` +
+          `      <stop offset="0%" stop-color="${color}"/>` +
+          `      <stop offset="${Math.min((len / minLineLengthPx) * 1000, 100)}%" stop-color="rgba(255,255,255,0)"/>` +
+          `      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>` +
+          `    </linearGradient>`,
+      )
+
       parts.push(
-        `    <line x1="${fmt(start2d.x)}" y1="${fmt(start2d.y)}" x2="${fmt(end2d2.x)}" y2="${fmt(end2d2.y)}" stroke="${color}" />`,
+        `    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="url(#${gradId})" />`,
       )
     }
+  })
+
+  // Insert gradients into SVG <defs> if any
+  if (gradientDefs.length) {
+    parts.unshift(`  <defs>\n${gradientDefs.join("\n")}\n  </defs>`)
   }
 
   return parts.length

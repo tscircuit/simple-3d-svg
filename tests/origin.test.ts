@@ -5,21 +5,21 @@ test("origin lines", async () => {
   const scene: Scene = {
     boxes: [
       {
-        center: { x: 5, y: 0, z: 0 },
+        center: { x: 7, y: 0, z: 0 },
         size: { x: 1, y: 1, z: 1 },
         color: "rgba(255,0,0,0.8)",
-        topLabel: "X=5",
+        topLabel: "X=7",
       },
       {
-        center: { x: 0, y: 5, z: 0 },
+        center: { x: 0, y: 7, z: 0 },
         size: { x: 1, y: 1, z: 1 },
-        topLabel: "Y=5",
+        topLabel: "Y=7",
         color: "rgba(0,128,255,0.8)",
       },
       {
-        center: { x: 0, y: 0, z: 5 },
+        center: { x: 0, y: 0, z: 7 },
         size: { x: 1, y: 1, z: 1 },
-        topLabel: "Z=5",
+        topLabel: "Z=7",
         color: "rgba(255,128,0,0.8)",
       },
     ],
