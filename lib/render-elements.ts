@@ -132,6 +132,7 @@ export async function buildRenderElements(
         mesh,
         box,
         box.scaleStlToBox ?? false,
+        "stl",
       )
 
       // Render STL triangles
@@ -170,6 +171,7 @@ export async function buildRenderElements(
         mesh,
         box,
         box.scaleObjToBox ?? false,
+        "obj",
       )
 
       for (let i = 0; i < mesh.triangles.length; i++) {
