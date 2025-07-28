@@ -75,6 +75,9 @@ export async function buildRenderElements(
   images: Img[]
   texId: Map<string, string>
 }> {
+  const startTime = performance.now()
+  console.log("🎯 Starting buildRenderElements")
+  
   const W = opt.width ?? W_DEF
   const H = opt.height ?? H_DEF
   const focal = scene.camera.focalLength ?? FOCAL
@@ -88,28 +91,36 @@ export async function buildRenderElements(
   const texId = new Map<string, string>()
 
   // Load STL meshes for boxes that have stlUrl
+  const meshLoadStart = performance.now()
   const stlMeshes = new Map<string, STLMesh>()
   const objMeshes = new Map<string, STLMesh>()
   for (const box of scene.boxes) {
     if (box.stlUrl && !stlMeshes.has(box.stlUrl)) {
       try {
+        const stlStart = performance.now()
         const mesh = await loadSTL(box.stlUrl)
         stlMeshes.set(box.stlUrl, mesh)
+        console.log(`📦 Loaded STL ${box.stlUrl} in ${(performance.now() - stlStart).toFixed(2)}ms`)
       } catch (error) {
         console.warn(`Failed to load STL from ${box.stlUrl}:`, error)
       }
     }
     if (box.objUrl && !objMeshes.has(box.objUrl)) {
       try {
+        const objStart = performance.now()
         const mesh = await loadOBJ(box.objUrl)
         objMeshes.set(box.objUrl, mesh)
+        console.log(`📦 Loaded OBJ ${box.objUrl} in ${(performance.now() - objStart).toFixed(2)}ms`)
       } catch (error) {
         console.warn(`Failed to load OBJ from ${box.objUrl}:`, error)
       }
     }
   }
+  console.log(`⏱️ Total mesh loading: ${(performance.now() - meshLoadStart).toFixed(2)}ms`)
 
+  const boxProcessingStart = performance.now()
   for (const box of scene.boxes) {
+    const boxStart = performance.now()
     const bw = verts(box)
     const bc = bw.map((v) => toCam(v, scene.camera))
     const bp = bc.map((v) => proj(v, W, H, focal))
@@ -127,6 +138,7 @@ export async function buildRenderElements(
 
     // Handle STL rendering
     if (box.stlUrl && stlMeshes.has(box.stlUrl)) {
+      const stlRenderStart = performance.now()
       const mesh = stlMeshes.get(box.stlUrl)!
       const transformedVertices = scaleAndPositionMesh(
         mesh,
@@ -165,7 +177,9 @@ export async function buildRenderElements(
           })
         }
       }
+      console.log(`📦 STL render for ${box.stlUrl}: ${(performance.now() - stlRenderStart).toFixed(2)}ms (${mesh.triangles.length} triangles)`)
     } else if (box.objUrl && objMeshes.has(box.objUrl)) {
+      const objRenderStart = performance.now()
       const mesh = objMeshes.get(box.objUrl)!
       const transformedVertices = scaleAndPositionMesh(
         mesh,
@@ -206,8 +220,10 @@ export async function buildRenderElements(
           })
         }
       }
+      console.log(`📦 OBJ render for ${box.objUrl}: ${(performance.now() - objRenderStart).toFixed(2)}ms (${mesh.triangles.length} triangles)`)
     } else {
       // Handle regular box rendering
+      const regularBoxStart = performance.now()
       const vw = verts(box)
       const vc = vw.map((v) => toCam(v, scene.camera))
       const vp = vc.map((v) => proj(v, W, H, focal))
@@ -236,6 +252,7 @@ export async function buildRenderElements(
 
       // top face image
       if (box.faceImages?.top) {
+        const imageStart = performance.now()
         const pts = TOP.map((i) => vw[i])
         if (pts.every(Boolean)) {
           const dst = pts as [Point3, Point3, Point3, Point3]
@@ -346,6 +363,7 @@ export async function buildRenderElements(
             }
           }
         }
+        console.log(`🖼️ Top face image processing: ${(performance.now() - imageStart).toFixed(2)}ms (${quadsPerSide * quadsPerSide * 2} triangles)`)
       }
 
       // top label
@@ -379,8 +397,11 @@ export async function buildRenderElements(
           }
         }
       }
+      console.log(`📦 Regular box processing: ${(performance.now() - regularBoxStart).toFixed(2)}ms`)
     }
+    console.log(`📦 Box processed in ${(performance.now() - boxStart).toFixed(2)}ms`)
   }
+  console.log(`⏱️ Total box processing: ${(performance.now() - boxProcessingStart).toFixed(2)}ms`)
 
   // BSP sort faces before merging with other elements
   function sortFacesBSP(
@@ -509,8 +530,11 @@ export async function buildRenderElements(
     return ordered
   }
 
+  const bspStart = performance.now()
   const orderedFaces = sortFacesBSP(faces, W, H, focal)
+  console.log(`🔄 BSP face sorting: ${(performance.now() - bspStart).toFixed(2)}ms (${faces.length} faces)`)
 
+  const elementBuildStart = performance.now()
   const elements: RenderElement[] = []
   for (const f of orderedFaces) {
     const img = faceToImg.get(f)
@@ -526,6 +550,11 @@ export async function buildRenderElements(
       .sort((a, b) => a.depth - b.depth)
       .map((e) => ({ type: "edge" as const, data: e })),
   )
+  console.log(`🔨 Element building: ${(performance.now() - elementBuildStart).toFixed(2)}ms`)
+
+  const totalTime = performance.now() - startTime
+  console.log(`✅ buildRenderElements completed in ${totalTime.toFixed(2)}ms`)
+  console.log(`📊 Final stats: ${elements.length} elements, ${images.length} images, ${texId.size} textures`)
 
   return {
     width: W,
