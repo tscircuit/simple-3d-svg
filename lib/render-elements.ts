@@ -413,8 +413,8 @@ export async function buildRenderElements(
     const EPS = 1e-6
     type Node = {
       face: Face
-      normal: Point3
-      point: Point3
+      normal: Point3          // splitter plane normal (need not be unit length)
+      planeD: number          // plane constant:  n·x + d = 0  (d = –n·p0)
       front: Node | null
       back: Node | null
     }
@@ -422,10 +422,19 @@ export async function buildRenderElements(
     function build(list: Face[]): Node | null {
       if (!list.length) return null
       const face = list[0]!
-      const p0 = face.cam[0]!
-      const p1 = face.cam[1]!
-      const p2 = face.cam[2]!
-      const normal = cross(sub(p1, p0), sub(p2, p0))
+      const [p0, p1, p2] = face.cam as [Point3, Point3, Point3]
+
+      // --- inline cross( p1-p0 , p2-p0 ) --------------------------
+      const ax = p1.x - p0.x, ay = p1.y - p0.y, az = p1.z - p0.z
+      const bx = p2.x - p0.x, by = p2.y - p0.y, bz = p2.z - p0.z
+      const normal = {
+        x: ay * bz - az * by,
+        y: az * bx - ax * bz,
+        z: ax * by - ay * bx,
+      }
+      // plane constant  d = –n·p0
+      const planeD = -(normal.x * p0.x + normal.y * p0.y + normal.z * p0.z)
+
       const front: Face[] = []
       const back: Face[] = []
 
@@ -436,7 +445,7 @@ export async function buildRenderElements(
           neg = 0
         const d: number[] = []
         for (const v of f.cam) {
-          const dist = dot(normal, sub(v!, p0))
+          const dist = normal.x * v.x + normal.y * v.y + normal.z * v.z + planeD
           d.push(dist)
           if (dist > EPS) pos++
           else if (dist < -EPS) neg++
@@ -504,7 +513,7 @@ export async function buildRenderElements(
       return {
         face,
         normal,
-        point: p0,
+        planeD,
         front: build(front),
         back: build(back),
       }
@@ -512,8 +521,7 @@ export async function buildRenderElements(
 
     function traverse(node: Node | null, out: Face[]) {
       if (!node) return
-      const cameraSide = dot(node.normal, scale(node.point, -1))
-      if (cameraSide >= 0) {
+      if (node.planeD >= 0) {      // camera (origin) is on the “front” side
         traverse(node.back, out)
         out.push(node.face)
         traverse(node.front, out)
