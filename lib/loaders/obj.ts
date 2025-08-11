@@ -29,7 +29,7 @@ function parseOBJ(text: string): STLMesh {
       const x = parts[1]!
       const y = parts[2]!
       const z = parts[3]!
-      vertices.push({ x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) })
+      vertices.push({ x: parseFloat(x), y: parseFloat(y), z: -parseFloat(z) })
       if (parts.length >= 7) {
         const [rStr, gStr, bStr] = parts.slice(4, 7) as [string, string, string]
         let r = Number(rStr)
@@ -49,7 +49,7 @@ function parseOBJ(text: string): STLMesh {
       const x = parts[1]!
       const y = parts[2]!
       const z = parts[3]!
-      normals.push({ x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) })
+      normals.push({ x: parseFloat(x), y: parseFloat(y), z: -parseFloat(z) })
     } else if (trimmed.startsWith("newmtl ")) {
       activeMaterial = trimmed.split(/\s+/)[1]!
     } else if (trimmed.startsWith("Kd ") && activeMaterial) {
@@ -105,7 +105,7 @@ function parseOBJ(text: string): STLMesh {
           normal = {
             x: edge1.y * edge2.z - edge1.z * edge2.y,
             y: edge1.z * edge2.x - edge1.x * edge2.z,
-            z: edge1.x * edge2.y - edge1.y * edge2.x,
+            z: -(edge1.x * edge2.y - edge1.y * edge2.x),
           }
         }
         let color: Color | undefined

@@ -35,7 +35,7 @@ export const repro3 = {
       objRotation: {
         x: -1.5707963267948966,
         y: 6.283185307179586,
-        z: 0,
+        z: 3.14,
       },
     },
     {
@@ -69,8 +69,8 @@ export const repro3 = {
         "https://modelcdn.tscircuit.com/easyeda_models/download?uuid=6ef04b62f1e945518af209609f65fa6f&pn=C110153&cachebust_origin=",
       objRotation: {
         x: -1.5707963267948966,
-        y: 3.141592653589793,
-        z: 0,
+        y: 0,
+        z: 3.141592653589793,
       },
     },
     {
