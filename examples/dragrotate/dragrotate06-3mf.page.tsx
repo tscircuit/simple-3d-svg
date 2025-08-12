@@ -6,7 +6,7 @@ const scene = {
       center: { x: 0, y: 0, z: 0 },
       size: { x: 10, y: 10, z: 10 },
       color: "rgba(100,149,237,0.8)",
-      threeMfUrl: "https://github.com/3MFConsortium/3mf-samples/raw/refs/heads/master/examples/core/heartgears.3mf",
+      threeMfUrl: "https://misc-assets-cors.seve.workers.dev/heartgears.3mf",
       scaleThreeMfToBox: true,
     },
   ],
