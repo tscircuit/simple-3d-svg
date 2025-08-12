@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <polygon fill="red" points="0,0 61,35 70,-40 0,-71" />
+    <polygon fill="red" points="0,0 61,35 0,81 -61,35" />
+    <polygon fill="red" points="0,0 0,-71 -70,-40 -61,35" />
+    <polygon fill="red" points="61,35 70,-40 0,0 0,81" />
+    <polygon fill="red" points="0,-71 70,-40 0,0 -70,-40" />
+    <polygon fill="red" points="-61,35 -70,-40 0,0 0,81" />
+  </g>
+</svg>

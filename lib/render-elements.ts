@@ -1,6 +1,7 @@
 import type { Point3, Color, Box, Camera, Scene, STLMesh } from "./types"
 import { loadSTL } from "./loaders/stl"
 import { loadOBJ } from "./loaders/obj"
+import { load3MF } from "./loaders/threemf"
 import { add, sub, dot, cross, scale, len, norm, rotLocal } from "./vec3"
 import { colorToCss, shadeByNormal } from "./color"
 import { scaleAndPositionMesh } from "./mesh"
@@ -90,6 +91,7 @@ export async function buildRenderElements(
   // Load STL meshes for boxes that have stlUrl
   const stlMeshes = new Map<string, STLMesh>()
   const objMeshes = new Map<string, STLMesh>()
+  const threeMFMeshes = new Map<string, STLMesh>()
   for (const box of scene.boxes) {
     if (box.stlUrl && !stlMeshes.has(box.stlUrl)) {
       try {
@@ -105,6 +107,14 @@ export async function buildRenderElements(
         objMeshes.set(box.objUrl, mesh)
       } catch (error) {
         console.warn(`Failed to load OBJ from ${box.objUrl}:`, error)
+      }
+    }
+    if (box.threeMFUrl && !threeMFMeshes.has(box.threeMFUrl)) {
+      try {
+        const mesh = await load3MF(box.threeMFUrl)
+        threeMFMeshes.set(box.threeMFUrl, mesh)
+      } catch (error) {
+        console.warn(`Failed to load 3MF from ${box.threeMFUrl}:`, error)
       }
     }
   }
@@ -202,6 +212,43 @@ export async function buildRenderElements(
               box.color ?? triangle.color ?? "gray",
               faceNormal,
             ),
+            stroke: false,
+          })
+        }
+      }
+    } else if (box.threeMFUrl && threeMFMeshes.has(box.threeMFUrl)) {
+      const mesh = threeMFMeshes.get(box.threeMFUrl)!
+      const transformedVertices = scaleAndPositionMesh(
+        mesh,
+        box,
+        box.scaleThreeMFToBox ?? false,
+        "3mf",
+      )
+
+      for (let i = 0; i < mesh.triangles.length; i++) {
+        const vertexStart = i * 3
+
+        const v0w = transformedVertices[vertexStart]!
+        const v1w = transformedVertices[vertexStart + 1]!
+        const v2w = transformedVertices[vertexStart + 2]!
+
+        const v0c = toCam(v0w, scene.camera)
+        const v1c = toCam(v1w, scene.camera)
+        const v2c = toCam(v2w, scene.camera)
+
+        const v0p = proj(v0c, W, H, focal)
+        const v1p = proj(v1c, W, H, focal)
+        const v2p = proj(v2c, W, H, focal)
+
+        if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const normal = cross(edge1, edge2)
+          const baseColor = box.color ?? "gray"
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            cam: [v0c, v1c, v2c],
+            fill: shadeByNormal(baseColor, normal),
             stroke: false,
           })
         }

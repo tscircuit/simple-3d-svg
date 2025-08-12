@@ -35,6 +35,12 @@ export interface Box {
   objPosition?: Point3
   /** When true, fit/normalize OBJ mesh to the box dimensions */
   scaleObjToBox?: boolean
+  // 3MF support
+  threeMFUrl?: string
+  threeMFRotation?: Point3
+  threeMFPosition?: Point3
+  /** When true, fit/normalize 3MF mesh to the box dimensions */
+  scaleThreeMFToBox?: boolean
 }
 
 export interface Camera {
