@@ -5,7 +5,7 @@ export function scaleAndPositionMesh(
   mesh: STLMesh,
   box: Box,
   scaleToBox: boolean,
-  modelType: "stl" | "obj",
+  modelType: "stl" | "obj" | "3mf",
 ): Point3[] {
   const { boundingBox } = mesh
   const meshCenter = scale(add(boundingBox.min, boundingBox.max), 0.5)
@@ -20,6 +20,8 @@ export function scaleAndPositionMesh(
         p = rotLocal(p, box.stlRotation)
       if (modelType === "obj" && box.objRotation)
         p = rotLocal(p, box.objRotation)
+      if (modelType === "3mf" && box.threeMfRotation)
+        p = rotLocal(p, box.threeMfRotation)
       if (!centerModel) p = add(p, meshCenter)
       rotatedVerts.push(p)
     }
@@ -59,6 +61,7 @@ export function scaleAndPositionMesh(
     }
     if (box.stlPosition) t = add(t, box.stlPosition)
     if (box.objPosition) t = add(t, box.objPosition)
+    if (box.threeMfPosition) t = add(t, box.threeMfPosition)
     if (box.rotation) t = rotLocal(t, box.rotation)
     t = add(t, box.center)
     transformedVertices.push(t)
