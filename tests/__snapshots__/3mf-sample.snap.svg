@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <polygon fill="rgba(0,0,0,1)" stroke="none" points="15,26 47,46 -18,94" />
+    <polygon fill="rgba(0,0,0,1)" stroke="none" points="-18,94 -51,68 15,26" />
+    <polygon fill="rgba(0,0,0,1)" stroke="none" points="18,-94 59,-79 47,46" />
+    <polygon fill="rgba(0,0,0,1)" stroke="none" points="47,46 15,26 18,-94" />
+    <polygon fill="rgba(0,0,0,1)" stroke="none" points="-64,-61 18,-94 15,26" />
+    <polygon fill="rgba(0,0,0,1)" stroke="none" points="15,26 -51,68 -64,-61" />
+    <polygon fill="rgba(59,59,59,1)" stroke="none" points="-51,68 -18,94 -23,-40" />
+    <polygon fill="rgba(59,59,59,1)" stroke="none" points="-23,-40 -64,-61 -51,68" />
+    <polygon fill="rgba(59,59,59,1)" stroke="none" points="-18,94 47,46 59,-79" />
+    <polygon fill="rgba(59,59,59,1)" stroke="none" points="59,-79 -23,-40 -18,94" />
+    <polygon fill="rgba(59,59,59,1)" stroke="none" points="59,-79 18,-94 -64,-61" />
+    <polygon fill="rgba(59,59,59,1)" stroke="none" points="-64,-61 -23,-40 59,-79" />
+  </g>
+</svg>

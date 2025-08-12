@@ -21,3 +21,5 @@ export { renderScene } from "./render-svg"
 export { loadSTL } from "./loaders/stl"
 // Re-export OBJ loader
 export { loadOBJ } from "./loaders/obj"
+// Re-export 3MF loader
+export { load3MF } from "./loaders/3mf"

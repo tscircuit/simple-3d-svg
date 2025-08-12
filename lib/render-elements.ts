@@ -1,15 +1,13 @@
-import type { Point3, Color, Box, Camera, Scene, STLMesh } from "./types"
+import type { Point3, Color, Camera, Scene, STLMesh } from "./types"
 import { loadSTL } from "./loaders/stl"
 import { loadOBJ } from "./loaders/obj"
-import { add, sub, dot, cross, scale, len, norm, rotLocal } from "./vec3"
+import { load3MF } from "./loaders/3mf"
+import { sub, dot, cross, scale, len, norm } from "./vec3"
 import { colorToCss, shadeByNormal } from "./color"
 import { scaleAndPositionMesh } from "./mesh"
 import { FACES, EDGES, TOP, verts } from "./geometry"
 import { affineMatrix } from "./affine"
 
-function fmt(n: number): string {
-  return Math.round(n).toString()
-}
 function fmtPrecise(n: number): string {
   return (Math.round(n * 100) / 100).toString()
 }
@@ -90,6 +88,7 @@ export async function buildRenderElements(
   // Load STL meshes for boxes that have stlUrl
   const stlMeshes = new Map<string, STLMesh>()
   const objMeshes = new Map<string, STLMesh>()
+  const threeMfMeshes = new Map<string, STLMesh>()
   for (const box of scene.boxes) {
     if (box.stlUrl && !stlMeshes.has(box.stlUrl)) {
       try {
@@ -105,6 +104,14 @@ export async function buildRenderElements(
         objMeshes.set(box.objUrl, mesh)
       } catch (error) {
         console.warn(`Failed to load OBJ from ${box.objUrl}:`, error)
+      }
+    }
+    if (box.threeMfUrl && !threeMfMeshes.has(box.threeMfUrl)) {
+      try {
+        const mesh = await load3MF(box.threeMfUrl)
+        threeMfMeshes.set(box.threeMfUrl, mesh)
+      } catch (error) {
+        console.warn(`Failed to load 3MF from ${box.threeMfUrl}:`, error)
       }
     }
   }
@@ -137,7 +144,6 @@ export async function buildRenderElements(
 
       // Render STL triangles
       for (let i = 0; i < mesh.triangles.length; i++) {
-        const triangle = mesh.triangles[i]
         const vertexStart = i * 3
 
         const v0w = transformedVertices[vertexStart]!
@@ -172,6 +178,47 @@ export async function buildRenderElements(
         box,
         box.scaleObjToBox ?? false,
         "obj",
+      )
+
+      for (let i = 0; i < mesh.triangles.length; i++) {
+        const vertexStart = i * 3
+        const triangle = mesh.triangles[i]!
+
+        const v0w = transformedVertices[vertexStart]!
+        const v1w = transformedVertices[vertexStart + 1]!
+        const v2w = transformedVertices[vertexStart + 2]!
+
+        const v0c = toCam(v0w, scene.camera)
+        const v1c = toCam(v1w, scene.camera)
+        const v2c = toCam(v2w, scene.camera)
+
+        const v0p = proj(v0c, W, H, focal)
+        const v1p = proj(v1c, W, H, focal)
+        const v2p = proj(v2c, W, H, focal)
+
+        if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const faceNormal = cross(edge1, edge2)
+
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            cam: [v0c, v1c, v2c],
+            fill: shadeByNormal(
+              box.color ?? triangle.color ?? "gray",
+              faceNormal,
+            ),
+            stroke: false,
+          })
+        }
+      }
+    } else if (box.threeMfUrl && threeMfMeshes.has(box.threeMfUrl)) {
+      const mesh = threeMfMeshes.get(box.threeMfUrl)!
+      const transformedVertices = scaleAndPositionMesh(
+        mesh,
+        box,
+        box.scaleThreeMfToBox ?? false,
+        "3mf",
       )
 
       for (let i = 0; i < mesh.triangles.length; i++) {
@@ -411,8 +458,8 @@ export async function buildRenderElements(
       for (let k = 1; k < list.length; k++) {
         const f = list[k]!
         // classify each vertex
-        let pos = 0,
-          neg = 0
+        let pos = 0
+        let neg = 0
         const d: number[] = []
         for (const v of f.cam) {
           const dist = dot(normal, sub(v!, p0))
@@ -436,7 +483,6 @@ export async function buildRenderElements(
             const aCam = f.cam[i]!
             const bCam = f.cam[j]!
             const a2D = f.pts[i]!
-            const b2D = f.pts[j]!
             const da = d[i]!
             const db = d[j]!
 
