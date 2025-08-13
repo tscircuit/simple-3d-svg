@@ -25,15 +25,33 @@ function parse3MF(xml: string): STLMesh {
   const json = parser.parse(xml)
   const vertexData =
     json?.model?.resources?.object?.mesh?.vertices?.vertex ?? []
-  const vertices: Point3[] = vertexData.map((v: any) => ({
+  const verticesArr = Array.isArray(vertexData) ? vertexData : [vertexData]
+  const vertices: Point3[] = verticesArr.map((v: any) => ({
     x: parseFloat(v["@_x"]),
     y: parseFloat(v["@_y"]),
     z: parseFloat(v["@_z"]),
   }))
 
+  const baseMaterials = json?.model?.resources?.basematerials
+  const materialColors: Record<string, [number, number, number, number][]> = {}
+  if (baseMaterials) {
+    const mats = Array.isArray(baseMaterials) ? baseMaterials : [baseMaterials]
+    for (const mat of mats) {
+      const id = mat["@_id"]
+      const bases = mat.base ?? []
+      const basesArr = Array.isArray(bases) ? bases : [bases]
+      materialColors[id] = basesArr.map((b: any) =>
+        parseDisplayColor(b["@_displaycolor"]),
+      )
+    }
+  }
+
   const triangleData =
     json?.model?.resources?.object?.mesh?.triangles?.triangle ?? []
-  const triangles: Triangle[] = triangleData.map((t: any) => {
+  const trianglesArr = Array.isArray(triangleData)
+    ? triangleData
+    : [triangleData]
+  const triangles: Triangle[] = trianglesArr.map((t: any) => {
     const v1 = vertices[parseInt(t["@_v1"])]!
     const v2 = vertices[parseInt(t["@_v2"])]!
     const v3 = vertices[parseInt(t["@_v3"])]!
@@ -44,7 +62,15 @@ function parse3MF(xml: string): STLMesh {
       y: edge1.z * edge2.x - edge1.x * edge2.z,
       z: -(edge1.x * edge2.y - edge1.y * edge2.x),
     }
-    return { vertices: [v1, v2, v3], normal }
+    let color
+    const pid = t["@_pid"]
+    if (pid && materialColors[pid]) {
+      const idx = parseInt(t["@_p1"] ?? t["@_p2"] ?? t["@_p3"] ?? "0")
+      color = materialColors[pid][idx]
+    }
+    return color
+      ? { vertices: [v1, v2, v3], normal, color }
+      : { vertices: [v1, v2, v3], normal }
   })
 
   const rotatedTriangles = triangles.map((tri) => ({
@@ -65,6 +91,26 @@ function parse3MF(xml: string): STLMesh {
     triangles: rotatedTriangles,
     boundingBox: calculateBoundingBox(rotatedTriangles),
   }
+}
+
+function parseDisplayColor(str: string): [number, number, number, number] {
+  if (str?.startsWith("#")) {
+    const hex = str.slice(1)
+    if (hex.length === 8) {
+      const r = parseInt(hex.slice(0, 2), 16)
+      const g = parseInt(hex.slice(2, 4), 16)
+      const b = parseInt(hex.slice(4, 6), 16)
+      const a = parseInt(hex.slice(6, 8), 16) / 255
+      return [r, g, b, a]
+    }
+    if (hex.length === 6) {
+      const r = parseInt(hex.slice(0, 2), 16)
+      const g = parseInt(hex.slice(2, 4), 16)
+      const b = parseInt(hex.slice(4, 6), 16)
+      return [r, g, b, 1]
+    }
+  }
+  return [0, 0, 0, 1]
 }
 
 function calculateBoundingBox(triangles: Triangle[]): {

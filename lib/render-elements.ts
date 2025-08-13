@@ -227,6 +227,7 @@ export async function buildRenderElements(
 
       for (let i = 0; i < mesh.triangles.length; i++) {
         const vertexStart = i * 3
+        const triangle = mesh.triangles[i]!
 
         const v0w = transformedVertices[vertexStart]!
         const v1w = transformedVertices[vertexStart + 1]!
@@ -248,7 +249,10 @@ export async function buildRenderElements(
           faces.push({
             pts: [v0p, v1p, v2p],
             cam: [v0c, v1c, v2c],
-            fill: shadeByNormal(box.color ?? "gray", faceNormal),
+            fill: shadeByNormal(
+              box.color ?? triangle.color ?? "gray",
+              faceNormal,
+            ),
             stroke: false,
           })
         }
