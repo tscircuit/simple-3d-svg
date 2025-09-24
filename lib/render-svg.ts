@@ -4,7 +4,7 @@ import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
 function fmt(n: number) {
-  return Math.round(n) + ""
+  return Math.round(n * 10) / 10 + ""
 }
 
 export async function renderScene(
@@ -121,7 +121,7 @@ export async function renderScene(
       const e = element.data
       out.push(
         `  <polyline fill="none" stroke="${e.color}" points="${e.pts
-          .map((p) => `${p.x},${p.y}`)
+          .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
           .join(" ")}" />\n`,
       )
     }
