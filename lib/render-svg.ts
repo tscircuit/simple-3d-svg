@@ -3,7 +3,7 @@ import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
-function fmt(n: number) {
+function fmt(n: number, precision = 0) {
   return Math.round(n) + ""
 }
 
@@ -91,10 +91,11 @@ export async function renderScene(
       if (element.type === "face") {
         const f = element.data
         const strokeAttr = f.stroke ? "" : ' stroke="none"'
+        const points = f.pts
+          .map((p) => `${Math.round(p.x)},${Math.round(p.y)}`)
+          .join(" ")
         out.push(
-          `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
-            .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
-            .join(" ")}" />\n`,
+          `    <polygon fill="${f.fill}"${strokeAttr} points="${points}" />\n`,
         )
       } else {
         const img = element.data
@@ -197,13 +198,13 @@ function renderAxes(cam: Camera, W: number, H: number): string {
     const tx = end.x + nx * 10
     const ty = end.y + ny * 10
     parts.push(
-      `    <line x1="${fmt(start.x)}" y1="${fmt(start.y)}" x2="${fmt(hx)}" y2="${fmt(hy)}" stroke="${color}" />`,
+      `    <line x1="${Math.round(start.x)}" y1="${Math.round(start.y)}" x2="${Math.round(hx)}" y2="${Math.round(hy)}" stroke="${color}" />`,
     )
     parts.push(
-      `    <polygon fill="${color}" points="${fmt(end.x)},${fmt(end.y)} ${fmt(b1x)},${fmt(b1y)} ${fmt(b2x)},${fmt(b2y)}" />`,
+      `    <polygon fill="${color}" points="${Math.round(end.x)},${Math.round(end.y)} ${Math.round(b1x)},${Math.round(b1y)} ${Math.round(b2x)},${Math.round(b2y)}" />`,
     )
     parts.push(
-      `    <text x="${fmt(tx)}" y="${fmt(ty)}" fill="${color}" font-size="12" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${label}</text>`,
+      `    <text x="${Math.round(tx)}" y="${Math.round(ty)}" fill="${color}" font-size="12" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${label}</text>`,
     )
   }
 
@@ -240,8 +241,7 @@ function renderGrid(
       const p1 = project(b)
       if (p0 && p1) {
         lines.push(
-          `    <line x1="${fmt(p0.x)}" y1="${fmt(p0.y)}" ` +
-            `x2="${fmt(p1.x)}" y2="${fmt(p1.y)}" />`,
+          `    <line x1="${Math.round(p0.x)}" y1="${Math.round(p0.y)}" x2="${Math.round(p1.x)}" y2="${Math.round(p1.y)}" />`,
         )
       }
     }

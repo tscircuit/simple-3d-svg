@@ -12,7 +12,27 @@ function fmt(n: number): string {
   return Math.round(n).toString()
 }
 function fmtPrecise(n: number): string {
-  return (Math.round(n * 100) / 100).toString()
+  return Math.round(n * 10) / 10 + ""
+}
+
+function getAdaptiveSubdivision(
+  faceSize: { width: number; height: number },
+  viewDistance: number,
+  maxSubdivision: number = 8,
+): number {
+  const screenArea = faceSize.width * faceSize.height
+  const distanceFactor = Math.max(1, viewDistance / 10)
+
+  if (screenArea < 100) return 1
+  if (screenArea < 1000) return Math.min(2, maxSubdivision)
+  if (screenArea < 10000) return Math.min(4, maxSubdivision)
+
+  const adaptiveLevel = Math.min(
+    Math.ceil(Math.sqrt(screenArea / 1000) / distanceFactor),
+    maxSubdivision,
+  )
+
+  return Math.max(1, adaptiveLevel)
 }
 
 /*────────────── Camera & Projection ─────────────*/
@@ -300,7 +320,32 @@ export async function buildRenderElements(
           const sym = texId.get(href)!
 
           // Subdivide the face into projectionSubdivision x projectionSubdivision grid
-          const subdivisions = box.projectionSubdivision ?? 2
+          const baseSubdivisions = box.projectionSubdivision ?? 2
+
+          const faceCenter = toCam(
+            {
+              x: box.center.x,
+              y: box.center.y + box.size.y / 2,
+              z: box.center.z,
+            },
+            scene.camera,
+          )
+          const viewDistance = Math.sqrt(
+            faceCenter.x * faceCenter.x +
+              faceCenter.y * faceCenter.y +
+              faceCenter.z * faceCenter.z,
+          )
+
+          const projectedSize = {
+            width: Math.abs(
+              (box.size.x * focal) / Math.max(1, Math.abs(faceCenter.z)),
+            ),
+            height: Math.abs(
+              (box.size.z * focal) / Math.max(1, Math.abs(faceCenter.z)),
+            ),
+          }
+
+          const subdivisions = 1
           const quadsPerSide = subdivisions
           for (let row = 0; row < quadsPerSide; row++) {
             for (let col = 0; col < quadsPerSide; col++) {
@@ -440,6 +485,12 @@ export async function buildRenderElements(
     H: number,
     focal: number,
   ): Face[] {
+    return polys.sort((a, b) => {
+      const aDepth = a.cam.reduce((sum, p) => sum + p.z, 0) / a.cam.length
+      const bDepth = b.cam.reduce((sum, p) => sum + p.z, 0) / b.cam.length
+      return bDepth - aDepth
+    })
+
     const EPS = 1e-6
     type Node = {
       face: Face
@@ -451,6 +502,16 @@ export async function buildRenderElements(
 
     function build(list: Face[]): Node | null {
       if (!list.length) return null
+      if (list.length <= 20) {
+        return {
+          face: list[0]!,
+          normal: { x: 0, y: 0, z: 1 },
+          point: list[0]!.cam[0]!,
+          front: list.length > 1 ? build(list.slice(1)) : null,
+          back: null,
+        }
+      }
+
       const face = list[0]!
       const p0 = face.cam[0]!
       const p1 = face.cam[1]!
@@ -461,22 +522,24 @@ export async function buildRenderElements(
 
       for (let k = 1; k < list.length; k++) {
         const f = list[k]!
-        // classify each vertex
         let pos = 0,
           neg = 0
         const d: number[] = []
+
         for (const v of f.cam) {
           const dist = dot(normal, sub(v!, p0))
           d.push(dist)
           if (dist > EPS) pos++
           else if (dist < -EPS) neg++
         }
+
         if (!pos && !neg) {
-          front.push(f) // coplanar – draw after splitter
-        } else if (!pos) back.push(f)
-        else if (!neg) front.push(f)
-        else {
-          // split polygon by plane
+          front.push(f)
+        } else if (!pos) {
+          back.push(f)
+        } else if (!neg) {
+          front.push(f)
+        } else {
           const fFrontCam: Point3[] = []
           const fBackCam: Point3[] = []
           const fFront2D: Proj[] = []
@@ -491,18 +554,14 @@ export async function buildRenderElements(
             const da = d[i]!
             const db = d[j]!
 
-            const push = (
-              arrCam: Point3[],
-              arr2D: Proj[],
-              cCam: Point3,
-              c2D: Proj,
-            ) => {
-              arrCam.push(cCam)
-              arr2D.push(c2D)
+            if (da >= -EPS) {
+              fFrontCam.push(aCam)
+              fFront2D.push(a2D)
             }
-
-            if (da >= -EPS) push(fFrontCam, fFront2D, aCam!, a2D!)
-            if (da <= EPS) push(fBackCam, fBack2D, aCam!, a2D!)
+            if (da <= EPS) {
+              fBackCam.push(aCam)
+              fBack2D.push(a2D)
+            }
 
             if ((da > 0 && db < 0) || (da < 0 && db > 0)) {
               const t = da / (da - db)
@@ -512,8 +571,10 @@ export async function buildRenderElements(
                 z: aCam.z + (bCam.z - aCam.z) * t,
               }
               const inter2D = proj(interCam, W, H, focal)!
-              push(fFrontCam, fFront2D, interCam, inter2D)
-              push(fBackCam, fBack2D, interCam, inter2D)
+              fFrontCam.push(interCam)
+              fFront2D.push(inter2D)
+              fBackCam.push(interCam)
+              fBack2D.push(inter2D)
             }
           }
 
