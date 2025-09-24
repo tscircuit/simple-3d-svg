@@ -9,10 +9,12 @@ import { FACES, EDGES, TOP, verts } from "./geometry"
 import { affineMatrix } from "./affine"
 
 function fmt(n: number): string {
-  return Math.round(n).toString()
+  const rounded = Math.round(n * 10) / 10
+  return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(1)
 }
 function fmtPrecise(n: number): string {
-  return (Math.round(n * 100) / 100).toString()
+  const rounded = Math.round(n * 100) / 100
+  return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(2)
 }
 
 /*────────────── Camera & Projection ─────────────*/

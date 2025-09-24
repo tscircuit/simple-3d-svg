@@ -3,8 +3,8 @@ import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
-function fmt(n: number) {
-  return Math.round(n) + ""
+function fmt(n: number): string {
+  return Math.round(n).toString()
 }
 
 export async function renderScene(
@@ -75,62 +75,86 @@ export async function renderScene(
     )
   }
 
-  // ---- element rendering loop ----
-  let inStrokeGroup = false
+  // Group consecutive polygons with same fill/stroke to reduce file size
 
-  for (const element of elements) {
-    if (element.type === "face" || element.type === "image") {
-      // Start stroke group if not already in one
-      if (!inStrokeGroup) {
-        out.push(
-          '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n',
-        )
-        inStrokeGroup = true
-      }
+  let currentGroup: {
+    fill: string
+    hasStroke: boolean
+    polygons: Array<{ pts: Array<{ x: number; y: number }> }>
+  } | null = null
 
-      if (element.type === "face") {
-        const f = element.data
-        const strokeAttr = f.stroke ? "" : ' stroke="none"'
-        out.push(
-          `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
-            .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
-            .join(" ")}" />\n`,
-        )
+  const flushGroup = () => {
+    if (currentGroup && currentGroup.polygons.length > 0) {
+      if (currentGroup.hasStroke) {
+        out.push(`<g fill="${currentGroup.fill}" stroke="#000">`)
       } else {
-        const img = element.data
-        out.push(
-          `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>\n`,
-        )
-      }
-    } else if (element.type === "label") {
-      // Close stroke group if we're in one
-      if (inStrokeGroup) {
-        out.push("  </g>\n")
-        inStrokeGroup = false
+        out.push(`<g fill="${currentGroup.fill}">`)
       }
 
-      const l = element.data
-      out.push(
-        `  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>\n`,
-      )
-    } else if (element.type === "edge") {
-      if (inStrokeGroup) {
-        out.push("  </g>\n")
-        inStrokeGroup = false
+      for (const polygon of currentGroup.polygons) {
+        out.push(
+          `<polygon points="${polygon.pts.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join("")}"/>`,
+        )
       }
-      const e = element.data
-      out.push(
-        `  <polyline fill="none" stroke="${e.color}" points="${e.pts
-          .map((p) => `${p.x},${p.y}`)
-          .join(" ")}" />\n`,
-      )
+
+      out.push("</g>")
+      currentGroup = null
     }
   }
 
-  // Close stroke group if still open
-  if (inStrokeGroup) {
-    out.push("  </g>\n")
+  // Render in depth order but group same-color polygons together
+  for (const element of elements) {
+    if (element.type === "face") {
+      const f = element.data
+      const fill = f.fill
+      const hasStroke = f.stroke
+
+      // Check if we can add this face to the current group
+      if (
+        currentGroup &&
+        currentGroup.fill === fill &&
+        currentGroup.hasStroke === hasStroke
+      ) {
+        // Add to current group
+        currentGroup.polygons.push({ pts: f.pts })
+      } else {
+        // Flush current group and start new one
+        flushGroup()
+        currentGroup = {
+          fill,
+          hasStroke,
+          polygons: [{ pts: f.pts }],
+        }
+      }
+    } else {
+      // Non-face elements flush the current group and render immediately
+      flushGroup()
+
+      if (element.type === "image") {
+        const img = element.data
+        out.push(
+          `  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n`,
+        )
+        out.push(
+          `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym || ""}"/></g>\n`,
+        )
+        out.push("  </g>\n")
+      } else if (element.type === "label") {
+        const l = element.data
+        out.push(
+          `  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>\n`,
+        )
+      } else if (element.type === "edge") {
+        const e = element.data
+        out.push(
+          `  <polyline fill="none" stroke="${e.color}" points="${e.pts.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")}" />\n`,
+        )
+      }
+    }
   }
+
+  // Flush any remaining group
+  flushGroup()
 
   if (opt.showOrigin) {
     out.push(renderOrigin(scene.camera, W, H))
