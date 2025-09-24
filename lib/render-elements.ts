@@ -42,14 +42,18 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
   const s = focal / p.z
   const x = (p.x * s * w) / 2
   const y = (-p.y * s * h) / 2
-  
+
   // Cull polygons that are completely off-screen
   const margin = Math.max(w, h) * 0.1 // 10% margin
-  if (x < -w/2 - margin || x > w/2 + margin || 
-      y < -h/2 - margin || y > h/2 + margin) {
+  if (
+    x < -w / 2 - margin ||
+    x > w / 2 + margin ||
+    y < -h / 2 - margin ||
+    y > h / 2 + margin
+  ) {
     return null
   }
-  
+
   return { x, y, z: p.z }
 }
 
