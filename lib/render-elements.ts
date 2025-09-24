@@ -65,6 +65,120 @@ type RenderElement =
   | { type: "label"; data: Label }
   | { type: "edge"; data: Edge }
 
+type TexSample = {
+  uv: { x: number; y: number }
+  cam: Point3
+  proj: Proj
+}
+
+function triArea2D(tri: [TexSample, TexSample, TexSample]): number {
+  const [a, b, c] = tri
+  return (
+    (b.proj.x - a.proj.x) * (c.proj.y - a.proj.y) -
+    (b.proj.y - a.proj.y) * (c.proj.x - a.proj.x)
+  )
+}
+
+function triangleError(
+  tri: [TexSample, TexSample, TexSample],
+  sample: (u: number, v: number) => TexSample | null,
+): number {
+  const barycentricWeights = [
+    [0.5, 0.5, 0],
+    [0, 0.5, 0.5],
+    [0.5, 0, 0.5],
+    [1 / 3, 1 / 3, 1 / 3],
+  ] as const
+
+  let maxErr = 0
+  for (const [w0, w1, w2] of barycentricWeights) {
+    const targetU = tri[0]!.uv.x * w0 + tri[1]!.uv.x * w1 + tri[2]!.uv.x * w2
+    const targetV = tri[0]!.uv.y * w0 + tri[1]!.uv.y * w1 + tri[2]!.uv.y * w2
+    const real = sample(targetU, targetV)
+    if (!real) continue
+    const px = tri[0]!.proj.x * w0 + tri[1]!.proj.x * w1 + tri[2]!.proj.x * w2
+    const py = tri[0]!.proj.y * w0 + tri[1]!.proj.y * w1 + tri[2]!.proj.y * w2
+    const dx = real.proj.x - px
+    const dy = real.proj.y - py
+    const err = Math.hypot(dx, dy)
+    if (err > maxErr) maxErr = err
+  }
+  return maxErr
+}
+
+function keyForUV(u: number, v: number): string {
+  return `${Math.round(u * 1e6) / 1e6}:${Math.round(v * 1e6) / 1e6}`
+}
+
+function subdivideTriangle(
+  tri: [TexSample, TexSample, TexSample],
+  sample: (u: number, v: number) => TexSample | null,
+  maxDepth: number,
+  pixelThreshold: number,
+  depth = 0,
+): [TexSample, TexSample, TexSample][] {
+  if (depth >= maxDepth) return [tri]
+  if (Math.abs(triArea2D(tri)) < 1e-6) return [tri]
+
+  const err = triangleError(tri, sample)
+  if (err <= pixelThreshold) return [tri]
+
+  const mid = (u0: TexSample, u1: TexSample): TexSample | null => {
+    const mu = (u0.uv.x + u1.uv.x) * 0.5
+    const mv = (u0.uv.y + u1.uv.y) * 0.5
+    return sample(mu, mv)
+  }
+
+  const m01 = mid(tri[0]!, tri[1]!)
+  const m12 = mid(tri[1]!, tri[2]!)
+  const m20 = mid(tri[2]!, tri[0]!)
+  if (!m01 || !m12 || !m20) return [tri]
+
+  const degenerate = (p: TexSample, q: TexSample) =>
+    Math.hypot(p.proj.x - q.proj.x, p.proj.y - q.proj.y) < 1e-4
+  if (
+    degenerate(m01, tri[0]!) ||
+    degenerate(m01, tri[1]!) ||
+    degenerate(m12, tri[1]!) ||
+    degenerate(m12, tri[2]!) ||
+    degenerate(m20, tri[2]!) ||
+    degenerate(m20, tri[0]!)
+  ) {
+    return [tri]
+  }
+
+  return [
+    ...subdivideTriangle(
+      [tri[0]!, m01, m20],
+      sample,
+      maxDepth,
+      pixelThreshold,
+      depth + 1,
+    ),
+    ...subdivideTriangle(
+      [m01, tri[1]!, m12],
+      sample,
+      maxDepth,
+      pixelThreshold,
+      depth + 1,
+    ),
+    ...subdivideTriangle(
+      [m20, m12, tri[2]!],
+      sample,
+      maxDepth,
+      pixelThreshold,
+      depth + 1,
+    ),
+    ...subdivideTriangle(
+      [m01, m12, m20],
+      sample,
+      maxDepth,
+      pixelThreshold,
+      depth + 1,
+    ),
+  ]
+}
+
 export async function buildRenderElements(
   scene: Scene,
   opt: { width?: number; height?: number; backgroundColor?: Color } = {},
@@ -293,112 +407,96 @@ export async function buildRenderElements(
           const cz = Math.max(...TOP.map((i) => vc[i]!.z))
           const href = box.faceImages.top
 
-          // Assign unique texture ID
           if (!texId.has(href)) {
             texId.set(href, `tex${texId.size}`)
           }
           const sym = texId.get(href)!
 
-          // Subdivide the face into projectionSubdivision x projectionSubdivision grid
-          const subdivisions = box.projectionSubdivision ?? 2
-          const quadsPerSide = subdivisions
-          for (let row = 0; row < quadsPerSide; row++) {
-            for (let col = 0; col < quadsPerSide; col++) {
-              const u0 = col / quadsPerSide
-              const u1 = (col + 1) / quadsPerSide
-              const v0 = row / quadsPerSide
-              const v1 = (row + 1) / quadsPerSide
+          const quality = Math.max(1, box.projectionSubdivision ?? 2)
+          const pixelThreshold = 0.55 + 0.45 / quality
+          const maxDepth = Math.max(
+            1,
+            Math.min(3, Math.ceil(Math.log2(quality)) - 2),
+          )
 
-              // Bilinear interpolation for quad corners in 3D space
-              const lerp = (a: Point3, b: Point3, t: number): Point3 => ({
-                x: a.x * (1 - t) + b.x * t,
-                y: a.y * (1 - t) + b.y * t,
-                z: a.z * (1 - t) + b.z * t,
-              })
+          const sampleCache = new Map<string, TexSample>()
+          const lerp = (a: Point3, b: Point3, t: number): Point3 => ({
+            x: a.x * (1 - t) + b.x * t,
+            y: a.y * (1 - t) + b.y * t,
+            z: a.z * (1 - t) + b.z * t,
+          })
+          const bilinear = (u: number, v: number): Point3 => {
+            const ab = lerp(dst[0], dst[1], u)
+            const cd = lerp(dst[3], dst[2], u)
+            return lerp(ab, cd, v)
+          }
 
-              // --- compute camera-space vertices once ---
-              const c00 = toCam(
-                lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v0),
-                scene.camera,
-              )
-              const c10 = toCam(
-                lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v0),
-                scene.camera,
-              )
-              const c01 = toCam(
-                lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v1),
-                scene.camera,
-              )
-              const c11 = toCam(
-                lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v1),
-                scene.camera,
-              )
+          const sample = (u: number, v: number): TexSample | null => {
+            const key = keyForUV(u, v)
+            const cached = sampleCache.get(key)
+            if (cached) return cached
+            const world = bilinear(u, v)
+            const camPt = toCam(world, scene.camera)
+            const projPt = proj(camPt, W, H, focal)
+            if (!projPt) return null
+            const value: TexSample = {
+              uv: { x: u, y: v },
+              cam: camPt,
+              proj: projPt,
+            }
+            sampleCache.set(key, value)
+            return value
+          }
 
-              const p00 = proj(c00, W, H, focal)!
-              const p10 = proj(c10, W, H, focal)!
-              const p01 = proj(c01, W, H, focal)!
-              const p11 = proj(c11, W, H, focal)!
+          const triA = [sample(0, 0), sample(1, 0), sample(1, 1)] as [
+            TexSample,
+            TexSample,
+            TexSample,
+          ]
+          const triB = [sample(0, 0), sample(1, 1), sample(0, 1)] as [
+            TexSample,
+            TexSample,
+            TexSample,
+          ]
+          if (triA.every(Boolean) && triB.every(Boolean)) {
+            const texTris: [TexSample, TexSample, TexSample][] = []
+            texTris.push(
+              ...subdivideTriangle(triA, sample, maxDepth, pixelThreshold),
+              ...subdivideTriangle(triB, sample, maxDepth, pixelThreshold),
+            )
 
-              // First triangle: p00, p10, p11
-              const tri0Mat = affineMatrix(
-                [
-                  { x: u0, y: v0 },
-                  { x: u1, y: v0 },
-                  { x: u1, y: v1 },
+            for (const tri of texTris) {
+              const mat = affineMatrix(
+                tri.map((v) => ({ x: v.uv.x, y: v.uv.y })) as [
+                  { x: number; y: number },
+                  { x: number; y: number },
+                  { x: number; y: number },
                 ],
-                [p00, p10, p11],
+                tri.map((v) => v.proj) as [Proj, Proj, Proj],
               )
-              const id0 = `clip${clipSeq++}`
+              const id = `clip${clipSeq++}`
               images.push({
-                matrix: tri0Mat,
+                matrix: mat,
                 depth: cz,
                 href,
-                clip: id0,
-                points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
+                clip: id,
+                points: tri
+                  .map((v) => `${fmtPrecise(v.uv.x)},${fmtPrecise(v.uv.y)}`)
+                  .join(" "),
                 sym,
               })
-              // After pushing img for first triangle (p00,p10,p11)
-              const triFace0: Face = {
-                pts: [p00, p10, p11],
-                cam: [c00, c10, c11],
+              const triFace: Face = {
+                pts: tri.map((v) => v.proj) as [Proj, Proj, Proj],
+                cam: tri.map((v) => v.cam) as [Point3, Point3, Point3],
                 fill: "none",
                 stroke: false,
               }
-              faces.push(triFace0)
-              faceToImg.set(triFace0, images[images.length - 1]!)
-
-              // Second triangle: p00, p11, p01
-              const tri1Mat = affineMatrix(
-                [
-                  { x: u0, y: v0 },
-                  { x: u1, y: v1 },
-                  { x: u0, y: v1 },
-                ],
-                [p00, p11, p01],
-              )
-              const id1 = `clip${clipSeq++}`
-              images.push({
-                matrix: tri1Mat,
-                depth: cz,
-                href,
-                clip: id1,
-                points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
-                sym,
-              })
-              // After pushing img for second triangle (p00,p11,p01)
-              const triFace1: Face = {
-                pts: [p00, p11, p01],
-                cam: [c00, c11, c01],
-                fill: "none",
-                stroke: false,
-              }
-              faces.push(triFace1)
-              faceToImg.set(triFace1, images[images.length - 1]!)
+              faces.push(triFace)
+              faceToImg.set(triFace, images[images.length - 1]!)
             }
           }
         }
       }
-
       // top label
       if (box.topLabel) {
         const pts = TOP.map((i) => vp[i])
