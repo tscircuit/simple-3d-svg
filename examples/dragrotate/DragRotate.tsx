@@ -19,14 +19,36 @@ export default function DragRotate({ scene, opt }: Props) {
   const dragging = useRef(false)
   const last = useRef({ x: 0, y: 0 })
 
+  // performance optimization state
+  const renderTimeout = useRef<NodeJS.Timeout | null>(null)
+  const lastRenderTime = useRef(0)
+  const isHighQuality = useRef(true)
+
   // viewport size – updated on every window resize
   const [size, setSize] = useState({ width: 0, height: 0 })
 
   const [svg, setSvg] = useState("")
 
-  // helper to (re-)render
-  const redraw = async () => {
+  // helper to (re-)render with performance optimizations
+  const redraw = async (force = false) => {
     if (!size.width || !size.height) return // size unknown yet
+
+    const now = performance.now()
+    const timeSinceLastRender = now - lastRenderTime.current
+
+    // During drag, use lower quality and throttle renders
+    const isDraggingNow = dragging.current
+    const useHighQuality = !isDraggingNow || force
+    const minRenderInterval = isDraggingNow ? 16 : 0 // ~60fps during drag, unlimited when not dragging
+
+    // Skip render if too soon (unless forced)
+    if (!force && timeSinceLastRender < minRenderInterval) {
+      return
+    }
+
+    lastRenderTime.current = now
+    isHighQuality.current = useHighQuality
+
     const dim = Math.min(size.width, size.height) // keep square aspect
     const camPos = {
       x: radius * Math.cos(pitch.current) * Math.cos(yaw.current),
@@ -34,16 +56,53 @@ export default function DragRotate({ scene, opt }: Props) {
       z: radius * Math.cos(pitch.current) * Math.sin(yaw.current),
     }
 
-    const svgText = await renderScene(
-      { ...scene, camera: { ...scene.camera, position: camPos } },
-      { ...opt, width: dim, height: dim },
-    )
+    // Create adaptive scene with reduced subdivision during drag
+    const adaptiveScene = {
+      ...scene,
+      camera: { ...scene.camera, position: camPos },
+      boxes:
+        isDraggingNow && !force
+          ? scene.boxes.map((box) => ({
+              ...box,
+              // Reduce subdivision during drag for performance
+              projectionSubdivision: Math.min(
+                box.projectionSubdivision || 2,
+                4,
+              ),
+            }))
+          : scene.boxes,
+    }
+
+    const svgText = await renderScene(adaptiveScene, {
+      ...opt,
+      width: dim,
+      height: dim,
+    })
     setSvg(svgText.replace(/<\?xml[^>]*\?>\s*/g, ""))
+  }
+
+  // Throttled redraw for drag operations
+  const scheduleRedraw = (immediate = false) => {
+    if (renderTimeout.current) {
+      clearTimeout(renderTimeout.current)
+    }
+
+    if (immediate) {
+      redraw()
+    } else {
+      // Throttle renders during drag
+      renderTimeout.current = setTimeout(
+        () => {
+          redraw()
+        },
+        dragging.current ? 8 : 0,
+      ) // 8ms throttle during drag
+    }
   }
 
   /* initial render + event handling */
   useEffect(() => {
-    redraw()
+    redraw(true) // Force high quality on initial render
 
     const md = (e: MouseEvent) => {
       if (!containerRef.current?.contains(e.target as Node)) return
@@ -60,10 +119,14 @@ export default function DragRotate({ scene, opt }: Props) {
       const lim = Math.PI / 2 - 0.01
       if (pitch.current > lim) pitch.current = lim
       if (pitch.current < -lim) pitch.current = -lim
-      redraw()
+
+      // Use throttled rendering during drag
+      scheduleRedraw()
     }
     const mu = () => {
       dragging.current = false
+      // Force high quality render when drag ends
+      setTimeout(() => redraw(true), 50) // Small delay to ensure smooth transition
     }
 
     window.addEventListener("mousedown", md)
@@ -73,6 +136,9 @@ export default function DragRotate({ scene, opt }: Props) {
       window.removeEventListener("mousedown", md)
       window.removeEventListener("mousemove", mm)
       window.removeEventListener("mouseup", mu)
+      if (renderTimeout.current) {
+        clearTimeout(renderTimeout.current)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scene, opt, size]) // also when window size changes

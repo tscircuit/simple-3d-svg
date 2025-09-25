@@ -14,8 +14,23 @@ const radius = 30
 let isDragging = false
 let lastX = 0
 let lastY = 0
+let renderTimeout: NodeJS.Timeout | null = null
+let lastRenderTime = 0
 
-async function render() {
+async function render(force = false) {
+  const now = performance.now()
+  const timeSinceLastRender = now - lastRenderTime
+
+  // During drag, throttle renders to ~60fps
+  const minRenderInterval = isDragging ? 16 : 0
+
+  // Skip render if too soon (unless forced)
+  if (!force && timeSinceLastRender < minRenderInterval) {
+    return
+  }
+
+  lastRenderTime = now
+
   const dim = getDim()
   const camPos = {
     x: radius * Math.cos(pitch) * Math.cos(yaw),
@@ -46,6 +61,24 @@ async function render() {
   svgContainer.style.height = `${dim}px`
 }
 
+function scheduleRender(immediate = false) {
+  if (renderTimeout) {
+    clearTimeout(renderTimeout)
+  }
+
+  if (immediate) {
+    render()
+  } else {
+    // Throttle renders during drag
+    renderTimeout = setTimeout(
+      () => {
+        render()
+      },
+      isDragging ? 8 : 0,
+    )
+  }
+}
+
 svgContainer.addEventListener("mousedown", (ev) => {
   isDragging = true
   lastX = ev.clientX
@@ -62,14 +95,16 @@ window.addEventListener("mousemove", (ev) => {
   pitch += dy * 0.01
   if (pitch > Math.PI / 2 - 0.01) pitch = Math.PI / 2 - 0.01
   if (pitch < -Math.PI / 2 + 0.01) pitch = -Math.PI / 2 + 0.01
-  render()
+  scheduleRender()
 })
 
 window.addEventListener("mouseup", () => {
   isDragging = false
+  // Force high quality render when drag ends
+  setTimeout(() => render(true), 50)
 })
 
 // keep SVG square on resize
-window.addEventListener("resize", render)
+window.addEventListener("resize", () => render(true))
 
-render()
+render(true) // Force high quality on initial render
