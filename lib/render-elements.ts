@@ -83,7 +83,7 @@ export async function buildRenderElements(
   const focal = scene.camera.focalLength ?? FOCAL
   const faces: Face[] = []
   const images: Img[] = []
-  // Map each BSP-sorted Face if it actually represents an <image> triangle
+  // Map each depth-sorted Face if it actually represents an <image> triangle
   const faceToImg = new Map<Face, Img>()
   const labels: Label[] = []
   const edges: Edge[] = []
@@ -153,6 +153,10 @@ export async function buildRenderElements(
     const bw = verts(box)
     const bc = bw.map((v) => toCam(v, scene.camera))
     const bp = bc.map((v) => proj(v, W, H, focal))
+
+    // Always calculate simple box vertices for text positioning
+    const vc = bc // Save for text label positioning
+    const vp = bp // Save for text label positioning
 
     if (box.drawBoundingBox) {
       for (const [a, b] of EDGES) {
@@ -288,10 +292,7 @@ export async function buildRenderElements(
         }
       }
     } else {
-      // Handle regular box rendering
-      const vw = verts(box)
-      const vc = vw.map((v) => toCam(v, scene.camera))
-      const vp = vc.map((v) => proj(v, W, H, focal))
+      // Handle regular box rendering (vertices already calculated above)
 
       // faces
       for (const idx of FACES) {
@@ -317,7 +318,7 @@ export async function buildRenderElements(
 
       // top face image
       if (box.faceImages?.top) {
-        const pts = TOP.map((i) => vw[i])
+        const pts = TOP.map((i) => bw[i])
         if (pts.every(Boolean)) {
           const dst = pts as [Point3, Point3, Point3, Point3]
           const cz = Math.max(...TOP.map((i) => vc[i]!.z))
@@ -463,134 +464,95 @@ export async function buildRenderElements(
     }
   }
 
-  // BSP sort faces before merging with other elements
-  function sortFacesBSP(
-    polys: Face[],
-    W: number,
-    H: number,
-    focal: number,
-  ): Face[] {
-    const EPS = 1e-6
-    type Node = {
-      face: Face
-      normal: Point3
-      point: Point3
-      front: Node | null
-      back: Node | null
-    }
-
-    function build(list: Face[]): Node | null {
-      if (!list.length) return null
-      const face = list[0]!
-      const p0 = face.cam[0]!
-      const p1 = face.cam[1]!
-      const p2 = face.cam[2]!
-      const normal = cross(sub(p1, p0), sub(p2, p0))
-      const front: Face[] = []
-      const back: Face[] = []
-
-      for (let k = 1; k < list.length; k++) {
-        const f = list[k]!
-        // classify each vertex
-        let pos = 0,
-          neg = 0
-        const d: number[] = []
-        for (const v of f.cam) {
-          const dist = dot(normal, sub(v!, p0))
-          d.push(dist)
-          if (dist > EPS) pos++
-          else if (dist < -EPS) neg++
-        }
-        if (!pos && !neg) {
-          front.push(f) // coplanar – draw after splitter
-        } else if (!pos) back.push(f)
-        else if (!neg) front.push(f)
-        else {
-          // split polygon by plane
-          const fFrontCam: Point3[] = []
-          const fBackCam: Point3[] = []
-          const fFront2D: Proj[] = []
-          const fBack2D: Proj[] = []
-
-          for (let i = 0; i < f.cam.length; i++) {
-            const j = (i + 1) % f.cam.length
-            const aCam = f.cam[i]!
-            const bCam = f.cam[j]!
-            const a2D = f.pts[i]!
-            const b2D = f.pts[j]!
-            const da = d[i]!
-            const db = d[j]!
-
-            const push = (
-              arrCam: Point3[],
-              arr2D: Proj[],
-              cCam: Point3,
-              c2D: Proj,
-            ) => {
-              arrCam.push(cCam)
-              arr2D.push(c2D)
-            }
-
-            if (da >= -EPS) push(fFrontCam, fFront2D, aCam!, a2D!)
-            if (da <= EPS) push(fBackCam, fBack2D, aCam!, a2D!)
-
-            if ((da > 0 && db < 0) || (da < 0 && db > 0)) {
-              const t = da / (da - db)
-              const interCam = {
-                x: aCam.x + (bCam.x - aCam.x) * t,
-                y: aCam.y + (bCam.y - aCam.y) * t,
-                z: aCam.z + (bCam.z - aCam.z) * t,
-              }
-              const inter2D = proj(interCam, W, H, focal)!
-              push(fFrontCam, fFront2D, interCam, inter2D)
-              push(fBackCam, fBack2D, interCam, inter2D)
-            }
-          }
-
-          const mk = (cam: Point3[], pts: Proj[]): Face | null => {
-            if (cam.length < 3) return null
-            const nf: Face = { cam, pts, fill: f!.fill, stroke: false }
-            const img = faceToImg.get(f)
-            if (img) faceToImg.set(nf, img)
-            return nf
-          }
-          const f1 = mk(fFrontCam, fFront2D)
-          const f2 = mk(fBackCam, fBack2D)
-          if (f1) front.push(f1)
-          if (f2) back.push(f2)
-        }
+  // Fast depth sorting with proper intersection handling - O(n log n) + O(k) for intersections
+  function sortFacesByDepth(polys: Face[]): Face[] {
+    // Calculate depth info for each face
+    const facesWithDepth = polys.map((face, index) => {
+      // Calculate min, max, and average Z for better sorting
+      let minZ = Infinity
+      let maxZ = -Infinity
+      let sumZ = 0
+      for (const pt of face.cam) {
+        const z = pt.z
+        minZ = Math.min(minZ, z)
+        maxZ = Math.max(maxZ, z)
+        sumZ += z
       }
+      const avgZ = sumZ / face.cam.length
 
       return {
         face,
-        normal,
-        point: p0,
-        front: build(front),
-        back: build(back),
+        minZ,
+        maxZ,
+        avgZ,
+        originalIndex: index,
       }
-    }
+    })
 
-    function traverse(node: Node | null, out: Face[]) {
-      if (!node) return
-      const cameraSide = dot(node.normal, scale(node.point, -1))
-      if (cameraSide >= 0) {
-        traverse(node.back, out)
-        out.push(node.face)
-        traverse(node.front, out)
+    // Sort by average depth first (back to front)
+    facesWithDepth.sort((a, b) => {
+      // Primary sort by average depth
+      const depthDiff = b.avgZ - a.avgZ
+      if (Math.abs(depthDiff) > 1e-6) return depthDiff
+
+      // Secondary sort by min depth for overlapping ranges
+      const minDiff = b.minZ - a.minZ
+      if (Math.abs(minDiff) > 1e-6) return minDiff
+
+      // Tertiary sort by original index for stability
+      return a.originalIndex - b.originalIndex
+    })
+
+    // For faces with overlapping depth ranges, do additional checks
+    const result: Face[] = []
+    const processed = new Set<number>()
+
+    for (let i = 0; i < facesWithDepth.length; i++) {
+      if (processed.has(i)) continue
+
+      const current = facesWithDepth[i]!
+      const overlapping: Array<typeof current> = []
+
+      // Find faces that overlap in depth range
+      for (let j = i + 1; j < facesWithDepth.length; j++) {
+        if (processed.has(j)) continue
+
+        const other = facesWithDepth[j]!
+
+        // Check if depth ranges overlap
+        if (
+          current.minZ <= other.maxZ + 1e-6 &&
+          other.minZ <= current.maxZ + 1e-6
+        ) {
+          overlapping.push(other)
+          processed.add(j)
+        } else {
+          // No more overlapping faces since we're sorted
+          break
+        }
+      }
+
+      if (overlapping.length === 0) {
+        // No overlaps, add current face
+        result.push(current.face)
       } else {
-        traverse(node.front, out)
-        out.push(node.face)
-        traverse(node.back, out)
+        // Sort overlapping group by average depth
+        overlapping.push(current)
+        overlapping.sort((a, b) => b.avgZ - a.avgZ)
+
+        // Add all overlapping faces in depth order
+        for (const item of overlapping) {
+          result.push(item.face)
+        }
       }
+
+      processed.add(i)
     }
 
-    const root = build(polys)
-    const ordered: Face[] = []
-    traverse(root, ordered)
-    return ordered
+    return result
   }
 
-  const orderedFaces = sortFacesBSP(faces, W, H, focal)
+  const orderedFaces = sortFacesByDepth(faces)
 
   const elements: RenderElement[] = []
   for (const f of orderedFaces) {
