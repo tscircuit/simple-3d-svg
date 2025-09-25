@@ -20,9 +20,6 @@ export async function renderScene(
     showAxes?: boolean
     showOrigin?: boolean
     showGrid?: boolean
-    optimizePerformance?: boolean
-    coordinatePrecision?: number
-    maxSubdivision?: number
     grid?: {
       /** world-space grid cell size (default = 1)            */ cellSize?: number
       /** plane on which to draw the grid (default = "xz")   */ plane?:
@@ -43,9 +40,6 @@ export async function renderScene(
     width: opt.width,
     height: opt.height,
     backgroundColor: opt.backgroundColor,
-    optimizePerformance: opt.optimizePerformance,
-    coordinatePrecision: opt.coordinatePrecision,
-    maxSubdivision: opt.maxSubdivision,
   })
 
   const out: string[] = []
@@ -87,7 +81,7 @@ export async function renderScene(
 
   // ---- element rendering loop ----
   let inStrokeGroup = false
-  const coordinatePrecision = opt.coordinatePrecision ?? 0
+  const coordinatePrecision = 1
 
   for (const element of elements) {
     if (element.type === "face" || element.type === "image") {

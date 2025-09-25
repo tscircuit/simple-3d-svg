@@ -76,9 +76,6 @@ export async function buildRenderElements(
     width?: number
     height?: number
     backgroundColor?: Color
-    optimizePerformance?: boolean
-    coordinatePrecision?: number
-    maxSubdivision?: number
   } = {},
 ): Promise<{
   width: number
@@ -91,8 +88,8 @@ export async function buildRenderElements(
   const W = opt.width ?? W_DEF
   const H = opt.height ?? H_DEF
   const focal = scene.camera.focalLength ?? FOCAL
-  const coordinatePrecision = opt.coordinatePrecision ?? 0
-  const maxSubdivision = opt.maxSubdivision
+  const coordinatePrecision = 1
+  const maxSubdivision = 4
   const faces: Face[] = []
   const images: Img[] = []
   // Map each BSP-sorted Face if it actually represents an <image> triangle
@@ -316,23 +313,22 @@ export async function buildRenderElements(
           // Subdivide the face into projectionSubdivision x projectionSubdivision grid
           let subdivisions = box.projectionSubdivision ?? 2
 
-          if (opt.optimizePerformance && maxSubdivision !== undefined) {
-            subdivisions = Math.min(subdivisions, maxSubdivision)
+          subdivisions = Math.min(subdivisions, maxSubdivision)
 
-            const boxCenter = box.center
-            const camPos = scene.camera.position
-            const distance = Math.sqrt(
-              Math.pow(boxCenter.x - camPos.x, 2) +
-                Math.pow(boxCenter.y - camPos.y, 2) +
-                Math.pow(boxCenter.z - camPos.z, 2),
-            )
+          const boxCenter = box.center
+          const camPos = scene.camera.position
+          const distance = Math.sqrt(
+            Math.pow(boxCenter.x - camPos.x, 2) +
+              Math.pow(boxCenter.y - camPos.y, 2) +
+              Math.pow(boxCenter.z - camPos.z, 2),
+          )
 
-            if (distance > 50) {
-              subdivisions = Math.max(1, Math.floor(subdivisions / 2))
-            } else if (distance > 100) {
-              subdivisions = 1
-            }
+          if (distance > 50) {
+            subdivisions = Math.max(1, Math.floor(subdivisions / 2))
+          } else if (distance > 100) {
+            subdivisions = 1
           }
+
           const quadsPerSide = subdivisions
           for (let row = 0; row < quadsPerSide; row++) {
             for (let col = 0; col < quadsPerSide; col++) {
@@ -472,8 +468,6 @@ export async function buildRenderElements(
   }
 
   function mergeCoplanarFaces(faces: Face[]): Face[] {
-    if (!opt.optimizePerformance) return faces
-
     const merged: Face[] = []
     const processed = new Set<number>()
 
@@ -564,13 +558,11 @@ export async function buildRenderElements(
         } else if (!pos) back.push(f)
         else if (!neg) front.push(f)
         else {
-          if (opt.optimizePerformance) {
-            const area = calculatePolygonArea(f.pts)
-            if (area < 100) {
-              // Skip splitting small polygons (< 100 square pixels)
-              front.push(f)
-              continue
-            }
+          const area = calculatePolygonArea(f.pts)
+          if (area < 100) {
+            // Skip splitting small polygons (< 100 square pixels)
+            front.push(f)
+            continue
           }
 
           // split polygon by plane
