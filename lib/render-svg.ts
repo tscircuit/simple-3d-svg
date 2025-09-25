@@ -75,7 +75,7 @@ export async function renderScene(
     )
   }
 
-  // Group consecutive polygons with same fill/stroke to reduce file size
+  // Group consecutive polygons
 
   let currentGroup: {
     fill: string
