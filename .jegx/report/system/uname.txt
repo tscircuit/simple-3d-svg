@@ -1,0 +1,1 @@
+Linux archlinux-jegx 6.16.8-zen2-1-zen #1 ZEN SMP PREEMPT_DYNAMIC Sun, 21 Sep 2025 23:18:53 +0000 x86_64 GNU/Linux
