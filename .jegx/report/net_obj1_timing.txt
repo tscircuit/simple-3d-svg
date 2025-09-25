@@ -1,0 +1,7 @@
+size_download=562176
+http_code=200
+time_namelookup=0.006934
+time_connect=0.027079
+time_appconnect=0.298789
+time_starttransfer=0.500112
+time_total=0.910852
