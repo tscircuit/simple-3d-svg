@@ -1,0 +1,18 @@
+{
+  "node": "v24.8.0",
+  "scenePath": ".jegx/bench/scene-heavy.json",
+  "iterations": 20,
+  "totalMs": 35939.85,
+  "avgMs": 1796.99,
+  "sizeBytes": 3116014,
+  "sizeKB": 3043,
+  "counts": {
+    "path": 0,
+    "rect": 0,
+    "image": 1,
+    "text": 4,
+    "g": 205,
+    "defs": 1,
+    "use": 200
+  }
+}

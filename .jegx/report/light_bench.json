@@ -1,0 +1,18 @@
+{
+  "node": "v24.8.0",
+  "scenePath": ".jegx/bench/scene-light.json",
+  "iterations": 50,
+  "totalMs": 36.6,
+  "avgMs": 0.73,
+  "sizeBytes": 1522,
+  "sizeKB": 1.5,
+  "counts": {
+    "path": 0,
+    "rect": 0,
+    "image": 0,
+    "text": 0,
+    "g": 1,
+    "defs": 0,
+    "use": 0
+  }
+}
