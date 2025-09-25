@@ -1,0 +1,328 @@
+{
+  "path": ".jegx/report/node-prof/heavy-offline.cpuprofile",
+  "totalSamples": 1294,
+  "topBySelf": [
+    {
+      "id": 279,
+      "label": "(idle)  :-1:-1",
+      "selfSamples": 1107,
+      "selfPct": 85.55,
+      "totalSamples": 1107,
+      "totalPct": 85.55
+    },
+    {
+      "id": 129,
+      "label": "parseSource  node:internal/deps/cjs-module-lexer/lexer:84:21",
+      "selfSamples": 23,
+      "selfPct": 1.78,
+      "totalSamples": 36,
+      "totalPct": 2.78
+    },
+    {
+      "id": 63,
+      "label": "compileSourceTextModule  node:internal/modules/esm/utils:354:32",
+      "selfSamples": 13,
+      "selfPct": 1,
+      "totalSamples": 13,
+      "totalPct": 1
+    },
+    {
+      "id": 128,
+      "label": "parseCJS  node:internal/deps/cjs-module-lexer/lexer:39:18",
+      "selfSamples": 10,
+      "selfPct": 0.77,
+      "totalSamples": 46,
+      "totalPct": 3.55
+    },
+    {
+      "id": 119,
+      "label": "detectModuleFormat  node:internal/modules/esm/get_format:36:27",
+      "selfSamples": 5,
+      "selfPct": 0.39,
+      "totalSamples": 5,
+      "totalPct": 0.39
+    },
+    {
+      "id": 103,
+      "label": "(garbage collector)  :-1:-1",
+      "selfSamples": 5,
+      "selfPct": 0.39,
+      "totalSamples": 5,
+      "totalPct": 0.39
+    },
+    {
+      "id": 2,
+      "label": "(program)  :-1:-1",
+      "selfSamples": 4,
+      "selfPct": 0.31,
+      "totalSamples": 4,
+      "totalPct": 0.31
+    },
+    {
+      "id": 131,
+      "label": "stringLiteral  node:internal/deps/cjs-module-lexer/lexer:1251:23",
+      "selfSamples": 4,
+      "selfPct": 0.31,
+      "totalSamples": 5,
+      "totalPct": 0.39
+    },
+    {
+      "id": 244,
+      "label": "(anonymous)  file:///home/jegx/jegx/work/bounty/fix/2025/tscircuit/simple-3d-svg/node_modules/tsx/dist/cli.mjs:0:0",
+      "selfSamples": 4,
+      "selfPct": 0.31,
+      "totalSamples": 21,
+      "totalPct": 1.62
+    },
+    {
+      "id": 56,
+      "label": "read  :-1:-1",
+      "selfSamples": 3,
+      "selfPct": 0.23,
+      "totalSamples": 3,
+      "totalPct": 0.23
+    },
+    {
+      "id": 313,
+      "label": "spawn  node:internal/child_process:354:45",
+      "selfSamples": 3,
+      "selfPct": 0.23,
+      "totalSamples": 3,
+      "totalPct": 0.23
+    },
+    {
+      "id": 94,
+      "label": "(anonymous)  node:net:0:0",
+      "selfSamples": 2,
+      "selfPct": 0.15,
+      "totalSamples": 7,
+      "totalPct": 0.54
+    },
+    {
+      "id": 133,
+      "label": "tryParseObjectDefineOrKeys  node:internal/deps/cjs-module-lexer/lexer:330:36",
+      "selfSamples": 2,
+      "selfPct": 0.15,
+      "totalSamples": 2,
+      "totalPct": 0.15
+    },
+    {
+      "id": 219,
+      "label": "(anonymous)  node:crypto:0:0",
+      "selfSamples": 2,
+      "selfPct": 0.15,
+      "totalSamples": 9,
+      "totalPct": 0.7
+    },
+    {
+      "id": 245,
+      "label": "a  file:///home/jegx/jegx/work/bounty/fix/2025/tscircuit/simple-3d-svg/node_modules/tsx/dist/cli.mjs:1:35",
+      "selfSamples": 2,
+      "selfPct": 0.15,
+      "totalSamples": 2,
+      "totalPct": 0.15
+    },
+    {
+      "id": 260,
+      "label": "internalModuleStat  :-1:-1",
+      "selfSamples": 2,
+      "selfPct": 0.15,
+      "totalSamples": 2,
+      "totalPct": 0.15
+    },
+    {
+      "id": 268,
+      "label": "gt  file:///home/jegx/jegx/work/bounty/fix/2025/tscircuit/simple-3d-svg/node_modules/tsx/dist/cli.mjs:20:950",
+      "selfSamples": 2,
+      "selfPct": 0.15,
+      "totalSamples": 2,
+      "totalPct": 0.15
+    },
+    {
+      "id": 269,
+      "label": "(anonymous)  file:///home/jegx/jegx/work/bounty/fix/2025/tscircuit/simple-3d-svg/node_modules/tsx/dist/cli.mjs:52:34861",
+      "selfSamples": 2,
+      "selfPct": 0.15,
+      "totalSamples": 5,
+      "totalPct": 0.39
+    },
+    {
+      "id": 309,
+      "label": "spawn  node:child_process:787:14",
+      "selfSamples": 2,
+      "selfPct": 0.15,
+      "totalSamples": 6,
+      "totalPct": 0.46
+    },
+    {
+      "id": 8,
+      "label": "normalizeString  node:path:91:24",
+      "selfSamples": 1,
+      "selfPct": 0.08,
+      "totalSamples": 1,
+      "totalPct": 0.08
+    }
+  ],
+  "topByTotal": [
+    {
+      "id": 1,
+      "label": "(root)  :-1:-1",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 1294,
+      "totalPct": 100
+    },
+    {
+      "id": 279,
+      "label": "(idle)  :-1:-1",
+      "selfSamples": 1107,
+      "selfPct": 85.55,
+      "totalSamples": 1107,
+      "totalPct": 85.55
+    },
+    {
+      "id": 46,
+      "label": "getModuleJobForImport  node:internal/modules/esm/loader:316:29",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 94,
+      "totalPct": 7.26
+    },
+    {
+      "id": 47,
+      "label": "#getJobFromResolveResult  node:internal/modules/esm/loader:346:26",
+      "selfSamples": 1,
+      "selfPct": 0.08,
+      "totalSamples": 94,
+      "totalPct": 7.26
+    },
+    {
+      "id": 48,
+      "label": "#createModuleJob  node:internal/modules/esm/loader:645:18",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 93,
+      "totalPct": 7.19
+    },
+    {
+      "id": 49,
+      "label": "loadAndTranslate  node:internal/modules/esm/loader:621:18",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 92,
+      "totalPct": 7.11
+    },
+    {
+      "id": 57,
+      "label": "afterLoad  node:internal/modules/esm/loader:623:22",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 81,
+      "totalPct": 6.26
+    },
+    {
+      "id": 58,
+      "label": "#translate  node:internal/modules/esm/loader:553:12",
+      "selfSamples": 1,
+      "selfPct": 0.08,
+      "totalSamples": 81,
+      "totalPct": 6.26
+    },
+    {
+      "id": 120,
+      "label": "commonjsStrategy  node:internal/modules/esm/translators:318:53",
+      "selfSamples": 1,
+      "selfPct": 0.08,
+      "totalSamples": 49,
+      "totalPct": 3.79
+    },
+    {
+      "id": 126,
+      "label": "createCJSModuleWrap  node:internal/modules/esm/translators:194:28",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 46,
+      "totalPct": 3.55
+    },
+    {
+      "id": 127,
+      "label": "cjsPreparseModuleExports  node:internal/modules/esm/translators:385:33",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 46,
+      "totalPct": 3.55
+    },
+    {
+      "id": 128,
+      "label": "parseCJS  node:internal/deps/cjs-module-lexer/lexer:39:18",
+      "selfSamples": 10,
+      "selfPct": 0.77,
+      "totalSamples": 46,
+      "totalPct": 3.55
+    },
+    {
+      "id": 193,
+      "label": "run  node:internal/modules/esm/module_job:359:11",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 39,
+      "totalPct": 3.01
+    },
+    {
+      "id": 194,
+      "label": "evaluate  :-1:-1",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 39,
+      "totalPct": 3.01
+    },
+    {
+      "id": 129,
+      "label": "parseSource  node:internal/deps/cjs-module-lexer/lexer:84:21",
+      "selfSamples": 23,
+      "selfPct": 1.78,
+      "totalSamples": 36,
+      "totalPct": 2.78
+    },
+    {
+      "id": 244,
+      "label": "(anonymous)  file:///home/jegx/jegx/work/bounty/fix/2025/tscircuit/simple-3d-svg/node_modules/tsx/dist/cli.mjs:0:0",
+      "selfSamples": 4,
+      "selfPct": 0.31,
+      "totalSamples": 21,
+      "totalPct": 1.62
+    },
+    {
+      "id": 87,
+      "label": "builtinStrategy  node:internal/modules/esm/translators:443:51",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 16,
+      "totalPct": 1.24
+    },
+    {
+      "id": 298,
+      "label": "processTicksAndRejections  node:internal/process/task_queues:71:34",
+      "selfSamples": 1,
+      "selfPct": 0.08,
+      "totalSamples": 15,
+      "totalPct": 1.16
+    },
+    {
+      "id": 59,
+      "label": "moduleStrategy  node:internal/modules/esm/translators:102:49",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 14,
+      "totalPct": 1.08
+    },
+    {
+      "id": 195,
+      "label": "(anonymous)  node:internal/modules/esm/translators:216:62",
+      "selfSamples": 0,
+      "selfPct": 0,
+      "totalSamples": 14,
+      "totalPct": 1.08
+    }
+  ]
+}
