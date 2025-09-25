@@ -94,29 +94,57 @@ export async function buildRenderElements(
   const stlMeshes = new Map<string, STLMesh>()
   const objMeshes = new Map<string, STLMesh>()
   const threeMfMeshes = new Map<string, STLMesh>()
+
+  // Global cache for mesh loading across renders
+  if (!(globalThis as any).__meshCache) {
+    ;(globalThis as any).__meshCache = {
+      stl: new Map<string, STLMesh>(),
+      obj: new Map<string, STLMesh>(),
+      threemf: new Map<string, STLMesh>(),
+    }
+  }
+  const meshCache = (globalThis as any).__meshCache
   for (const box of scene.boxes) {
     if (box.stlUrl && !stlMeshes.has(box.stlUrl)) {
-      try {
-        const mesh = await loadSTL(box.stlUrl)
-        stlMeshes.set(box.stlUrl, mesh)
-      } catch (error) {
-        console.warn(`Failed to load STL from ${box.stlUrl}:`, error)
+      if (meshCache.stl.has(box.stlUrl)) {
+        stlMeshes.set(box.stlUrl, meshCache.stl.get(box.stlUrl)!)
+      } else {
+        try {
+          const mesh = await loadSTL(box.stlUrl)
+          stlMeshes.set(box.stlUrl, mesh)
+          meshCache.stl.set(box.stlUrl, mesh)
+        } catch (error) {
+          console.warn(`Failed to load STL from ${box.stlUrl}:`, error)
+        }
       }
     }
     if (box.objUrl && !objMeshes.has(box.objUrl)) {
-      try {
-        const mesh = await loadOBJ(box.objUrl)
-        objMeshes.set(box.objUrl, mesh)
-      } catch (error) {
-        console.warn(`Failed to load OBJ from ${box.objUrl}:`, error)
+      if (meshCache.obj.has(box.objUrl)) {
+        objMeshes.set(box.objUrl, meshCache.obj.get(box.objUrl)!)
+      } else {
+        try {
+          const mesh = await loadOBJ(box.objUrl)
+          objMeshes.set(box.objUrl, mesh)
+          meshCache.obj.set(box.objUrl, mesh)
+        } catch (error) {
+          console.warn(`Failed to load OBJ from ${box.objUrl}:`, error)
+        }
       }
     }
     if (box.threeMfUrl && !threeMfMeshes.has(box.threeMfUrl)) {
-      try {
-        const mesh = await load3MF(box.threeMfUrl)
-        threeMfMeshes.set(box.threeMfUrl, mesh)
-      } catch (error) {
-        console.warn(`Failed to load 3MF from ${box.threeMfUrl}:`, error)
+      if (meshCache.threemf.has(box.threeMfUrl)) {
+        threeMfMeshes.set(
+          box.threeMfUrl,
+          meshCache.threemf.get(box.threeMfUrl)!,
+        )
+      } else {
+        try {
+          const mesh = await load3MF(box.threeMfUrl)
+          threeMfMeshes.set(box.threeMfUrl, mesh)
+          meshCache.threemf.set(box.threeMfUrl, mesh)
+        } catch (error) {
+          console.warn(`Failed to load 3MF from ${box.threeMfUrl}:`, error)
+        }
       }
     }
   }
