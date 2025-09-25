@@ -4,7 +4,7 @@ import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
 function fmt(n: number) {
-  return Math.round(n * 10) / 10 + ""
+  return Math.round(n) + ""
 }
 
 export async function renderScene(
