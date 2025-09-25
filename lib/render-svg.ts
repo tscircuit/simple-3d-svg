@@ -93,7 +93,7 @@ export async function renderScene(
 
       for (const polygon of currentGroup.polygons) {
         out.push(
-          `<polygon points="${polygon.pts.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join("")}"/>`,
+          `<polygon points="${polygon.pts.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")}"/>`,
         )
       }
 
