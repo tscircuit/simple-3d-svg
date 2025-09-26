@@ -24,6 +24,16 @@ interface Proj {
   y: number
   z: number
 }
+
+function triArea2i(a: Proj, b: Proj, c: Proj): number {
+  const ax = Math.round(a.x)
+  const ay = Math.round(a.y)
+  const bx = Math.round(b.x)
+  const by = Math.round(b.y)
+  const cx = Math.round(c.x)
+  const cy = Math.round(c.y)
+  return Math.abs((bx - ax) * (cy - ay) - (by - ay) * (cx - ax))
+}
 function axes(cam: Camera) {
   const f = norm(sub(cam.lookAt, cam.position))
   const wUp = { x: 0, y: 1, z: 0 }
@@ -163,6 +173,7 @@ export async function buildRenderElements(
         const v2p = proj(v2c, W, H, focal)
 
         if (v0p && v1p && v2p) {
+          if (triArea2i(v0p, v1p, v2p) === 0) continue
           const edge1 = sub(v1c, v0c)
           const edge2 = sub(v2c, v0c)
           const normal = cross(edge1, edge2)
@@ -201,6 +212,7 @@ export async function buildRenderElements(
         const v2p = proj(v2c, W, H, focal)
 
         if (v0p && v1p && v2p) {
+          if (triArea2i(v0p, v1p, v2p) === 0) continue
           const edge1 = sub(v1c, v0c)
           const edge2 = sub(v2c, v0c)
           const faceNormal = cross(edge1, edge2)
@@ -242,6 +254,7 @@ export async function buildRenderElements(
         const v2p = proj(v2c, W, H, focal)
 
         if (v0p && v1p && v2p) {
+          if (triArea2i(v0p, v1p, v2p) === 0) continue
           const edge1 = sub(v1c, v0c)
           const edge2 = sub(v2c, v0c)
           const faceNormal = cross(edge1, edge2)
@@ -339,61 +352,61 @@ export async function buildRenderElements(
               const p01 = proj(c01, W, H, focal)!
               const p11 = proj(c11, W, H, focal)!
 
-              // First triangle: p00, p10, p11
-              const tri0Mat = affineMatrix(
-                [
-                  { x: u0, y: v0 },
-                  { x: u1, y: v0 },
-                  { x: u1, y: v1 },
-                ],
-                [p00, p10, p11],
-              )
-              const id0 = `clip${clipSeq++}`
-              images.push({
-                matrix: tri0Mat,
-                depth: cz,
-                href,
-                clip: id0,
-                points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
-                sym,
-              })
-              // After pushing img for first triangle (p00,p10,p11)
-              const triFace0: Face = {
-                pts: [p00, p10, p11],
-                cam: [c00, c10, c11],
-                fill: "none",
-                stroke: false,
+              if (triArea2i(p00, p10, p11) !== 0) {
+                const tri0Mat = affineMatrix(
+                  [
+                    { x: u0, y: v0 },
+                    { x: u1, y: v0 },
+                    { x: u1, y: v1 },
+                  ],
+                  [p00, p10, p11],
+                )
+                const id0 = `clip${clipSeq++}`
+                images.push({
+                  matrix: tri0Mat,
+                  depth: cz,
+                  href,
+                  clip: id0,
+                  points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
+                  sym,
+                })
+                const triFace0: Face = {
+                  pts: [p00, p10, p11],
+                  cam: [c00, c10, c11],
+                  fill: "none",
+                  stroke: false,
+                }
+                faces.push(triFace0)
+                faceToImg.set(triFace0, images[images.length - 1]!)
               }
-              faces.push(triFace0)
-              faceToImg.set(triFace0, images[images.length - 1]!)
 
-              // Second triangle: p00, p11, p01
-              const tri1Mat = affineMatrix(
-                [
-                  { x: u0, y: v0 },
-                  { x: u1, y: v1 },
-                  { x: u0, y: v1 },
-                ],
-                [p00, p11, p01],
-              )
-              const id1 = `clip${clipSeq++}`
-              images.push({
-                matrix: tri1Mat,
-                depth: cz,
-                href,
-                clip: id1,
-                points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
-                sym,
-              })
-              // After pushing img for second triangle (p00,p11,p01)
-              const triFace1: Face = {
-                pts: [p00, p11, p01],
-                cam: [c00, c11, c01],
-                fill: "none",
-                stroke: false,
+              if (triArea2i(p00, p11, p01) !== 0) {
+                const tri1Mat = affineMatrix(
+                  [
+                    { x: u0, y: v0 },
+                    { x: u1, y: v1 },
+                    { x: u0, y: v1 },
+                  ],
+                  [p00, p11, p01],
+                )
+                const id1 = `clip${clipSeq++}`
+                images.push({
+                  matrix: tri1Mat,
+                  depth: cz,
+                  href,
+                  clip: id1,
+                  points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
+                  sym,
+                })
+                const triFace1: Face = {
+                  pts: [p00, p11, p01],
+                  cam: [c00, c11, c01],
+                  fill: "none",
+                  stroke: false,
+                }
+                faces.push(triFace1)
+                faceToImg.set(triFace1, images[images.length - 1]!)
               }
-              faces.push(triFace1)
-              faceToImg.set(triFace1, images[images.length - 1]!)
             }
           }
         }
