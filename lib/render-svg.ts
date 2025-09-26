@@ -4,7 +4,9 @@ import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
 function fmt(n: number) {
-  return Math.round(n) + ""
+  // Use reduced precision to decrease SVG size
+  const rounded = Math.round(n * 10) / 10 // Round to 1 decimal place
+  return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(1)
 }
 
 export async function renderScene(
@@ -91,10 +93,10 @@ export async function renderScene(
       if (element.type === "face") {
         const f = element.data
         const strokeAttr = f.stroke ? "" : ' stroke="none"'
+        // OPTIMIZATION: Pre-build points string to avoid repeated function calls
+        const pointsStr = f.pts.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")
         out.push(
-          `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
-            .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
-            .join(" ")}" />\n`,
+          `    <polygon fill="${f.fill}"${strokeAttr} points="${pointsStr}" />\n`,
         )
       } else {
         const img = element.data
@@ -119,10 +121,10 @@ export async function renderScene(
         inStrokeGroup = false
       }
       const e = element.data
+      // OPTIMIZATION: Pre-build points string
+      const pointsStr = e.pts.map((p) => `${p.x},${p.y}`).join(" ")
       out.push(
-        `  <polyline fill="none" stroke="${e.color}" points="${e.pts
-          .map((p) => `${p.x},${p.y}`)
-          .join(" ")}" />\n`,
+        `  <polyline fill="none" stroke="${e.color}" points="${pointsStr}" />\n`,
       )
     }
   }

@@ -1,79 +1,79 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="-200 -200 400 400">  <rect x="-200" y="-200" width="400" height="400" fill="white" />
   <g stroke="#ccc" stroke-width="0.5">
-    <line x1="0" y1="566" x2="327" y2="0" />
-    <line x1="0" y1="566" x2="-327" y2="0" />
-    <line x1="-45" y1="489" x2="300" y2="-9" />
-    <line x1="45" y1="489" x2="-300" y2="-9" />
-    <line x1="-82" y1="424" x2="276" y2="-18" />
-    <line x1="82" y1="424" x2="-276" y2="-18" />
-    <line x1="-113" y1="370" x2="252" y2="-26" />
-    <line x1="113" y1="370" x2="-252" y2="-26" />
-    <line x1="-140" y1="323" x2="231" y2="-33" />
-    <line x1="140" y1="323" x2="-231" y2="-33" />
-    <line x1="-163" y1="283" x2="210" y2="-40" />
-    <line x1="163" y1="283" x2="-210" y2="-40" />
-    <line x1="-184" y1="247" x2="191" y2="-47" />
-    <line x1="184" y1="247" x2="-191" y2="-47" />
-    <line x1="-202" y1="216" x2="172" y2="-54" />
-    <line x1="202" y1="216" x2="-172" y2="-54" />
-    <line x1="-218" y1="189" x2="155" y2="-60" />
-    <line x1="218" y1="189" x2="-155" y2="-60" />
-    <line x1="-232" y1="164" x2="138" y2="-65" />
-    <line x1="232" y1="164" x2="-138" y2="-65" />
-    <line x1="-245" y1="141" x2="122" y2="-71" />
-    <line x1="245" y1="141" x2="-122" y2="-71" />
-    <line x1="-257" y1="121" x2="108" y2="-76" />
-    <line x1="257" y1="121" x2="-108" y2="-76" />
-    <line x1="-267" y1="103" x2="93" y2="-81" />
-    <line x1="267" y1="103" x2="-93" y2="-81" />
-    <line x1="-277" y1="86" x2="80" y2="-86" />
-    <line x1="277" y1="86" x2="-80" y2="-86" />
-    <line x1="-286" y1="71" x2="67" y2="-90" />
-    <line x1="286" y1="71" x2="-67" y2="-90" />
-    <line x1="-294" y1="57" x2="54" y2="-94" />
-    <line x1="294" y1="57" x2="-54" y2="-94" />
-    <line x1="-301" y1="44" x2="43" y2="-98" />
-    <line x1="301" y1="44" x2="-43" y2="-98" />
-    <line x1="-308" y1="31" x2="31" y2="-102" />
-    <line x1="308" y1="31" x2="-31" y2="-102" />
-    <line x1="-315" y1="20" x2="20" y2="-106" />
-    <line x1="315" y1="20" x2="-20" y2="-106" />
-    <line x1="-321" y1="10" x2="10" y2="-110" />
-    <line x1="321" y1="10" x2="-10" y2="-110" />
-    <line x1="-327" y1="0" x2="0" y2="-113" />
-    <line x1="327" y1="0" x2="0" y2="-113" />
+    <line x1="0" y1="565.7" x2="326.6" y2="0" />
+    <line x1="0" y1="565.7" x2="-326.6" y2="0" />
+    <line x1="-44.5" y1="488.5" x2="300.3" y2="-9.1" />
+    <line x1="44.5" y1="488.5" x2="-300.3" y2="-9.1" />
+    <line x1="-81.6" y1="424.3" x2="275.6" y2="-17.7" />
+    <line x1="81.6" y1="424.3" x2="-275.6" y2="-17.7" />
+    <line x1="-113.1" y1="369.9" x2="252.4" y2="-25.7" />
+    <line x1="113.1" y1="369.9" x2="-252.4" y2="-25.7" />
+    <line x1="-140" y1="323.2" x2="230.5" y2="-33.3" />
+    <line x1="140" y1="323.2" x2="-230.5" y2="-33.3" />
+    <line x1="-163.3" y1="282.8" x2="210" y2="-40.4" />
+    <line x1="163.3" y1="282.8" x2="-210" y2="-40.4" />
+    <line x1="-183.7" y1="247.5" x2="190.5" y2="-47.1" />
+    <line x1="183.7" y1="247.5" x2="-190.5" y2="-47.1" />
+    <line x1="-201.7" y1="216.3" x2="172.1" y2="-53.5" />
+    <line x1="201.7" y1="216.3" x2="-172.1" y2="-53.5" />
+    <line x1="-217.7" y1="188.6" x2="154.7" y2="-59.5" />
+    <line x1="217.7" y1="188.6" x2="-154.7" y2="-59.5" />
+    <line x1="-232.1" y1="163.8" x2="138.2" y2="-65.3" />
+    <line x1="232.1" y1="163.8" x2="-138.2" y2="-65.3" />
+    <line x1="-244.9" y1="141.4" x2="122.5" y2="-70.7" />
+    <line x1="244.9" y1="141.4" x2="-122.5" y2="-70.7" />
+    <line x1="-256.6" y1="121.2" x2="107.5" y2="-75.9" />
+    <line x1="256.6" y1="121.2" x2="-107.5" y2="-75.9" />
+    <line x1="-267.2" y1="102.9" x2="93.3" y2="-80.8" />
+    <line x1="267.2" y1="102.9" x2="-93.3" y2="-80.8" />
+    <line x1="-276.9" y1="86.1" x2="79.8" y2="-85.5" />
+    <line x1="276.9" y1="86.1" x2="-79.8" y2="-85.5" />
+    <line x1="-285.8" y1="70.7" x2="66.8" y2="-90" />
+    <line x1="285.8" y1="70.7" x2="-66.8" y2="-90" />
+    <line x1="-293.9" y1="56.6" x2="54.4" y2="-94.3" />
+    <line x1="293.9" y1="56.6" x2="-54.4" y2="-94.3" />
+    <line x1="-301.5" y1="43.5" x2="42.6" y2="-98.4" />
+    <line x1="301.5" y1="43.5" x2="-42.6" y2="-98.4" />
+    <line x1="-308.5" y1="31.4" x2="31.3" y2="-102.3" />
+    <line x1="308.5" y1="31.4" x2="-31.3" y2="-102.3" />
+    <line x1="-314.9" y1="20.2" x2="20.4" y2="-106.1" />
+    <line x1="314.9" y1="20.2" x2="-20.4" y2="-106.1" />
+    <line x1="-321" y1="9.8" x2="10" y2="-109.7" />
+    <line x1="321" y1="9.8" x2="-10" y2="-109.7" />
+    <line x1="-326.6" y1="0" x2="0" y2="-113.1" />
+    <line x1="326.6" y1="0" x2="0" y2="-113.1" />
   </g>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(255,128,0,0.8)" points="105,-45 107,-62 91,-68 89,-51" />
-    <polygon fill="rgba(255,128,0,0.8)" points="94,-39 78,-45 89,-51 105,-45" />
-    <polygon fill="rgba(255,128,0,0.8)" points="78,-45 81,-62 91,-68 89,-51" />
-    <polygon fill="rgba(255,128,0,0.8)" points="94,-39 97,-56 107,-62 105,-45" />
-    <polygon fill="rgba(255,128,0,0.8)" points="97,-56 81,-62 91,-68 107,-62" />
-    <polygon fill="rgba(255,128,0,0.8)" points="94,-39 78,-45 81,-62 97,-56" />
-    <polygon fill="rgba(0,128,255,0.8)" points="21,-156 22,-189 0,-193 0,-162" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-78,-45 -81,-62 -91,-68 -89,-51" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -105,-45 -89,-51 -78,-45" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-105,-45 -107,-62 -91,-68 -89,-51" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -97,-56 -81,-62 -78,-45" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-97,-56 -107,-62 -91,-68 -81,-62" />
-    <polygon fill="rgba(0,128,255,0.8)" points="0,-151 -21,-156 0,-162 21,-156" />
-    <polygon fill="rgba(0,128,255,0.8)" points="-21,-156 -22,-189 0,-193 0,-162" />
-    <polygon fill="rgba(0,128,255,0.8)" points="0,-151 0,-184 22,-189 21,-156" />
-    <polygon fill="rgba(0,128,255,0.8)" points="0,-184 -22,-189 0,-193 22,-189" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -105,-45 -107,-62 -97,-56" />
-    <polygon fill="rgba(0,128,255,0.8)" points="0,-151 -21,-156 -22,-189 0,-184" />
+    <polygon fill="rgba(255,128,0,0.8)" points="104.5,-45.3 107.4,-62 91.4,-67.9 89.1,-51.4" />
+    <polygon fill="rgba(255,128,0,0.8)" points="94,-38.7 78.4,-45.3 89.1,-51.4 104.5,-45.3" />
+    <polygon fill="rgba(255,128,0,0.8)" points="78.4,-45.3 80.5,-62 91.4,-67.9 89.1,-51.4" />
+    <polygon fill="rgba(255,128,0,0.8)" points="94,-38.7 96.6,-55.8 107.4,-62 104.5,-45.3" />
+    <polygon fill="rgba(255,128,0,0.8)" points="96.6,-55.8 80.5,-62 91.4,-67.9 107.4,-62" />
+    <polygon fill="rgba(255,128,0,0.8)" points="94,-38.7 78.4,-45.3 80.5,-62 96.6,-55.8" />
+    <polygon fill="rgba(0,128,255,0.8)" points="20.8,-156.5 21.8,-188.6 0,-192.6 0,-161.6" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-78.4,-45.3 -80.5,-62 -91.4,-67.9 -89.1,-51.4" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-94,-38.7 -104.5,-45.3 -89.1,-51.4 -78.4,-45.3" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-104.5,-45.3 -107.4,-62 -91.4,-67.9 -89.1,-51.4" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-94,-38.7 -96.6,-55.8 -80.5,-62 -78.4,-45.3" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-96.6,-55.8 -107.4,-62 -91.4,-67.9 -80.5,-62" />
+    <polygon fill="rgba(0,128,255,0.8)" points="0,-150.8 -20.8,-156.5 0,-161.6 20.8,-156.5" />
+    <polygon fill="rgba(0,128,255,0.8)" points="-20.8,-156.5 -21.8,-188.6 0,-192.6 0,-161.6" />
+    <polygon fill="rgba(0,128,255,0.8)" points="0,-150.8 0,-184.2 21.8,-188.6 20.8,-156.5" />
+    <polygon fill="rgba(0,128,255,0.8)" points="0,-184.2 -21.8,-188.6 0,-192.6 21.8,-188.6" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-94,-38.7 -104.5,-45.3 -107.4,-62 -96.6,-55.8" />
+    <polygon fill="rgba(0,128,255,0.8)" points="0,-150.8 -20.8,-156.5 -21.8,-188.6 0,-184.2" />
   </g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.8650945499936691 -0.4994625713133217 0.9320238414410013 -0.3608463564421803 -93.98831875350639 -61.90997500447729)"><text x="0" y="0" fill="rgba(0,0,0,1)">X=7</text></g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.9799845782086478 -0.19737012559201522 0.9799845782086478 -0.19737012559201522 0 -188.46850707528625)"><text x="0" y="0" fill="rgba(0,0,0,1)">Y=7</text></g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.9320238414410013 -0.3608463564421803 0.8650945499936691 -0.4994625713133217 93.98831875350639 -61.90997500447729)"><text x="0" y="0" fill="rgba(0,0,0,1)">Z=7</text></g>
   <g stroke-width="1">
   <defs>
-    <linearGradient id="axis-grad-0" x1="0" y1="0" x2="-490" y2="-283" gradientUnits="userSpaceOnUse">      <stop offset="0%" stop-color="red"/>      <stop offset="32.25806451612902%" stop-color="rgba(255,255,255,0)"/>      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>    </linearGradient>
-    <linearGradient id="axis-grad-1" x1="0" y1="0" x2="0" y2="-566" gradientUnits="userSpaceOnUse">      <stop offset="0%" stop-color="green"/>      <stop offset="34.48275862068963%" stop-color="rgba(255,255,255,0)"/>      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>    </linearGradient>
-    <linearGradient id="axis-grad-2" x1="0" y1="0" x2="490" y2="-283" gradientUnits="userSpaceOnUse">      <stop offset="0%" stop-color="blue"/>      <stop offset="32.25806451612902%" stop-color="rgba(255,255,255,0)"/>      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>    </linearGradient>
+    <linearGradient id="axis-grad-0" x1="0" y1="0" x2="-489.9" y2="-282.8" gradientUnits="userSpaceOnUse">      <stop offset="0%" stop-color="red"/>      <stop offset="32.25806451612902%" stop-color="rgba(255,255,255,0)"/>      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>    </linearGradient>
+    <linearGradient id="axis-grad-1" x1="0" y1="0" x2="0" y2="-565.7" gradientUnits="userSpaceOnUse">      <stop offset="0%" stop-color="green"/>      <stop offset="34.48275862068963%" stop-color="rgba(255,255,255,0)"/>      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>    </linearGradient>
+    <linearGradient id="axis-grad-2" x1="0" y1="0" x2="489.9" y2="-282.8" gradientUnits="userSpaceOnUse">      <stop offset="0%" stop-color="blue"/>      <stop offset="32.25806451612902%" stop-color="rgba(255,255,255,0)"/>      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>    </linearGradient>
   </defs>
-    <line x1="0" y1="0" x2="-490" y2="-283" stroke="url(#axis-grad-0)" />
-    <line x1="0" y1="0" x2="0" y2="-566" stroke="url(#axis-grad-1)" />
-    <line x1="0" y1="0" x2="490" y2="-283" stroke="url(#axis-grad-2)" />
+    <line x1="0" y1="0" x2="-489.9" y2="-282.8" stroke="url(#axis-grad-0)" />
+    <line x1="0" y1="0" x2="0" y2="-565.7" stroke="url(#axis-grad-1)" />
+    <line x1="0" y1="0" x2="489.9" y2="-282.8" stroke="url(#axis-grad-2)" />
   </g>
 </svg>

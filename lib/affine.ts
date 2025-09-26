@@ -73,5 +73,10 @@ export function affineMatrix(
     [1, 1, 1],
   ]
   const M = mul3(D, inv3(S))
-  return `matrix(${M[0]![0]} ${M[1]![0]} ${M[0]![1]} ${M[1]![1]} ${M[0]![2]} ${M[1]![2]})`
+  // OPTIMIZATION: Round matrix values to reduce SVG size
+  const fmt = (n: number) => {
+    const rounded = Math.round(n * 100) / 100
+    return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(2)
+  }
+  return `matrix(${fmt(M[0]![0])} ${fmt(M[1]![0])} ${fmt(M[0]![1])} ${fmt(M[1]![1])} ${fmt(M[0]![2])} ${fmt(M[1]![2])})`
 }

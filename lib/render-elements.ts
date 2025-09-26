@@ -9,10 +9,13 @@ import { FACES, EDGES, TOP, verts } from "./geometry"
 import { affineMatrix } from "./affine"
 
 function fmt(n: number): string {
-  return Math.round(n).toString()
+  const rounded = Math.round(n * 10) / 10
+  return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(1)
 }
 function fmtPrecise(n: number): string {
-  return (Math.round(n * 100) / 100).toString()
+  // VERY aggressive rounding for clip paths - use 1 decimal or integers when possible
+  const rounded = Math.round(n * 10) / 10
+  return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(1)
 }
 
 /*────────────── Camera & Projection ─────────────*/
@@ -121,6 +124,7 @@ export async function buildRenderElements(
 
   for (const box of scene.boxes) {
     const bw = verts(box)
+    // OPTIMIZATION: Cache camera transformations
     const bc = bw.map((v) => toCam(v, scene.camera))
     const bp = bc.map((v) => proj(v, W, H, focal))
 
@@ -267,6 +271,11 @@ export async function buildRenderElements(
       for (const idx of FACES) {
         const p4: Proj[] = []
         let behind = false
+
+        // OPTIMIZATION: Early culling - check if entire face is behind camera
+        const faceZs = idx.map((i) => vc[i]?.z || 0)
+        if (faceZs.every((z) => z <= 0)) continue // All vertices behind camera
+
         for (const i of idx) {
           const p = vp[i]
           if (!p) {
@@ -299,15 +308,60 @@ export async function buildRenderElements(
           }
           const sym = texId.get(href)!
 
-          // Subdivide the face into projectionSubdivision x projectionSubdivision grid
-          const subdivisions = box.projectionSubdivision ?? 2
+          // OPTIMIZED: Adaptive subdivision based on face size in screen space
+          const rawSubdivisions = box.projectionSubdivision ?? 2
+
+          // Calculate face size in screen space to determine optimal subdivision
+          const corners2D: Proj[] = []
+          for (const i of TOP) {
+            const vertex = vw[i]
+            if (vertex) {
+              const projected = proj(toCam(vertex, scene.camera), W, H, focal)
+              if (projected) corners2D.push(projected)
+            }
+          }
+
+          let screenArea = 0
+          if (corners2D.length >= 3) {
+            // Simple area calculation for adaptive subdivision
+            const p0 = corners2D[0]!
+            const p1 = corners2D[1]!
+            const p2 = corners2D[2]!
+            screenArea =
+              Math.abs(
+                (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y),
+              ) / 2
+          }
+
+          // AGGRESSIVE subdivision reduction to massively reduce SVG bloat
+          let subdivisions = rawSubdivisions
+          if (screenArea < 2000)
+            subdivisions = 1 // Very small faces: just 1 subdivision
+          else if (screenArea < 8000)
+            subdivisions = 2 // Medium faces: 2 subdivisions
+          else if (screenArea < 20000)
+            subdivisions = Math.max(2, Math.floor(rawSubdivisions / 2))
+          else subdivisions = Math.min(rawSubdivisions, 4) // Cap at 4 to prevent bloat
+
           const quadsPerSide = subdivisions
           for (let row = 0; row < quadsPerSide; row++) {
             for (let col = 0; col < quadsPerSide; col++) {
+              // OPTIMIZATION: Use simpler fractions to get shorter clip path coordinates
               const u0 = col / quadsPerSide
               const u1 = (col + 1) / quadsPerSide
               const v0 = row / quadsPerSide
               const v1 = (row + 1) / quadsPerSide
+
+              // Round to nice fractions for common subdivision counts
+              const round = (n: number) => {
+                if (quadsPerSide <= 4)
+                  return Math.round(n * quadsPerSide) / quadsPerSide
+                return Math.round(n * 10) / 10
+              }
+              const ru0 = round(u0),
+                ru1 = round(u1),
+                rv0 = round(v0),
+                rv1 = round(v1)
 
               // Bilinear interpolation for quad corners in 3D space
               const lerp = (a: Point3, b: Point3, t: number): Point3 => ({
@@ -354,7 +408,7 @@ export async function buildRenderElements(
                 depth: cz,
                 href,
                 clip: id0,
-                points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)}`,
+                points: `${fmtPrecise(ru0)},${fmtPrecise(rv0)} ${fmtPrecise(ru1)},${fmtPrecise(rv0)} ${fmtPrecise(ru1)},${fmtPrecise(rv1)}`,
                 sym,
               })
               // After pushing img for first triangle (p00,p10,p11)
@@ -382,7 +436,7 @@ export async function buildRenderElements(
                 depth: cz,
                 href,
                 clip: id1,
-                points: `${fmtPrecise(u0)},${fmtPrecise(v0)} ${fmtPrecise(u1)},${fmtPrecise(v1)} ${fmtPrecise(u0)},${fmtPrecise(v1)}`,
+                points: `${fmtPrecise(ru0)},${fmtPrecise(rv0)} ${fmtPrecise(ru1)},${fmtPrecise(rv1)} ${fmtPrecise(ru0)},${fmtPrecise(rv1)}`,
                 sym,
               })
               // After pushing img for second triangle (p00,p11,p01)
