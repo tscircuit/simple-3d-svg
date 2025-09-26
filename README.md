@@ -124,7 +124,7 @@ renderScene(
 
 ### `backfaceCulling`
 
-Meshes (STL/OBJ/3MF) attempt to cull back-facing triangles automatically (`"auto"` by default). Set the global option to `true` to force culling, or to `false` to render double-sided surfaces. You can also override the behaviour per box with `backfaceCulling: false | true | "auto"`.
+Meshes (STL/OBJ/3MF) attempt to cull back-facing triangles automatically (`"auto"` by default) and fall back to double-sided rendering if almost the entire mesh would disappear. Set the global option to `true` to force culling, or to `false` to render double-sided surfaces. You can also override the behaviour per box with `backfaceCulling: false | true | "auto"`.
 
 ```ts
 renderScene(scene, {
@@ -139,8 +139,8 @@ scene.boxes[0]!.backfaceCulling = false
 
 | Scene | Baseline avg (ms) | Current avg (ms) | Speed-up | Baseline size | Current size | Size reduction |
 | ----- | ----------------: | ----------------: | -------: | -------------: | -----------: | -------------: |
-| Heavy (online) | 1,796.99 | **492.98** | **3.65×** | 3.12 MB | **1.50 MB** | **−51.9 %** |
-| Heavy (offline) | 15–18 | **2.86** | **5.24×** | 85 KB | **27.8 KB** | **−67.3 %** |
-| Light | 0.47 | **0.49** | **0.96×** | 1.5 KB | **1.5 KB** | — |
+| Heavy (online) | 1,796.99 | **418.69** | **4.29×** | 3.12 MB | **1.50 MB** | **−51.9 %** |
+| Heavy (offline) | 15–18 | **1.85** | **8.11×** | 85 KB | **27.8 KB** | **−67.3 %** |
+| Light | 0.47 | **0.39** | **1.21×** | 1.5 KB | **1.5 KB** | — |
 
 Benchmarks were recorded with `npx tsx .jegx/bench/bench.ts` against the bundled light/heavy scenes (Node v24.8.0 on an Intel Celeron N4020). Detailed reports and raw artefacts live under `.jegx/`.
