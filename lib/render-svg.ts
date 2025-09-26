@@ -82,15 +82,15 @@ export async function renderScene(
     if (element.type === "face" || element.type === "image") {
       // Start stroke group if not already in one
       if (!inStrokeGroup) {
-        out.push(
-          '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n',
-        )
+        out.push('  <g stroke="none">\n')
         inStrokeGroup = true
       }
 
       if (element.type === "face") {
         const f = element.data
-        const strokeAttr = f.stroke ? "" : ' stroke="none"'
+        const strokeAttr = f.stroke
+          ? ' stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"'
+          : ""
         out.push(
           `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
             .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
