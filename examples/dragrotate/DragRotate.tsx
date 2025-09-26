@@ -39,6 +39,7 @@ export default function DragRotate({ scene, opt }: Props) {
       { ...scene, camera: { ...scene.camera, position: camPos } },
       { ...opt, width: dim, height: dim }
     )
+    
     setSvg(svgText.replace(/<\?xml[^>]*\?>\s*/g, ""))
     redrawPending.current = false
   }
