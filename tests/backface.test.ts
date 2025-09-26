@@ -19,9 +19,11 @@ test("global backface culling toggle", async () => {
     },
   }
 
-  const culled = await renderScene(baseScene)
+  const auto = await renderScene(baseScene)
+  const culled = await renderScene(baseScene, { backfaceCulling: true })
   const visible = await renderScene(baseScene, { backfaceCulling: false })
 
+  expect(auto.includes("polygon")).toBe(true)
   expect(culled.includes("polygon")).toBe(false)
   expect(visible.includes("polygon")).toBe(true)
 })

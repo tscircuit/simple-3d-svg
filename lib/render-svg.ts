@@ -22,7 +22,7 @@ export async function renderScene(
     width: opt.width,
     height: opt.height,
     backgroundColor: opt.backgroundColor,
-    backfaceCulling: opt.backfaceCulling ?? true,
+    backfaceCulling: opt.backfaceCulling ?? "auto",
   })
 
   const out: string[] = []

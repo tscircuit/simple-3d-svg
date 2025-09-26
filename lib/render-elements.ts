@@ -8,6 +8,16 @@ import { scaleAndPositionMesh } from "./mesh"
 import { FACES, EDGES, TOP, verts } from "./geometry"
 import { affineMatrix } from "./affine"
 
+type CullSetting = boolean | "auto"
+
+const resolveCullSetting = (
+  boxSetting: CullSetting | undefined,
+  globalSetting: CullSetting,
+): CullSetting => {
+  if (boxSetting === undefined) return globalSetting
+  return boxSetting
+}
+
 function fmt(n: number): string {
   return Math.round(n).toString()
 }
@@ -215,36 +225,59 @@ export async function buildRenderElements(
         "stl",
       )
 
-      for (let i = 0; i < mesh.triangles.length; i++) {
-        const vertexStart = i * 3
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
+      const cullSetting = resolveCullSetting(
+        box.backfaceCulling,
+        opt.backfaceCulling,
+      )
 
-        const shouldCull = box.backfaceCulling ?? opt.backfaceCulling
-        if (shouldCull && isBackFacing(v0w, v1w, v2w, camPosition)) continue
+      const emit = (enableCull: boolean) => {
+        const produced: Face[] = []
+        let culled = 0
+        for (let i = 0; i < mesh.triangles.length; i++) {
+          const triangle = mesh.triangles[i]!
+          const vertexStart = i * 3
+          const v0w = transformedVertices[vertexStart]!
+          const v1w = transformedVertices[vertexStart + 1]!
+          const v2w = transformedVertices[vertexStart + 2]!
 
-        const v0c = toCam(v0w)
-        const v1c = toCam(v1w)
-        const v2c = toCam(v2w)
+          if (enableCull && isBackFacing(v0w, v1w, v2w, camPosition)) {
+            culled++
+            continue
+          }
 
-        const v0p = project(v0c)
-        const v1p = project(v1c)
-        const v2p = project(v2c)
+          const v0c = toCam(v0w)
+          const v1c = toCam(v1w)
+          const v2c = toCam(v2w)
 
-        if (v0p && v1p && v2p) {
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const normal = cross(edge1, edge2)
-          const baseColor = box.color ?? "gray"
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            cam: [v0c, v1c, v2c],
-            fill: shadeByNormal(baseColor, normal),
-            stroke: false,
-          })
+          const v0p = project(v0c)
+          const v1p = project(v1c)
+          const v2p = project(v2c)
+
+          if (v0p && v1p && v2p) {
+            const edge1 = sub(v1c, v0c)
+            const edge2 = sub(v2c, v0c)
+            const normal = cross(edge1, edge2)
+            const baseColor = box.color ?? triangle.color ?? "gray"
+            produced.push({
+              pts: [v0p, v1p, v2p],
+              cam: [v0c, v1c, v2c],
+              fill: shadeByNormal(baseColor, normal),
+              stroke: false,
+            })
+          }
         }
+        return { produced, culled }
       }
+
+      const initialCull = cullSetting === "auto" ? true : Boolean(cullSetting)
+      let { produced, culled } = emit(initialCull)
+      const total = produced.length + culled
+
+      if (cullSetting === "auto" && total > 0 && produced.length < total * 0.15) {
+        ;({ produced } = emit(false))
+      }
+
+      faces.push(...produced)
     } else if (box.objUrl && objMeshes.has(box.objUrl)) {
       const mesh = objMeshes.get(box.objUrl)!
       const transformedVertices = scaleAndPositionMesh(
@@ -254,41 +287,62 @@ export async function buildRenderElements(
         "obj",
       )
 
-      for (let i = 0; i < mesh.triangles.length; i++) {
-        const vertexStart = i * 3
-        const triangle = mesh.triangles[i]!
+      const cullSetting = resolveCullSetting(
+        box.backfaceCulling,
+        opt.backfaceCulling,
+      )
 
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
+      const emit = (enableCull: boolean) => {
+        const produced: Face[] = []
+        let culled = 0
+        for (let i = 0; i < mesh.triangles.length; i++) {
+          const triangle = mesh.triangles[i]!
+          const vertexStart = i * 3
+          const v0w = transformedVertices[vertexStart]!
+          const v1w = transformedVertices[vertexStart + 1]!
+          const v2w = transformedVertices[vertexStart + 2]!
 
-        const shouldCull = box.backfaceCulling ?? opt.backfaceCulling
-        if (shouldCull && isBackFacing(v0w, v1w, v2w, camPosition)) continue
+          if (enableCull && isBackFacing(v0w, v1w, v2w, camPosition)) {
+            culled++
+            continue
+          }
 
-        const v0c = toCam(v0w)
-        const v1c = toCam(v1w)
-        const v2c = toCam(v2w)
+          const v0c = toCam(v0w)
+          const v1c = toCam(v1w)
+          const v2c = toCam(v2w)
 
-        const v0p = project(v0c)
-        const v1p = project(v1c)
-        const v2p = project(v2c)
+          const v0p = project(v0c)
+          const v1p = project(v1c)
+          const v2p = project(v2c)
 
-        if (v0p && v1p && v2p) {
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const faceNormal = cross(edge1, edge2)
+          if (v0p && v1p && v2p) {
+            const edge1 = sub(v1c, v0c)
+            const edge2 = sub(v2c, v0c)
+            const faceNormal = cross(edge1, edge2)
 
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            cam: [v0c, v1c, v2c],
-            fill: shadeByNormal(
-              box.color ?? triangle.color ?? "gray",
-              faceNormal,
-            ),
-            stroke: false,
-          })
+            produced.push({
+              pts: [v0p, v1p, v2p],
+              cam: [v0c, v1c, v2c],
+              fill: shadeByNormal(
+                box.color ?? triangle.color ?? "gray",
+                faceNormal,
+              ),
+              stroke: false,
+            })
+          }
         }
+        return { produced, culled }
       }
+
+      const initialCull = cullSetting === "auto" ? true : Boolean(cullSetting)
+      let { produced, culled } = emit(initialCull)
+      const total = produced.length + culled
+
+      if (cullSetting === "auto" && total > 0 && produced.length < total * 0.15) {
+        ;({ produced } = emit(false))
+      }
+
+      faces.push(...produced)
     } else if (box.threeMfUrl && threeMfMeshes.has(box.threeMfUrl)) {
       const mesh = threeMfMeshes.get(box.threeMfUrl)!
       const transformedVertices = scaleAndPositionMesh(
@@ -298,41 +352,62 @@ export async function buildRenderElements(
         "3mf",
       )
 
-      for (let i = 0; i < mesh.triangles.length; i++) {
-        const vertexStart = i * 3
-        const triangle = mesh.triangles[i]!
+      const cullSetting = resolveCullSetting(
+        box.backfaceCulling,
+        opt.backfaceCulling,
+      )
 
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
+      const emit = (enableCull: boolean) => {
+        const produced: Face[] = []
+        let culled = 0
+        for (let i = 0; i < mesh.triangles.length; i++) {
+          const triangle = mesh.triangles[i]!
+          const vertexStart = i * 3
+          const v0w = transformedVertices[vertexStart]!
+          const v1w = transformedVertices[vertexStart + 1]!
+          const v2w = transformedVertices[vertexStart + 2]!
 
-        const shouldCull = box.backfaceCulling ?? opt.backfaceCulling
-        if (shouldCull && isBackFacing(v0w, v1w, v2w, camPosition)) continue
+          if (enableCull && isBackFacing(v0w, v1w, v2w, camPosition)) {
+            culled++
+            continue
+          }
 
-        const v0c = toCam(v0w)
-        const v1c = toCam(v1w)
-        const v2c = toCam(v2w)
+          const v0c = toCam(v0w)
+          const v1c = toCam(v1w)
+          const v2c = toCam(v2w)
 
-        const v0p = project(v0c)
-        const v1p = project(v1c)
-        const v2p = project(v2c)
+          const v0p = project(v0c)
+          const v1p = project(v1c)
+          const v2p = project(v2c)
 
-        if (v0p && v1p && v2p) {
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const faceNormal = cross(edge1, edge2)
+          if (v0p && v1p && v2p) {
+            const edge1 = sub(v1c, v0c)
+            const edge2 = sub(v2c, v0c)
+            const faceNormal = cross(edge1, edge2)
 
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            cam: [v0c, v1c, v2c],
-            fill: shadeByNormal(
-              box.color ?? triangle.color ?? "gray",
-              faceNormal,
-            ),
-            stroke: false,
-          })
+            produced.push({
+              pts: [v0p, v1p, v2p],
+              cam: [v0c, v1c, v2c],
+              fill: shadeByNormal(
+                box.color ?? triangle.color ?? "gray",
+                faceNormal,
+              ),
+              stroke: false,
+            })
+          }
         }
+        return { produced, culled }
       }
+
+      const initialCull = cullSetting === "auto" ? true : Boolean(cullSetting)
+      let { produced, culled } = emit(initialCull)
+      const total = produced.length + culled
+
+      if (cullSetting === "auto" && total > 0 && produced.length < total * 0.15) {
+        ;({ produced } = emit(false))
+      }
+
+      faces.push(...produced)
     } else {
       // Handle regular box rendering
       const vw = verts(box)
