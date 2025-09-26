@@ -41,6 +41,8 @@ export interface Box {
   threeMfPosition?: Point3
   /** When true, fit/normalize 3MF mesh to the box dimensions */
   scaleThreeMfToBox?: boolean
+  /** Optional per-box override for backface culling (default: true). */
+  backfaceCulling?: boolean
 }
 
 export interface Camera {
@@ -52,6 +54,21 @@ export interface Camera {
 export interface Scene {
   boxes: Box[]
   camera: Camera
+}
+
+export interface RenderOptions {
+  width?: number
+  height?: number
+  backgroundColor?: Color
+  showAxes?: boolean
+  showOrigin?: boolean
+  showGrid?: boolean
+  grid?: {
+    cellSize?: number
+    plane?: "xy" | "yz" | "xz"
+  }
+  /** Global toggle for mesh backface culling (default: true). */
+  backfaceCulling?: boolean
 }
 
 export interface Triangle {

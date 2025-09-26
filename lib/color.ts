@@ -24,8 +24,19 @@ export const NAMED_COLORS: Record<string, [number, number, number]> = {
 
 export function colorToCss(c: Color): string {
   if (typeof c === "string") return c
-  const [r, g, b, a] = c
-  return `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${a})`
+  let [r, g, b, a] = c
+  r = Math.min(255, Math.max(0, Math.round(r)))
+  g = Math.min(255, Math.max(0, Math.round(g)))
+  b = Math.min(255, Math.max(0, Math.round(b)))
+  if (Math.abs(a - 1) < 1e-6) {
+    const toHex = (value: number) => value.toString(16).padStart(2, "0")
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+  }
+  const alpha = Math.max(0, Math.min(1, a))
+  let formattedAlpha = alpha.toFixed(alpha === 0 || alpha === 1 ? 0 : 3)
+  formattedAlpha = formattedAlpha.replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1")
+  if (formattedAlpha.endsWith(".")) formattedAlpha = formattedAlpha.slice(0, -1)
+  return `rgba(${r},${g},${b},${formattedAlpha})`
 }
 
 export function colorToRGBA(c: Color): RGBA {
