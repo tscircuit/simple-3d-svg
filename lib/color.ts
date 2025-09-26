@@ -34,7 +34,9 @@ export function colorToCss(c: Color): string {
   }
   const alpha = Math.max(0, Math.min(1, a))
   let formattedAlpha = alpha.toFixed(alpha === 0 || alpha === 1 ? 0 : 3)
-  formattedAlpha = formattedAlpha.replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1")
+  formattedAlpha = formattedAlpha
+    .replace(/\.0+$/, "")
+    .replace(/(\.\d*?)0+$/, "$1")
   if (formattedAlpha.endsWith(".")) formattedAlpha = formattedAlpha.slice(0, -1)
   return `rgba(${r},${g},${b},${formattedAlpha})`
 }

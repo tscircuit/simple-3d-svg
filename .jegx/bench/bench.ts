@@ -7,7 +7,9 @@ import fs from "node:fs"
 import { performance } from "node:perf_hooks"
 import { renderScene } from "../../lib/index.ts"
 
-function bytesToKB(n: number) { return (n / 1024).toFixed(1) }
+function bytesToKB(n: number) {
+  return (n / 1024).toFixed(1)
+}
 function countElements(svg: string) {
   const m = (re: RegExp) => (svg.match(re) || []).length
   return {
@@ -31,7 +33,9 @@ async function main() {
   const scenePath = process.argv[2]
   const iterations = Number(process.argv[3] || 10)
   if (!scenePath) {
-    console.error("Usage: npx tsx .jegx/bench/bench.ts <scene.json> [iterations]")
+    console.error(
+      "Usage: npx tsx .jegx/bench/bench.ts <scene.json> [iterations]",
+    )
     process.exit(1)
   }
   if (!fs.existsSync(scenePath)) {
@@ -56,22 +60,33 @@ async function main() {
   const sizeB = Buffer.byteLength(lastSvg, "utf-8")
   const counts = countElements(lastSvg)
 
-  console.log(JSON.stringify({
-    node: process.version,
-    scenePath,
-    iterations,
-    totalMs: Number(totalMs.toFixed(2)),
-    avgMs: Number(avgMs.toFixed(2)),
-    sizeBytes: sizeB,
-    sizeKB: Number(bytesToKB(sizeB)),
-    counts
-  }, null, 2))
+  console.log(
+    JSON.stringify(
+      {
+        node: process.version,
+        scenePath,
+        iterations,
+        totalMs: Number(totalMs.toFixed(2)),
+        avgMs: Number(avgMs.toFixed(2)),
+        sizeBytes: sizeB,
+        sizeKB: Number(bytesToKB(sizeB)),
+        counts,
+      },
+      null,
+      2,
+    ),
+  )
 
   fs.mkdirSync(".jegx/bench/out", { recursive: true })
-  const out = `.jegx/bench/out/${Date.now()}_${scenePath.split("/").pop()?.replace(".json","")}.svg`
+  const out = `.jegx/bench/out/${Date.now()}_${scenePath
+    .split("/")
+    .pop()
+    ?.replace(".json", "")}.svg`
   fs.writeFileSync(out, lastSvg)
   console.error("SVG written:", out)
 }
 
-main().catch((e) => { console.error(e); process.exit(1) })
-
+main().catch((e) => {
+  console.error(e)
+  process.exit(1)
+})

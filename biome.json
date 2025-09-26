@@ -8,7 +8,12 @@
     "indentStyle": "space"
   },
   "files": {
-    "ignore": ["cosmos-export", "dist", "package.json"]
+    "ignore": [
+      "cosmos-export",
+      "dist",
+      "package.json",
+      ".jegx/report/profiles/**"
+    ]
   },
   "javascript": {
     "formatter": {

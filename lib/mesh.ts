@@ -9,7 +9,13 @@ type TransformCacheEntry = {
 const transformCache = new WeakMap<Box, Map<STLMesh, TransformCacheEntry>>()
 
 const numSig = (n: number): string =>
-  Number.isFinite(n) ? n.toFixed(6) : n === Infinity ? "inf" : n === -Infinity ? "-inf" : "nan"
+  Number.isFinite(n)
+    ? n.toFixed(6)
+    : n === Infinity
+      ? "inf"
+      : n === -Infinity
+        ? "-inf"
+        : "nan"
 
 const pointSig = (p?: Point3 | null): string =>
   p ? `${numSig(p.x)},${numSig(p.y)},${numSig(p.z)}` : "null"

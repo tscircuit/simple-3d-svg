@@ -8,6 +8,8 @@ export interface Point3 {
 export type RGBA = [number, number, number, number]
 export type Color = RGBA | string
 
+export type BackfaceSetting = boolean | "auto"
+
 export interface Box {
   center: Point3
   size: Point3
@@ -41,8 +43,8 @@ export interface Box {
   threeMfPosition?: Point3
   /** When true, fit/normalize 3MF mesh to the box dimensions */
   scaleThreeMfToBox?: boolean
-  /** Optional per-box override for backface culling (default: "auto"). */
-  backfaceCulling?: boolean | "auto"
+  /** Optional per-box override for backface culling. */
+  backfaceCulling?: BackfaceSetting
 }
 
 export interface Camera {
@@ -68,7 +70,7 @@ export interface RenderOptions {
     plane?: "xy" | "yz" | "xz"
   }
   /** Global toggle for mesh backface culling (default: "auto"). */
-  backfaceCulling?: boolean | "auto"
+  backfaceCulling?: BackfaceSetting
 }
 
 export interface Triangle {

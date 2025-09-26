@@ -30,18 +30,19 @@ test("OBJ colors override box color", async () => {
         return [r, g, b]
       }
       if (value.length === 4) {
-        const r = parseInt(value[1] + value[1], 16)
-        const g = parseInt(value[2] + value[2], 16)
-        const b = parseInt(value[3] + value[3], 16)
+        const rHex = value.charAt(1)
+        const gHex = value.charAt(2)
+        const bHex = value.charAt(3)
+        const r = parseInt(rHex + rHex, 16)
+        const g = parseInt(gHex + gHex, 16)
+        const b = parseInt(bHex + bHex, 16)
         return [r, g, b]
       }
       return [0, 0, 0]
     }
     const rgbaMatch = value.match(/^rgba?\(([^)]+)\)$/)
-    if (rgbaMatch) {
-      const [r = 0, g = 0, b = 0] = rgbaMatch[1]!
-        .split(/,\s*/)
-        .map(Number)
+    if (rgbaMatch?.[1]) {
+      const [r = 0, g = 0, b = 0] = rgbaMatch[1].split(/,\s*/).map(Number)
       return [r, g, b]
     }
     return [0, 0, 0]

@@ -1,4 +1,12 @@
-import type { Point3, Color, Box, Camera, Scene, STLMesh } from "./types"
+import type {
+  Point3,
+  Color,
+  Box,
+  Camera,
+  Scene,
+  STLMesh,
+  BackfaceSetting,
+} from "./types"
 import { loadSTL } from "./loaders/stl"
 import { loadOBJ } from "./loaders/obj"
 import { load3MF } from "./loaders/threemf"
@@ -8,15 +16,12 @@ import { scaleAndPositionMesh } from "./mesh"
 import { FACES, EDGES, TOP, verts } from "./geometry"
 import { affineMatrix } from "./affine"
 
-type CullSetting = boolean | "auto"
+type CullSetting = BackfaceSetting
 
 const resolveCullSetting = (
-  boxSetting: CullSetting | undefined,
-  globalSetting: CullSetting,
-): CullSetting => {
-  if (boxSetting === undefined) return globalSetting
-  return boxSetting
-}
+  boxSetting: BackfaceSetting | undefined,
+  globalSetting: BackfaceSetting,
+): CullSetting => (boxSetting === undefined ? globalSetting : boxSetting)
 
 function fmt(n: number): string {
   return Math.round(n).toString()
@@ -50,14 +55,22 @@ const computeCameraBasis = (cam: Camera): CameraBasis => {
   return { r: right, u: up, f: forward }
 }
 
-const toCameraSpace = (p: Point3, camPos: Point3, basis: CameraBasis): Point3 => {
+const toCameraSpace = (
+  p: Point3,
+  camPos: Point3,
+  basis: CameraBasis,
+): Point3 => {
   const d = sub(p, camPos)
   return { x: dot(d, basis.r), y: dot(d, basis.u), z: dot(d, basis.f) }
 }
 
 type ProjectFunc = (p: Point3) => Proj | null
 
-const createProjector = (width: number, height: number, focal: number): ProjectFunc => {
+const createProjector = (
+  width: number,
+  height: number,
+  focal: number,
+): ProjectFunc => {
   const widthScale = (focal * width) / 2
   const heightScale = (focal * height) / 2
   return (p: Point3): Proj | null => {
@@ -142,7 +155,12 @@ type RenderElement =
 
 export async function buildRenderElements(
   scene: Scene,
-  opt: { width?: number; height?: number; backgroundColor?: Color; backfaceCulling: boolean },
+  opt: {
+    width?: number
+    height?: number
+    backgroundColor?: Color
+    backfaceCulling: BackfaceSetting
+  },
 ): Promise<{
   width: number
   height: number
@@ -273,7 +291,11 @@ export async function buildRenderElements(
       let { produced, culled } = emit(initialCull)
       const total = produced.length + culled
 
-      if (cullSetting === "auto" && total > 0 && produced.length < total * 0.15) {
+      if (
+        cullSetting === "auto" &&
+        total > 0 &&
+        produced.length < total * 0.15
+      ) {
         ;({ produced } = emit(false))
       }
 
@@ -338,7 +360,11 @@ export async function buildRenderElements(
       let { produced, culled } = emit(initialCull)
       const total = produced.length + culled
 
-      if (cullSetting === "auto" && total > 0 && produced.length < total * 0.15) {
+      if (
+        cullSetting === "auto" &&
+        total > 0 &&
+        produced.length < total * 0.15
+      ) {
         ;({ produced } = emit(false))
       }
 
@@ -403,7 +429,11 @@ export async function buildRenderElements(
       let { produced, culled } = emit(initialCull)
       const total = produced.length + culled
 
-      if (cullSetting === "auto" && total > 0 && produced.length < total * 0.15) {
+      if (
+        cullSetting === "auto" &&
+        total > 0 &&
+        produced.length < total * 0.15
+      ) {
         ;({ produced } = emit(false))
       }
 
@@ -451,7 +481,9 @@ export async function buildRenderElements(
           const sym = texId.get(href)!
 
           // Subdivide the face into projectionSubdivision x projectionSubdivision grid
-          const projectedCorners = TOP.map((i) => vp[i]).filter(Boolean) as Proj[]
+          const projectedCorners = TOP.map((i) => vp[i]).filter(
+            Boolean,
+          ) as Proj[]
           let subdivisions = box.projectionSubdivision ?? 2
           if (projectedCorners.length === 4) {
             subdivisions = pickSubdivision(subdivisions, projectedCorners)
