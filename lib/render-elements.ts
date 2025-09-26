@@ -94,57 +94,29 @@ export async function buildRenderElements(
   const stlMeshes = new Map<string, STLMesh>()
   const objMeshes = new Map<string, STLMesh>()
   const threeMfMeshes = new Map<string, STLMesh>()
-
-  // Global cache for mesh loading across renders
-  if (!(globalThis as any).__meshCache) {
-    ;(globalThis as any).__meshCache = {
-      stl: new Map<string, STLMesh>(),
-      obj: new Map<string, STLMesh>(),
-      threemf: new Map<string, STLMesh>(),
-    }
-  }
-  const meshCache = (globalThis as any).__meshCache
   for (const box of scene.boxes) {
     if (box.stlUrl && !stlMeshes.has(box.stlUrl)) {
-      if (meshCache.stl.has(box.stlUrl)) {
-        stlMeshes.set(box.stlUrl, meshCache.stl.get(box.stlUrl)!)
-      } else {
-        try {
-          const mesh = await loadSTL(box.stlUrl)
-          stlMeshes.set(box.stlUrl, mesh)
-          meshCache.stl.set(box.stlUrl, mesh)
-        } catch (error) {
-          console.warn(`Failed to load STL from ${box.stlUrl}:`, error)
-        }
+      try {
+        const mesh = await loadSTL(box.stlUrl)
+        stlMeshes.set(box.stlUrl, mesh)
+      } catch (error) {
+        console.warn(`Failed to load STL from ${box.stlUrl}:`, error)
       }
     }
     if (box.objUrl && !objMeshes.has(box.objUrl)) {
-      if (meshCache.obj.has(box.objUrl)) {
-        objMeshes.set(box.objUrl, meshCache.obj.get(box.objUrl)!)
-      } else {
-        try {
-          const mesh = await loadOBJ(box.objUrl)
-          objMeshes.set(box.objUrl, mesh)
-          meshCache.obj.set(box.objUrl, mesh)
-        } catch (error) {
-          console.warn(`Failed to load OBJ from ${box.objUrl}:`, error)
-        }
+      try {
+        const mesh = await loadOBJ(box.objUrl)
+        objMeshes.set(box.objUrl, mesh)
+      } catch (error) {
+        console.warn(`Failed to load OBJ from ${box.objUrl}:`, error)
       }
     }
     if (box.threeMfUrl && !threeMfMeshes.has(box.threeMfUrl)) {
-      if (meshCache.threemf.has(box.threeMfUrl)) {
-        threeMfMeshes.set(
-          box.threeMfUrl,
-          meshCache.threemf.get(box.threeMfUrl)!,
-        )
-      } else {
-        try {
-          const mesh = await load3MF(box.threeMfUrl)
-          threeMfMeshes.set(box.threeMfUrl, mesh)
-          meshCache.threemf.set(box.threeMfUrl, mesh)
-        } catch (error) {
-          console.warn(`Failed to load 3MF from ${box.threeMfUrl}:`, error)
-        }
+      try {
+        const mesh = await load3MF(box.threeMfUrl)
+        threeMfMeshes.set(box.threeMfUrl, mesh)
+      } catch (error) {
+        console.warn(`Failed to load 3MF from ${box.threeMfUrl}:`, error)
       }
     }
   }
@@ -464,92 +436,66 @@ export async function buildRenderElements(
     }
   }
 
-  // Fast depth sorting with proper intersection handling - O(n log n) + O(k) for intersections
+  // Improved depth sorting - robust and performant
   function sortFacesByDepth(polys: Face[]): Face[] {
-    // Calculate depth info for each face
+    if (polys.length <= 1) return polys
+
+    // Calculate depth info for each face with better sorting criteria
     const facesWithDepth = polys.map((face, index) => {
-      // Calculate min, max, and average Z for better sorting
       let minZ = Infinity
       let maxZ = -Infinity
       let sumZ = 0
+
       for (const pt of face.cam) {
         const z = pt.z
-        minZ = Math.min(minZ, z)
-        maxZ = Math.max(maxZ, z)
+        if (z < minZ) minZ = z
+        if (z > maxZ) maxZ = z
         sumZ += z
       }
+
       const avgZ = sumZ / face.cam.length
+      const centerZ = (minZ + maxZ) / 2
+      const depthRange = maxZ - minZ
 
       return {
         face,
         minZ,
         maxZ,
         avgZ,
+        centerZ,
+        depthRange,
         originalIndex: index,
       }
     })
 
-    // Sort by average depth first (back to front)
+    // Sort using a hierarchical comparison approach
     facesWithDepth.sort((a, b) => {
-      // Primary sort by average depth
-      const depthDiff = b.avgZ - a.avgZ
-      if (Math.abs(depthDiff) > 1e-6) return depthDiff
+      const EPS = 1e-8
 
-      // Secondary sort by min depth for overlapping ranges
+      // For nearly coplanar faces (small depth range), use average
+      if (a.depthRange < EPS && b.depthRange < EPS) {
+        const avgDiff = b.avgZ - a.avgZ
+        if (Math.abs(avgDiff) > EPS) return avgDiff
+        return a.originalIndex - b.originalIndex
+      }
+
+      // Primary: Use furthest point (maxZ) for back-to-front rendering
+      const maxDiff = b.maxZ - a.maxZ
+      if (Math.abs(maxDiff) > EPS) return maxDiff
+
+      // Secondary: Use average depth for ties
+      const avgDiff = b.avgZ - a.avgZ
+      if (Math.abs(avgDiff) > EPS) return avgDiff
+
+      // Tertiary: Use nearest point (minZ)
       const minDiff = b.minZ - a.minZ
-      if (Math.abs(minDiff) > 1e-6) return minDiff
+      if (Math.abs(minDiff) > EPS) return minDiff
 
-      // Tertiary sort by original index for stability
+      // Final: Use original index for deterministic output
       return a.originalIndex - b.originalIndex
     })
 
-    // For faces with overlapping depth ranges, do additional checks
-    const result: Face[] = []
-    const processed = new Set<number>()
-
-    for (let i = 0; i < facesWithDepth.length; i++) {
-      if (processed.has(i)) continue
-
-      const current = facesWithDepth[i]!
-      const overlapping: Array<typeof current> = []
-
-      // Find faces that overlap in depth range
-      for (let j = i + 1; j < facesWithDepth.length; j++) {
-        if (processed.has(j)) continue
-
-        const other = facesWithDepth[j]!
-
-        // Check if depth ranges overlap
-        if (
-          current.minZ <= other.maxZ + 1e-6 &&
-          other.minZ <= current.maxZ + 1e-6
-        ) {
-          overlapping.push(other)
-          processed.add(j)
-        } else {
-          // No more overlapping faces since we're sorted
-          break
-        }
-      }
-
-      if (overlapping.length === 0) {
-        // No overlaps, add current face
-        result.push(current.face)
-      } else {
-        // Sort overlapping group by average depth
-        overlapping.push(current)
-        overlapping.sort((a, b) => b.avgZ - a.avgZ)
-
-        // Add all overlapping faces in depth order
-        for (const item of overlapping) {
-          result.push(item.face)
-        }
-      }
-
-      processed.add(i)
-    }
-
-    return result
+    return facesWithDepth.map((item) => item.face)
   }
 
   const orderedFaces = sortFacesByDepth(faces)
