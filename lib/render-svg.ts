@@ -4,25 +4,22 @@ import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
 function fmt(n: number) {
-  return Math.round(n) + ""
+  return Number(n).toFixed(2)
 }
 
 export async function renderScene(
   scene: Scene,
   opt: {
-    width?: number
-    height?: number
-    backgroundColor?: Color
-    showAxes?: boolean
-    showOrigin?: boolean
-    showGrid?: boolean
+    width?: number;
+    height?: number;
+    backgroundColor?: Color;
+    showAxes?: boolean;
+    showOrigin?: boolean;
+    showGrid?: boolean;
     grid?: {
-      /** world-space grid cell size (default = 1)            */ cellSize?: number
-      /** plane on which to draw the grid (default = "xz")   */ plane?:
-        | "xy"
-        | "yz"
-        | "xz"
-    }
+      cellSize?: number;
+      plane?: "xy" | "yz" | "xz";
+    };
   } = {},
 ): Promise<string> {
   const {
@@ -36,112 +33,101 @@ export async function renderScene(
     width: opt.width,
     height: opt.height,
     backgroundColor: opt.backgroundColor,
-  })
+  });
 
-  const out: string[] = []
+  const out: string[] = [];
   out.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${-W / 2} ${-H / 2} ${W} ${H}">`,
-  )
+    `<svg width="${fmt(W)}" height="${fmt(H)}" viewBox="0 0 ${fmt(W)} ${fmt(H)}" xmlns="http://www.w3.org/2000/svg">`
+  );
+
+  // Background
   if (backgroundColor) {
     out.push(
-      `  <rect x="${-W / 2}" y="${-H / 2}" width="${W}" height="${H}" fill="${colorToCss(backgroundColor)}" />\n`,
-    )
+      `<rect width="100%" height="100%" fill="${colorToCss(backgroundColor)}"/>`
+    );
   }
 
-  // ---- defs section (identical to old code) ----
+  // SVG <defs> for images and clipPaths
   if (images.length) {
-    out.push("  <defs>\n")
-
-    // Write one <image> per unique texture
+    out.push("  <defs>");
     for (const [href, id] of texId) {
       out.push(
-        `    <image id="${id}" href="${href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>\n`,
-      )
+        `    <image id="${id}" href="${href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>`
+      );
     }
-
-    // Write clip paths
     for (const img of images) {
       out.push(
-        `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>\n`,
-      )
+        `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>`
+      );
     }
-    out.push("  </defs>\n")
+    out.push("  </defs>");
   }
 
-  // ── grid plane ────────────────────────────────────────────
+  // Optional grid
   if (opt.showGrid) {
     out.push(
-      renderGrid(scene, W, H, opt.grid?.cellSize ?? 1, opt.grid?.plane ?? "xz"),
-    )
+      renderGrid(
+        scene,
+        W,
+        H,
+        opt.grid?.cellSize ?? 1,
+        opt.grid?.plane ?? "xz"
+      )
+    );
   }
 
-  // ---- element rendering loop ----
-  let inStrokeGroup = false
-
+  // Batch rendering for faces and images
+  let inStrokeGroup = false;
   for (const element of elements) {
     if (element.type === "face" || element.type === "image") {
-      // Start stroke group if not already in one
       if (!inStrokeGroup) {
         out.push(
-          '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n',
-        )
-        inStrokeGroup = true
+          '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">'
+        );
+        inStrokeGroup = true;
       }
-
       if (element.type === "face") {
-        const f = element.data
-        const strokeAttr = f.stroke ? "" : ' stroke="none"'
+        const f = element.data;
+        const strokeAttr = f.stroke ? "" : ' stroke="none"';
+        // Reduce coordinate precision here!
         out.push(
-          `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
-            .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
-            .join(" ")}" />\n`,
-        )
-      } else {
-        const img = element.data
+          `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts.map((p: Point3) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")}"/>`
+        );
+      }
+      if (element.type === "image") {
+        const img = element.data;
         out.push(
-          `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>\n`,
-        )
+          `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>`
+        );
       }
     } else if (element.type === "label") {
-      // Close stroke group if we're in one
       if (inStrokeGroup) {
-        out.push("  </g>\n")
-        inStrokeGroup = false
+        out.push("  </g>");
+        inStrokeGroup = false;
       }
-
-      const l = element.data
+      const l = element.data;
       out.push(
-        `  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>\n`,
-      )
+        `  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>`
+      );
     } else if (element.type === "edge") {
       if (inStrokeGroup) {
-        out.push("  </g>\n")
-        inStrokeGroup = false
+        out.push("  </g>");
+        inStrokeGroup = false;
       }
-      const e = element.data
+      const e = element.data;
       out.push(
-        `  <polyline fill="none" stroke="${e.color}" points="${e.pts
-          .map((p) => `${p.x},${p.y}`)
-          .join(" ")}" />\n`,
-      )
+        `  <polyline fill="none" stroke="${e.color}" points="${e.pts.map((p: Point3) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")}"/>`
+      );
     }
   }
+  if (inStrokeGroup) out.push("  </g>");
 
-  // Close stroke group if still open
-  if (inStrokeGroup) {
-    out.push("  </g>\n")
-  }
+  // Origin, axes, overlays
+  if (opt.showOrigin) out.push(renderOrigin(scene.camera, W, H));
+  if (opt.showAxes) out.push(renderAxes(scene.camera, W, H));
 
-  if (opt.showOrigin) {
-    out.push(renderOrigin(scene.camera, W, H))
-  }
-
-  if (opt.showAxes) {
-    out.push(renderAxes(scene.camera, W, H))
-  }
-
-  out.push("</svg>")
-  return out.join("")
+  out.push("</svg>");
+  return out.join("");
 }
 
 function renderAxes(cam: Camera, W: number, H: number): string {
@@ -196,20 +182,17 @@ function renderAxes(cam: Camera, W: number, H: number): string {
     const b2y = hy - nx * 4
     const tx = end.x + nx * 10
     const ty = end.y + ny * 10
-    parts.push(
-      `    <line x1="${fmt(start.x)}" y1="${fmt(start.y)}" x2="${fmt(hx)}" y2="${fmt(hy)}" stroke="${color}" />`,
+    parts.push(`<line x1="${fmt(start.x)}" y1="${fmt(start.y)}" x2="${fmt(hx)}" y2="${fmt(hy)}" stroke="${color}" />`,
     )
-    parts.push(
-      `    <polygon fill="${color}" points="${fmt(end.x)},${fmt(end.y)} ${fmt(b1x)},${fmt(b1y)} ${fmt(b2x)},${fmt(b2y)}" />`,
+    parts.push(`<polygon fill="${color}" points="${fmt(end.x)},${fmt(end.y)} ${fmt(b1x)},${fmt(b1y)} ${fmt(b2x)},${fmt(b2y)}" />`,
     )
-    parts.push(
-      `    <text x="${fmt(tx)}" y="${fmt(ty)}" fill="${color}" font-size="12" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${label}</text>`,
+    parts.push(`<text x="${fmt(tx)}" y="${fmt(ty)}" fill="${color}" font-size="12" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${label}</text>`,
     )
   }
 
   return `  <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n${parts.join(
     "\n",
-  )}\n  </g>\n`
+  )}\n </g>\n`
 }
 
 function renderGrid(
@@ -241,7 +224,7 @@ function renderGrid(
       if (p0 && p1) {
         lines.push(
           `    <line x1="${fmt(p0.x)}" y1="${fmt(p0.y)}" ` +
-            `x2="${fmt(p1.x)}" y2="${fmt(p1.y)}" />`,
+          `x2="${fmt(p1.x)}" y2="${fmt(p1.y)}" />`,
         )
       }
     }
@@ -323,10 +306,10 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
       // Define the gradient: color at 0%, white at 50% and 100%
       gradientDefs.push(
         `    <linearGradient id="${gradId}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="userSpaceOnUse">` +
-          `      <stop offset="0%" stop-color="${color}"/>` +
-          `      <stop offset="${Math.min((len / minLineLengthPx) * 1000, 100)}%" stop-color="rgba(255,255,255,0)"/>` +
-          `      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>` +
-          `    </linearGradient>`,
+        `      <stop offset="0%" stop-color="${color}"/>` +
+        `      <stop offset="${Math.min((len / minLineLengthPx) * 1000, 100)}%" stop-color="rgba(255,255,255,0)"/>` +
+        `      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>` +
+        `    </linearGradient>`,
       )
 
       parts.push(
