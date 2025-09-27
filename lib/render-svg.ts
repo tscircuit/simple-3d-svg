@@ -36,8 +36,7 @@ export async function renderScene(
   })
 
   const out: string[] = []
-  out.push(`<svg width="${fmt(W)}" height="${fmt(H)}" viewBox="0 0 ${fmt(W)} ${fmt(H)}" xmlns="http://www.w3.org/2000/svg">`)
-
+  out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${-W / 2} ${-H / 2} ${W} ${H}">`,)
   // Background
   if (backgroundColor) {
     out.push(`<rect width="100%" height="100%" fill="${colorToCss(backgroundColor)}"/>`)
