@@ -10,16 +10,16 @@ function fmt(n: number) {
 export async function renderScene(
   scene: Scene,
   opt: {
-    width?: number
-    height?: number
-    backgroundColor?: Color
-    showAxes?: boolean
-    showOrigin?: boolean
-    showGrid?: boolean
+    width?: number;
+    height?: number;
+    backgroundColor?: Color;
+    showAxes?: boolean;
+    showOrigin?: boolean;
+    showGrid?: boolean;
     grid?: {
-      cellSize?: number
-      plane?: "xy" | "yz" | "xz"
-    }
+      cellSize?: number;
+      plane?: "xy" | "yz" | "xz";
+    };
   } = {},
 ): Promise<string> {
   const {
@@ -33,78 +33,101 @@ export async function renderScene(
     width: opt.width,
     height: opt.height,
     backgroundColor: opt.backgroundColor,
-  })
+  });
 
-  const out: string[] = []
-  out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${-W / 2} ${-H / 2} ${W} ${H}">`,)
+  const out: string[] = [];
+  out.push(
+    `<svg width="${fmt(W)}" height="${fmt(H)}" viewBox="0 0 ${fmt(W)} ${fmt(H)}" xmlns="http://www.w3.org/2000/svg">`
+  );
+
   // Background
   if (backgroundColor) {
-    out.push(`<rect width="100%" height="100%" fill="${colorToCss(backgroundColor)}"/>`)
+    out.push(
+      `<rect width="100%" height="100%" fill="${colorToCss(backgroundColor)}"/>`
+    );
   }
 
   // SVG <defs> for images and clipPaths
   if (images.length) {
-    out.push("  <defs>")
+    out.push("  <defs>");
     for (const [href, id] of texId) {
-      out.push(`    <image id="${id}" href="${href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>`)
+      out.push(
+        `    <image id="${id}" href="${href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>`
+      );
     }
     for (const img of images) {
-      out.push(`    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>`)
+      out.push(
+        `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>`
+      );
     }
-    out.push("  </defs>")
+    out.push("  </defs>");
   }
 
   // Optional grid
   if (opt.showGrid) {
-    out.push(renderGrid(scene, W, H, opt.grid?.cellSize ?? 1, opt.grid?.plane ?? "xz"))
+    out.push(
+      renderGrid(
+        scene,
+        W,
+        H,
+        opt.grid?.cellSize ?? 1,
+        opt.grid?.plane ?? "xz"
+      )
+    );
   }
 
   // Batch rendering for faces and images
-  let inStrokeGroup = false
+  let inStrokeGroup = false;
   for (const element of elements) {
     if (element.type === "face" || element.type === "image") {
       if (!inStrokeGroup) {
-        out.push('  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">')
-        inStrokeGroup = true
+        out.push(
+          '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">'
+        );
+        inStrokeGroup = true;
       }
       if (element.type === "face") {
-        const f = element.data
-        const strokeAttr = f.stroke ? "" : ' stroke="none"'
+        const f = element.data;
+        const strokeAttr = f.stroke ? "" : ' stroke="none"';
         // Reduce coordinate precision here!
-        out.push(`    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")}"/>`)
+        out.push(
+          `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts.map((p: Point3) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")}"/>`
+        );
       }
       if (element.type === "image") {
-        const img = element.data
-        out.push(`    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>`)
+        const img = element.data;
+        out.push(
+          `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>`
+        );
       }
     } else if (element.type === "label") {
       if (inStrokeGroup) {
-        out.push("  </g>")
-        inStrokeGroup = false
+        out.push("  </g>");
+        inStrokeGroup = false;
       }
-      const l = element.data
+      const l = element.data;
       out.push(
         `  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>`
-      )
+      );
     } else if (element.type === "edge") {
       if (inStrokeGroup) {
-        out.push("  </g>")
-        inStrokeGroup = false
+        out.push("  </g>");
+        inStrokeGroup = false;
       }
-      const e = element.data
+      const e = element.data;
       out.push(
-        `  <polyline fill="none" stroke="${e.color}" points="${e.pts.map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")}"/>`
-      )
+        `  <polyline fill="none" stroke="${e.color}" points="${e.pts.map((p: Point3) => `${fmt(p.x)},${fmt(p.y)}`).join(" ")}"/>`
+      );
     }
   }
-  if (inStrokeGroup) out.push("  </g>")
+  if (inStrokeGroup) out.push("  </g>");
 
   // Origin, axes, overlays
-  if (opt.showOrigin) out.push(renderOrigin(scene.camera, W, H))
-  if (opt.showAxes) out.push(renderAxes(scene.camera, W, H))
+  if (opt.showOrigin) out.push(renderOrigin(scene.camera, W, H));
+  if (opt.showAxes) out.push(renderAxes(scene.camera, W, H));
 
-  out.push("</svg>")
-  return out.join("")
+  out.push("</svg>");
+  return out.join("");
 }
 
 function renderAxes(cam: Camera, W: number, H: number): string {
