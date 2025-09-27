@@ -433,134 +433,16 @@ export async function buildRenderElements(
     }
   }
 
-  // BSP sort faces before merging with other elements
-  function sortFacesBSP(
-    polys: Face[],
-    W: number,
-    H: number,
-    focal: number,
-  ): Face[] {
-    const EPS = 1e-6
-    type Node = {
-      face: Face
-      normal: Point3
-      point: Point3
-      front: Node | null
-      back: Node | null
-    }
-
-    function build(list: Face[]): Node | null {
-      if (!list.length) return null
-      const face = list[0]!
-      const p0 = face.cam[0]!
-      const p1 = face.cam[1]!
-      const p2 = face.cam[2]!
-      const normal = cross(sub(p1, p0), sub(p2, p0))
-      const front: Face[] = []
-      const back: Face[] = []
-
-      for (let k = 1; k < list.length; k++) {
-        const f = list[k]!
-        // classify each vertex
-        let pos = 0,
-          neg = 0
-        const d: number[] = []
-        for (const v of f.cam) {
-          const dist = dot(normal, sub(v!, p0))
-          d.push(dist)
-          if (dist > EPS) pos++
-          else if (dist < -EPS) neg++
-        }
-        if (!pos && !neg) {
-          front.push(f) // coplanar – draw after splitter
-        } else if (!pos) back.push(f)
-        else if (!neg) front.push(f)
-        else {
-          // split polygon by plane
-          const fFrontCam: Point3[] = []
-          const fBackCam: Point3[] = []
-          const fFront2D: Proj[] = []
-          const fBack2D: Proj[] = []
-
-          for (let i = 0; i < f.cam.length; i++) {
-            const j = (i + 1) % f.cam.length
-            const aCam = f.cam[i]!
-            const bCam = f.cam[j]!
-            const a2D = f.pts[i]!
-            const b2D = f.pts[j]!
-            const da = d[i]!
-            const db = d[j]!
-
-            const push = (
-              arrCam: Point3[],
-              arr2D: Proj[],
-              cCam: Point3,
-              c2D: Proj,
-            ) => {
-              arrCam.push(cCam)
-              arr2D.push(c2D)
-            }
-
-            if (da >= -EPS) push(fFrontCam, fFront2D, aCam!, a2D!)
-            if (da <= EPS) push(fBackCam, fBack2D, aCam!, a2D!)
-
-            if ((da > 0 && db < 0) || (da < 0 && db > 0)) {
-              const t = da / (da - db)
-              const interCam = {
-                x: aCam.x + (bCam.x - aCam.x) * t,
-                y: aCam.y + (bCam.y - aCam.y) * t,
-                z: aCam.z + (bCam.z - aCam.z) * t,
-              }
-              const inter2D = proj(interCam, W, H, focal)!
-              push(fFrontCam, fFront2D, interCam, inter2D)
-              push(fBackCam, fBack2D, interCam, inter2D)
-            }
-          }
-
-          const mk = (cam: Point3[], pts: Proj[]): Face | null => {
-            if (cam.length < 3) return null
-            const nf: Face = { cam, pts, fill: f!.fill, stroke: false }
-            const img = faceToImg.get(f)
-            if (img) faceToImg.set(nf, img)
-            return nf
-          }
-          const f1 = mk(fFrontCam, fFront2D)
-          const f2 = mk(fBackCam, fBack2D)
-          if (f1) front.push(f1)
-          if (f2) back.push(f2)
-        }
-      }
-
-      return {
-        face,
-        normal,
-        point: p0,
-        front: build(front),
-        back: build(back),
-      }
-    }
-
-    function traverse(node: Node | null, out: Face[]) {
-      if (!node) return
-      const cameraSide = dot(node.normal, scale(node.point, -1))
-      if (cameraSide >= 0) {
-        traverse(node.back, out)
-        out.push(node.face)
-        traverse(node.front, out)
-      } else {
-        traverse(node.front, out)
-        out.push(node.face)
-        traverse(node.back, out)
-      }
-    }
-
-    const root = build(polys)
-    const ordered: Face[] = []
-    traverse(root, ordered)
-    return ordered
+  function sortFacesZ(faces: Face[]): Face[] {
+    // Sort by average Z (camera space)
+    return faces.slice().sort((a, b) => {
+      const za = a.cam.reduce((sum, v) => sum + v.z, 0) / a.cam.length
+      const zb = b.cam.reduce((sum, v) => sum + v.z, 0) / b.cam.length
+      return zb - za // farthest first
+    })
   }
 
-  const orderedFaces = sortFacesBSP(faces, W, H, focal)
+  const orderedFaces = sortFacesZ(faces)
 
   const elements: RenderElement[] = []
   for (const f of orderedFaces) {
