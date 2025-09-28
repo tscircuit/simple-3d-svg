@@ -1,5 +1,5 @@
 import type { Color, RGBA, Point3 } from "./types"
-import { norm } from "./vec3"
+import { fromPoint, norm, type Vec3, isVec3 } from "./vec3"
 
 export const NAMED_COLORS: Record<string, [number, number, number]> = {
   black: [0, 0, 0],
@@ -68,11 +68,12 @@ export function darkenColor(c: Color, f: number): RGBA {
   return [r * (1 - f), g * (1 - f), b * (1 - f), a]
 }
 
-export function shadeByNormal(base: Color, normal: Point3): string {
-  const n = norm(normal)
-  if (n.z >= 0) {
-    return colorToCss(lightenColor(base, n.z * 0.4))
-  } else {
-    return colorToCss(darkenColor(base, -n.z * 0.4))
+export function shadeByNormal(base: Color, normal: Point3 | Vec3): string {
+  const normalVec = isVec3(normal) ? normal : fromPoint(normal)
+  const n = norm(normalVec)
+  const nz = n[2] ?? 0
+  if (nz >= 0) {
+    return colorToCss(lightenColor(base, nz * 0.4))
   }
+  return colorToCss(darkenColor(base, -nz * 0.4))
 }

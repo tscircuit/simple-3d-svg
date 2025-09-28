@@ -1,5 +1,6 @@
-import type { Point3, Box } from "./types"
-import { add, rotLocal } from "./vec3"
+import { vec3 } from "gl-matrix"
+import type { Box } from "./types"
+import { add, fromPoint, rotLocal, type Vec3 } from "./vec3"
 
 // faces: front, back, bottom, top, right, left
 export const FACES: [number, number, number, number][] = [
@@ -26,21 +27,49 @@ export const EDGES: [number, number][] = [
 ]
 export const TOP = [3, 2, 6, 7] as const
 
-export function verts(b: Box): Point3[] {
-  const {
-    size: { x: sx, y: sy, z: sz },
-    center,
-    rotation,
-  } = b
-  const offs = [
-    { x: -sx / 2, y: -sy / 2, z: -sz / 2 },
-    { x: sx / 2, y: -sy / 2, z: -sz / 2 },
-    { x: sx / 2, y: sy / 2, z: -sz / 2 },
-    { x: -sx / 2, y: sy / 2, z: -sz / 2 },
-    { x: -sx / 2, y: -sy / 2, z: sz / 2 },
-    { x: sx / 2, y: -sy / 2, z: sz / 2 },
-    { x: sx / 2, y: sy / 2, z: sz / 2 },
-    { x: -sx / 2, y: sy / 2, z: sz / 2 },
+export const BOX_TRIANGLES: [number, number, number][] = [
+  [0, 1, 2],
+  [0, 2, 3],
+  [4, 6, 7],
+  [4, 5, 6],
+  [0, 5, 1],
+  [0, 4, 5],
+  [3, 6, 2],
+  [3, 7, 6],
+  [1, 6, 2],
+  [1, 5, 6],
+  [0, 7, 3],
+  [0, 4, 7],
+]
+
+export function verts(b: Box): Vec3[] {
+  const { size, center, rotation } = b
+  const sx = size.x
+  const sy = size.y
+  const sz = size.z
+
+  const offsets: Vec3[] = [
+    vec3.fromValues(-sx / 2, -sy / 2, -sz / 2),
+    vec3.fromValues(sx / 2, -sy / 2, -sz / 2),
+    vec3.fromValues(sx / 2, sy / 2, -sz / 2),
+    vec3.fromValues(-sx / 2, sy / 2, -sz / 2),
+    vec3.fromValues(-sx / 2, -sy / 2, sz / 2),
+    vec3.fromValues(sx / 2, -sy / 2, sz / 2),
+    vec3.fromValues(sx / 2, sy / 2, sz / 2),
+    vec3.fromValues(-sx / 2, sy / 2, sz / 2),
   ]
-  return offs.map((o) => add(center, rotLocal(o, rotation)))
+
+  const c = fromPoint(center)
+  return offsets.map((offset) => add(rotLocal(offset, rotation), c))
+}
+
+export function buildBoxTriangleBuffer(box: Box): Float32Array[] {
+  const v = verts(box)
+  return BOX_TRIANGLES.map(([a, b, c]) => {
+    const triangle = new Float32Array(9)
+    triangle.set(v[a]!, 0)
+    triangle.set(v[b]!, 3)
+    triangle.set(v[c]!, 6)
+    return triangle
+  })
 }

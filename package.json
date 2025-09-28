@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "fast-xml-parser": "^5.2.5",
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "gl-matrix": "^3.4.4"
   }
 }

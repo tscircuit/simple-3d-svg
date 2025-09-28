@@ -2,10 +2,22 @@ import type { Point3, Color, Box, Camera, Scene, STLMesh } from "./types"
 import { loadSTL } from "./loaders/stl"
 import { loadOBJ } from "./loaders/obj"
 import { load3MF } from "./loaders/threemf"
-import { add, sub, dot, cross, scale, len, norm, rotLocal } from "./vec3"
+import {
+  add,
+  create,
+  fromPoint,
+  toPoint,
+  sub,
+  dot,
+  cross,
+  scale,
+  len,
+  norm,
+  type Vec3,
+} from "./vec3"
 import { colorToCss, shadeByNormal } from "./color"
 import { scaleAndPositionMesh } from "./mesh"
-import { FACES, EDGES, TOP, verts } from "./geometry"
+import { buildBoxTriangleBuffer, EDGES, TOP, verts } from "./geometry"
 import { affineMatrix } from "./affine"
 
 function fmt(n: number): string {
@@ -24,28 +36,42 @@ interface Proj {
   y: number
   z: number
 }
-function axes(cam: Camera) {
-  const f = norm(sub(cam.lookAt, cam.position))
-  const wUp = { x: 0, y: 1, z: 0 }
-  let r = norm(cross(f, wUp))
-  if (!len(r)) r = { x: 1, y: 0, z: 0 }
-  const u = cross(r, f)
-  return { r, u, f }
+
+interface CameraBasis {
+  position: Vec3
+  r: Vec3
+  u: Vec3
+  f: Vec3
 }
-function toCam(p: Point3, cam: Camera) {
-  const { r, u, f } = axes(cam)
-  const d = sub(p, cam.position)
-  return { x: dot(d, r), y: dot(d, u), z: dot(d, f) }
+
+function buildCameraBasis(cam: Camera): CameraBasis {
+  const position = fromPoint(cam.position)
+  const lookAt = fromPoint(cam.lookAt)
+  const forward = norm(sub(lookAt, position))
+  const worldUp = create(0, 1, 0)
+  let right = norm(cross(forward, worldUp))
+  if (!len(right)) {
+    right = norm(create(1, 0, 0))
+  }
+  const up = cross(right, forward)
+  return { position, r: right, u: up, f: forward }
 }
-function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
-  if (p.z <= 0) return null
-  const s = focal / p.z
-  return { x: (p.x * s * w) / 2, y: (-p.y * s * h) / 2, z: p.z }
+
+function toCam(p: Point3 | Vec3, basis: CameraBasis): Vec3 {
+  const d = sub(p, basis.position)
+  return create(dot(d, basis.r), dot(d, basis.u), dot(d, basis.f))
+}
+
+function proj(p: Vec3, w: number, h: number, focal: number): Proj | null {
+  const z = p[2] ?? 0
+  if (z <= 0) return null
+  const s = focal / z
+  return { x: ((p[0] ?? 0) * s * w) / 2, y: (-(p[1] ?? 0) * s * h) / 2, z }
 }
 
 type Face = {
   pts: Proj[] // 2-D projected points (SVG space)
-  cam: Point3[] // the same vertices in CAMERA space (z>0)
+  cam: Vec3[] // the same vertices in CAMERA space (z>0)
   fill: string
   stroke: boolean
 }
@@ -79,6 +105,7 @@ export async function buildRenderElements(
   const W = opt.width ?? W_DEF
   const H = opt.height ?? H_DEF
   const focal = scene.camera.focalLength ?? FOCAL
+  const camBasis = buildCameraBasis(scene.camera)
   const faces: Face[] = []
   const images: Img[] = []
   // Map each BSP-sorted Face if it actually represents an <image> triangle
@@ -121,7 +148,7 @@ export async function buildRenderElements(
 
   for (const box of scene.boxes) {
     const bw = verts(box)
-    const bc = bw.map((v) => toCam(v, scene.camera))
+    const bc = bw.map((v) => toCam(v, camBasis))
     const bp = bc.map((v) => proj(v, W, H, focal))
 
     if (box.drawBoundingBox) {
@@ -129,7 +156,7 @@ export async function buildRenderElements(
         const pa = bp[a]
         const pb = bp[b]
         if (pa && pb) {
-          const depth = Math.max(bc[a]!.z, bc[b]!.z)
+          const depth = Math.max(bc[a]![2] ?? 0, bc[b]![2] ?? 0)
           edges.push({ pts: [pa, pb], depth, color: "rgba(0,0,0,0.5)" })
         }
       }
@@ -138,25 +165,23 @@ export async function buildRenderElements(
     // Handle STL rendering
     if (box.stlUrl && stlMeshes.has(box.stlUrl)) {
       const mesh = stlMeshes.get(box.stlUrl)!
-      const transformedVertices = scaleAndPositionMesh(
+      const transformed = scaleAndPositionMesh(
         mesh,
         box,
         box.scaleStlToBox ?? false,
         "stl",
       )
 
-      // Render STL triangles
-      for (let i = 0; i < mesh.triangles.length; i++) {
+      for (let i = 0; i < transformed.length; i++) {
         const triangle = mesh.triangles[i]
-        const vertexStart = i * 3
+        const buffer = transformed[i]!
+        const v0w = create(buffer[0]!, buffer[1]!, buffer[2]!)
+        const v1w = create(buffer[3]!, buffer[4]!, buffer[5]!)
+        const v2w = create(buffer[6]!, buffer[7]!, buffer[8]!)
 
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
-
-        const v0c = toCam(v0w, scene.camera)
-        const v1c = toCam(v1w, scene.camera)
-        const v2c = toCam(v2w, scene.camera)
+        const v0c = toCam(v0w, camBasis)
+        const v1c = toCam(v1w, camBasis)
+        const v2c = toCam(v2w, camBasis)
 
         const v0p = proj(v0c, W, H, focal)
         const v1p = proj(v1c, W, H, focal)
@@ -166,7 +191,7 @@ export async function buildRenderElements(
           const edge1 = sub(v1c, v0c)
           const edge2 = sub(v2c, v0c)
           const normal = cross(edge1, edge2)
-          const baseColor = box.color ?? "gray"
+          const baseColor = box.color ?? triangle?.color ?? "gray"
           faces.push({
             pts: [v0p, v1p, v2p],
             cam: [v0c, v1c, v2c],
@@ -177,24 +202,23 @@ export async function buildRenderElements(
       }
     } else if (box.objUrl && objMeshes.has(box.objUrl)) {
       const mesh = objMeshes.get(box.objUrl)!
-      const transformedVertices = scaleAndPositionMesh(
+      const transformed = scaleAndPositionMesh(
         mesh,
         box,
         box.scaleObjToBox ?? false,
         "obj",
       )
 
-      for (let i = 0; i < mesh.triangles.length; i++) {
-        const vertexStart = i * 3
-        const triangle = mesh.triangles[i]!
+      for (let i = 0; i < transformed.length; i++) {
+        const triangle = mesh.triangles[i]
+        const buffer = transformed[i]!
+        const v0w = create(buffer[0]!, buffer[1]!, buffer[2]!)
+        const v1w = create(buffer[3]!, buffer[4]!, buffer[5]!)
+        const v2w = create(buffer[6]!, buffer[7]!, buffer[8]!)
 
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
-
-        const v0c = toCam(v0w, scene.camera)
-        const v1c = toCam(v1w, scene.camera)
-        const v2c = toCam(v2w, scene.camera)
+        const v0c = toCam(v0w, camBasis)
+        const v1c = toCam(v1w, camBasis)
+        const v2c = toCam(v2w, camBasis)
 
         const v0p = proj(v0c, W, H, focal)
         const v1p = proj(v1c, W, H, focal)
@@ -209,7 +233,7 @@ export async function buildRenderElements(
             pts: [v0p, v1p, v2p],
             cam: [v0c, v1c, v2c],
             fill: shadeByNormal(
-              box.color ?? triangle.color ?? "gray",
+              box.color ?? triangle?.color ?? "gray",
               faceNormal,
             ),
             stroke: false,
@@ -218,24 +242,23 @@ export async function buildRenderElements(
       }
     } else if (box.threeMfUrl && threeMfMeshes.has(box.threeMfUrl)) {
       const mesh = threeMfMeshes.get(box.threeMfUrl)!
-      const transformedVertices = scaleAndPositionMesh(
+      const transformed = scaleAndPositionMesh(
         mesh,
         box,
         box.scaleThreeMfToBox ?? false,
         "3mf",
       )
 
-      for (let i = 0; i < mesh.triangles.length; i++) {
-        const vertexStart = i * 3
-        const triangle = mesh.triangles[i]!
+      for (let i = 0; i < transformed.length; i++) {
+        const triangle = mesh.triangles[i]
+        const buffer = transformed[i]!
+        const v0w = create(buffer[0]!, buffer[1]!, buffer[2]!)
+        const v1w = create(buffer[3]!, buffer[4]!, buffer[5]!)
+        const v2w = create(buffer[6]!, buffer[7]!, buffer[8]!)
 
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
-
-        const v0c = toCam(v0w, scene.camera)
-        const v1c = toCam(v1w, scene.camera)
-        const v2c = toCam(v2w, scene.camera)
+        const v0c = toCam(v0w, camBasis)
+        const v1c = toCam(v1w, camBasis)
+        const v2c = toCam(v2w, camBasis)
 
         const v0p = proj(v0c, W, H, focal)
         const v1p = proj(v1c, W, H, focal)
@@ -250,7 +273,7 @@ export async function buildRenderElements(
             pts: [v0p, v1p, v2p],
             cam: [v0c, v1c, v2c],
             fill: shadeByNormal(
-              box.color ?? triangle.color ?? "gray",
+              box.color ?? triangle?.color ?? "gray",
               faceNormal,
             ),
             stroke: false,
@@ -258,39 +281,42 @@ export async function buildRenderElements(
         }
       }
     } else {
-      // Handle regular box rendering
-      const vw = verts(box)
-      const vc = vw.map((v) => toCam(v, scene.camera))
-      const vp = vc.map((v) => proj(v, W, H, focal))
+      // Handle regular box rendering using triangles
+      const vp = bp
+      const boxTriangles = buildBoxTriangleBuffer(box)
 
-      // faces
-      for (const idx of FACES) {
-        const p4: Proj[] = []
-        let behind = false
-        for (const i of idx) {
-          const p = vp[i]
-          if (!p) {
-            behind = true
-            break
-          }
-          p4.push(p)
+      for (const buffer of boxTriangles) {
+        const v0w = create(buffer[0]!, buffer[1]!, buffer[2]!)
+        const v1w = create(buffer[3]!, buffer[4]!, buffer[5]!)
+        const v2w = create(buffer[6]!, buffer[7]!, buffer[8]!)
+
+        const v0c = toCam(v0w, camBasis)
+        const v1c = toCam(v1w, camBasis)
+        const v2c = toCam(v2w, camBasis)
+
+        const v0p = proj(v0c, W, H, focal)
+        const v1p = proj(v1c, W, H, focal)
+        const v2p = proj(v2c, W, H, focal)
+
+        if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const normal = cross(edge1, edge2)
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            cam: [v0c, v1c, v2c],
+            fill: shadeByNormal(box.color ?? "gray", normal),
+            stroke: false,
+          })
         }
-        if (behind) continue
-        const cam4 = idx.map((i) => vc[i] as Point3)
-        faces.push({
-          pts: p4,
-          cam: cam4,
-          fill: colorToCss(box.color ?? "gray"),
-          stroke: true,
-        })
       }
 
       // top face image
       if (box.faceImages?.top) {
-        const pts = TOP.map((i) => vw[i])
+        const pts = TOP.map((i) => toPoint(bw[i]!))
         if (pts.every(Boolean)) {
           const dst = pts as [Point3, Point3, Point3, Point3]
-          const cz = Math.max(...TOP.map((i) => vc[i]!.z))
+          const cz = Math.max(...TOP.map((i) => bc[i]![2]!))
           const href = box.faceImages.top
 
           // Assign unique texture ID
@@ -319,19 +345,19 @@ export async function buildRenderElements(
               // --- compute camera-space vertices once ---
               const c00 = toCam(
                 lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v0),
-                scene.camera,
+                camBasis,
               )
               const c10 = toCam(
                 lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v0),
-                scene.camera,
+                camBasis,
               )
               const c01 = toCam(
                 lerp(lerp(dst[0], dst[1], u0), lerp(dst[3], dst[2], u0), v1),
-                scene.camera,
+                camBasis,
               )
               const c11 = toCam(
                 lerp(lerp(dst[0], dst[1], u1), lerp(dst[3], dst[2], u1), v1),
-                scene.camera,
+                camBasis,
               )
 
               const p00 = proj(c00, W, H, focal)!
@@ -416,10 +442,10 @@ export async function buildRenderElements(
             const cx = pts.reduce((s, p) => s + (p as Proj).x, 0) / 4
             const cy = pts.reduce((s, p) => s + (p as Proj).y, 0) / 4
             // use furthest top-face vertex so the label follows the face order
-            const cz = Math.max(...TOP.map((i) => vc[i]!.z))
+            const cz = Math.max(...TOP.map((i) => bc[i]![2]!))
             // SVG transform matrix: [a b c d e f] where
             // x' = a*x + c*y + e ; y' = b*x + d*y + f
-            const m = `matrix(${uN.x} ${uN.y} ${vN.x} ${vN.y} ${cx} ${cy})`
+            const m = `matrix(${uN[0]} ${uN[1]} ${vN[0]} ${vN[1]} ${cx} ${cy})`
             const fillCol = box.topLabelColor ?? [0, 0, 0, 1]
             labels.push({
               matrix: m,
@@ -443,8 +469,8 @@ export async function buildRenderElements(
     const EPS = 1e-6
     type Node = {
       face: Face
-      normal: Point3
-      point: Point3
+      normal: Vec3
+      point: Vec3
       front: Node | null
       back: Node | null
     }
@@ -477,8 +503,8 @@ export async function buildRenderElements(
         else if (!neg) front.push(f)
         else {
           // split polygon by plane
-          const fFrontCam: Point3[] = []
-          const fBackCam: Point3[] = []
+          const fFrontCam: Vec3[] = []
+          const fBackCam: Vec3[] = []
           const fFront2D: Proj[] = []
           const fBack2D: Proj[] = []
 
@@ -492,9 +518,9 @@ export async function buildRenderElements(
             const db = d[j]!
 
             const push = (
-              arrCam: Point3[],
+              arrCam: Vec3[],
               arr2D: Proj[],
-              cCam: Point3,
+              cCam: Vec3,
               c2D: Proj,
             ) => {
               arrCam.push(cCam)
@@ -506,18 +532,14 @@ export async function buildRenderElements(
 
             if ((da > 0 && db < 0) || (da < 0 && db > 0)) {
               const t = da / (da - db)
-              const interCam = {
-                x: aCam.x + (bCam.x - aCam.x) * t,
-                y: aCam.y + (bCam.y - aCam.y) * t,
-                z: aCam.z + (bCam.z - aCam.z) * t,
-              }
+              const interCam = add(aCam, scale(sub(bCam, aCam), t))
               const inter2D = proj(interCam, W, H, focal)!
               push(fFrontCam, fFront2D, interCam, inter2D)
               push(fBackCam, fBack2D, interCam, inter2D)
             }
           }
 
-          const mk = (cam: Point3[], pts: Proj[]): Face | null => {
+          const mk = (cam: Vec3[], pts: Proj[]): Face | null => {
             if (cam.length < 3) return null
             const nf: Face = { cam, pts, fill: f!.fill, stroke: false }
             const img = faceToImg.get(f)

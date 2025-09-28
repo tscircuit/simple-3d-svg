@@ -1,7 +1,7 @@
 import type { Scene, Color, Camera, Point3 } from "./types"
 import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
-import { sub, cross, dot, len, norm, add, scale } from "./vec3"
+import { sub, cross, dot, len, norm, add, scale, toPoint } from "./vec3"
 
 function fmt(n: number) {
   return Math.round(n) + ""
@@ -298,7 +298,7 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
 
   axesData.forEach(({ dir, color }, i) => {
     const L = 1
-    const end = add(origin, scale(dir, L))
+    const end = toPoint(add(origin, scale(dir, L)))
     const startCam = toCam(origin)
     const endCam = toCam(end)
     const start2d = project(startCam)!
@@ -346,12 +346,12 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
 }
 
 function axes(cam: Camera) {
-  const f = norm(sub(cam.lookAt, cam.position))
+  const fVec = norm(sub(cam.lookAt, cam.position))
   const wUp = { x: 0, y: 1, z: 0 }
-  let r = norm(cross(f, wUp))
-  if (!len(r)) r = { x: 1, y: 0, z: 0 }
-  const u = cross(r, f)
-  return { r, u, f }
+  let rVec = norm(cross(fVec, wUp))
+  if (!len(rVec)) rVec = norm({ x: 1, y: 0, z: 0 })
+  const uVec = cross(rVec, fVec)
+  return { r: toPoint(rVec), u: toPoint(uVec), f: toPoint(fVec) }
 }
 
 function proj(
