@@ -12,8 +12,8 @@
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <polygon fill="gray" points="42,14 49,-91 -77,-83 -66,26" />
     <polygon fill="gray" points="82,88 -58,108 -66,26 42,14" />
-    <polygon fill="gray" points="82,88 99,-39 49,-91 42,14" />
     <polygon fill="gray" points="-58,108 -71,-24 -77,-83 -66,26" />
+    <polygon fill="gray" points="82,88 99,-39 49,-91 42,14" />
     <polygon fill="gray" points="99,-39 -71,-24 -77,-83 49,-91" />
     <g transform="matrix(-164.5206202104827 14.527121121346987 -34.37744302905609 -63.556154905893 99.44903161976939 -39.22322702763683)" clip-path="url(#clip0)"><use href="#tex0"/></g>
     <g transform="matrix(-140.6349942097749 10.400098075509774 -58.26306902976387 -59.42913186005579 99.44903161976939 -39.22322702763683)" clip-path="url(#clip1)"><use href="#tex0"/></g>

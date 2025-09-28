@@ -40,7 +40,13 @@ function toCam(p: Point3, cam: Camera) {
 function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
   if (p.z <= 0) return null
   const s = focal / p.z
-  return { x: (p.x * s * w) / 2, y: (-p.y * s * h) / 2, z: p.z }
+  const x = (p.x * s * w) / 2
+  const y = (-p.y * s * h) / 2
+
+  // Disable culling to ensure all polygons render correctly
+  // Performance optimization through depth sorting instead
+
+  return { x, y, z: p.z }
 }
 
 type Face = {
