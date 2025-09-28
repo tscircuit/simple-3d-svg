@@ -90,8 +90,7 @@ export async function renderScene(
 
       if (element.type === "face") {
         const f = element.data
-        const strokeAttr =
-          f.stroke && f.stroke !== true ? ` stroke="${f.stroke}"` : ""
+        const strokeAttr = f.stroke ? "" : ' stroke="none"'
         out.push(
           `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
             .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
