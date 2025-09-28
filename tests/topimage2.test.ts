@@ -2,8 +2,8 @@ import { test, expect } from "bun:test"
 import { renderScene } from "lib"
 import { CHECKER_2x2 } from "./fixtures/checkerboard"
 
-test("topimage2", () => {
-  const svg = renderScene({
+test("topimage2", async () => {
+  const svg = await renderScene({
     boxes: [
       {
         center: { x: 0, y: 0, z: 5 },

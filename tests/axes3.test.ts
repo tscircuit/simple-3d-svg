@@ -20,7 +20,7 @@ const scene = {
   },
 }
 
-test("axes guide from below", () => {
-  const svg = renderScene(scene, { showAxes: true })
+test("axes guide from below", async () => {
+  const svg = await renderScene(scene, { showAxes: true })
   expect(svg).toMatchSvgSnapshot(import.meta.path)
 })
