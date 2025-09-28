@@ -4,13 +4,12 @@ import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
 function fmt(n: number): string {
-  // Only check bounds for obviously large numbers
-  if (n > 1000000 || n < -1000000) {
-    if (n > 2147483647 || n < -2147483648) {
-      return Math.round(n) + "";
-    }
+  const rounded = n + 0.5;
+  // Check rounded value instead of original
+  if (rounded > 2147483647 || rounded < -2147483648) {
+    return Math.round(n) + "";
   }
-  return ((n + 0.5) | 0) + "";
+  return (rounded | 0) + "";
 }
 
 export async function renderScene(
