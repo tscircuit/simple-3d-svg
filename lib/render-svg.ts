@@ -7,6 +7,11 @@ function fmt(n: number) {
   return Math.round(n) + ""
 }
 
+// Optimized coordinate formatting for performance
+function fmtFast(n: number) {
+  return (n | 0) + "" // Bitwise OR for faster integer conversion
+}
+
 export async function renderScene(
   scene: Scene,
   opt: {
