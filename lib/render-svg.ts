@@ -3,8 +3,8 @@ import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
-function fmt(n: number) {
-  return Math.round(n) + ""
+function fmt(n: number): string {
+  return Math.trunc(n + 0.5) + "";
 }
 
 export async function renderScene(
@@ -19,9 +19,9 @@ export async function renderScene(
     grid?: {
       /** world-space grid cell size (default = 1)            */ cellSize?: number
       /** plane on which to draw the grid (default = "xz")   */ plane?:
-        | "xy"
-        | "yz"
-        | "xz"
+      | "xy"
+      | "yz"
+      | "xz"
     }
   } = {},
 ): Promise<string> {
@@ -241,7 +241,7 @@ function renderGrid(
       if (p0 && p1) {
         lines.push(
           `    <line x1="${fmt(p0.x)}" y1="${fmt(p0.y)}" ` +
-            `x2="${fmt(p1.x)}" y2="${fmt(p1.y)}" />`,
+          `x2="${fmt(p1.x)}" y2="${fmt(p1.y)}" />`,
         )
       }
     }
@@ -323,10 +323,10 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
       // Define the gradient: color at 0%, white at 50% and 100%
       gradientDefs.push(
         `    <linearGradient id="${gradId}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="userSpaceOnUse">` +
-          `      <stop offset="0%" stop-color="${color}"/>` +
-          `      <stop offset="${Math.min((len / minLineLengthPx) * 1000, 100)}%" stop-color="rgba(255,255,255,0)"/>` +
-          `      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>` +
-          `    </linearGradient>`,
+        `      <stop offset="0%" stop-color="${color}"/>` +
+        `      <stop offset="${Math.min((len / minLineLengthPx) * 1000, 100)}%" stop-color="rgba(255,255,255,0)"/>` +
+        `      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>` +
+        `    </linearGradient>`,
       )
 
       parts.push(
