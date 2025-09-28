@@ -1,4 +1,4 @@
-import type { Scene, Color, Camera, Point3 } from "./types"
+import type { Scene, Color, Camera, Point3, RenderOptions } from "./types"
 import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
@@ -9,21 +9,7 @@ function fmt(n: number) {
 
 export async function renderScene(
   scene: Scene,
-  opt: {
-    width?: number
-    height?: number
-    backgroundColor?: Color
-    showAxes?: boolean
-    showOrigin?: boolean
-    showGrid?: boolean
-    grid?: {
-      /** world-space grid cell size (default = 1)            */ cellSize?: number
-      /** plane on which to draw the grid (default = "xz")   */ plane?:
-        | "xy"
-        | "yz"
-        | "xz"
-    }
-  } = {},
+  opt: RenderOptions = {},
 ): Promise<string> {
   const {
     width: W,
@@ -36,6 +22,7 @@ export async function renderScene(
     width: opt.width,
     height: opt.height,
     backgroundColor: opt.backgroundColor,
+    backfaceCulling: opt.backfaceCulling ?? "auto",
   })
 
   const out: string[] = []

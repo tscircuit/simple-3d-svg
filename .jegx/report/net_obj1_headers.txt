@@ -1,0 +1,19 @@
+HTTP/2 200 
+access-control-allow-credentials: true
+access-control-allow-headers: X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version
+access-control-allow-methods: GET,OPTIONS,PATCH,DELETE,POST,PUT
+access-control-allow-origin: *
+age: 4905
+cache-control: public, max-age=31536000, immutable
+content-disposition: attachment; filename=C165948.obj
+content-type: application/octet-stream
+date: Thu, 25 Sep 2025 21:48:35 GMT
+etag: "anj97cg69qc1s0"
+server: Vercel
+strict-transport-security: max-age=63072000
+vary: Origin
+x-matched-path: /api/easyeda_models/[download]
+x-vercel-cache: HIT
+x-vercel-id: iad1::iad1::cbbff-1758841821040-ea691ebe6203
+content-length: 562176
+

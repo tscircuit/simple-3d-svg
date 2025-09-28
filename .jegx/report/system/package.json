@@ -1,0 +1,39 @@
+{
+  "name": "@tscircuit/simple-3d-svg",
+  "main": "./dist/index.js",
+  "version": "0.0.41",
+  "type": "module",
+  "description": "An extremely simple 3D SVG renderer",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "cosmos",
+    "build": "tsup-node --dts --sourcemap inline --format esm ./lib/index.ts",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "vercel-build": "bun run build:site",
+    "build:site": "cosmos-export",
+    "example": "bun examples/animatedsubdivision.html"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "latest",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "bun-match-svg": "^0.0.12",
+    "react": "^19.1.0",
+    "react-cosmos": "^7.0.0",
+    "react-cosmos-plugin-vite": "^7.0.0",
+    "react-dom": "^19.1.0",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.0.4"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.2.5",
+    "fflate": "^0.8.2"
+  }
+}
