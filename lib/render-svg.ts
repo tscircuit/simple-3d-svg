@@ -3,8 +3,13 @@ import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
-function fmt(n: number) {
-  return Math.round(n) + ""
+function fmt(n: number): string {
+  const rounded = n + 0.5
+  // Check rounded value instead of original
+  if (rounded > 2147483647 || rounded < -2147483648) {
+    return Math.round(n) + ""
+  }
+  return (rounded | 0) + ""
 }
 
 export async function renderScene(
