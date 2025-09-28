@@ -10,19 +10,25 @@
     <clipPath id="clip7" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,1 0.5,1" /></clipPath>
   </defs>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="gray" points="56,19 65,-89 -65,-89 -56,19" />
-    <polygon fill="gray" points="73,100 -73,100 -56,19 56,19" />
-    <polygon fill="gray" points="-73,100 -90,-31 -65,-89 -56,19" />
-    <polygon fill="gray" points="73,100 90,-31 65,-89 56,19" />
-    <polygon fill="gray" points="90,-31 -90,-31 -65,-89 65,-89" />
-    <g transform="matrix(-179.41390445677848 0 0 -67.49379652605461 89.70695222838924 -30.76923076923077)" clip-path="url(#clip0)"><use href="#tex0"/></g>
-    <g transform="matrix(-150.47617793149166 0 -28.93772652528682 -67.49379652605461 89.70695222838924 -30.76923076923077)" clip-path="url(#clip1)"><use href="#tex0"/></g>
-    <g transform="matrix(-179.41390445677848 0 28.93772652528682 -67.49379652605461 89.70695222838924 -30.76923076923077)" clip-path="url(#clip2)"><use href="#tex0"/></g>
-    <g transform="matrix(-150.47617793149166 0 0 -67.49379652605461 75.23808896574583 -30.769230769230774)" clip-path="url(#clip3)"><use href="#tex0"/></g>
-    <g transform="matrix(-150.47617793149166 0 0 -48.745519713261615 75.23808896574583 -40.14336917562727)" clip-path="url(#clip4)"><use href="#tex0"/></g>
-    <g transform="matrix(-129.57670877434003 0 -20.89946915715163 -48.745519713261615 85.68782354432165 -40.14336917562727)" clip-path="url(#clip5)"><use href="#tex0"/></g>
-    <g transform="matrix(-150.47617793149166 0 20.89946915715163 -48.745519713261615 64.78835438717002 -40.14336917562727)" clip-path="url(#clip6)"><use href="#tex0"/></g>
-    <g transform="matrix(-129.57670877434003 0 0 -48.745519713261615 64.78835438717002 -40.14336917562727)" clip-path="url(#clip7)"><use href="#tex0"/></g>
-    <polygon fill="gray" points="73,100 -73,100 -90,-31 90,-31" />
+    <polygon fill="rgba(84,84,84,1)" stroke="none" points="56,19 -65,-89 65,-89" />
+    <polygon fill="rgba(84,84,84,1)" stroke="none" points="56,19 -56,19 -65,-89" />
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="73,100 56,19 -56,19" />
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="73,100 -56,19 -73,100" />
+    <polygon fill="rgba(128,128,128,1)" stroke="none" points="-73,100 -56,19 -65,-89" />
+    <polygon fill="rgba(128,128,128,1)" stroke="none" points="-73,100 -65,-89 -90,-31" />
+    <polygon fill="rgba(128,128,128,1)" stroke="none" points="73,100 65,-89 90,-31" />
+    <polygon fill="rgba(128,128,128,1)" stroke="none" points="73,100 56,19 65,-89" />
+    <g transform="matrix(-179.41389719567402 0 0 -67.4938052742865 89.70694859783701 -30.76922089793698)" clip-path="url(#clip0)"><use href="#tex0"/></g>
+    <g transform="matrix(-150.47618637603978 0 -28.937710819634248 -67.4938052742865 89.70694859783701 -30.76922089793698)" clip-path="url(#clip1)"><use href="#tex0"/></g>
+    <g transform="matrix(-179.41389719567402 0 28.937710819634248 -67.4938052742865 89.70694859783701 -30.76922089793698)" clip-path="url(#clip2)"><use href="#tex0"/></g>
+    <g transform="matrix(-150.47618637603978 0 0 -67.4938052742865 75.23809318801989 -30.769220897936975)" clip-path="url(#clip3)"><use href="#tex0"/></g>
+    <g transform="matrix(-150.47618637603978 0 0 -48.74550667934429 75.23809318801989 -40.14337019540808)" clip-path="url(#clip4)"><use href="#tex0"/></g>
+    <g transform="matrix(-129.57670506985406 0 -20.89948130618572 -48.74550667934429 85.68783384111275 -40.14337019540808)" clip-path="url(#clip5)"><use href="#tex0"/></g>
+    <g transform="matrix(-150.47618637603978 0 20.89948130618572 -48.74550667934429 64.78835253492703 -40.14337019540808)" clip-path="url(#clip6)"><use href="#tex0"/></g>
+    <g transform="matrix(-129.57670506985406 0 0 -48.74550667934429 64.78835253492703 -40.14337019540808)" clip-path="url(#clip7)"><use href="#tex0"/></g>
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="90,-31 65,-89 -65,-89" />
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="90,-31 -65,-89 -90,-31" />
+    <polygon fill="rgba(84,84,84,1)" stroke="none" points="73,100 -73,100 -90,-31" />
+    <polygon fill="rgba(84,84,84,1)" stroke="none" points="73,100 -90,-31 90,-31" />
   </g>
 </svg>

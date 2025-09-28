@@ -10,19 +10,30 @@
     <clipPath id="clip7" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.5 1,1 0.5,1" /></clipPath>
   </defs>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="gray" points="42,14 49,-91 -77,-83 -66,26" />
-    <polygon fill="gray" points="82,88 -58,108 -66,26 42,14" />
-    <polygon fill="gray" points="82,88 99,-39 49,-91 42,14" />
-    <polygon fill="gray" points="-58,108 -71,-24 -77,-83 -66,26" />
-    <polygon fill="gray" points="99,-39 -71,-24 -77,-83 49,-91" />
-    <g transform="matrix(-164.5206202104827 14.527121121346987 -34.37744302905609 -63.556154905893 99.44903161976939 -39.22322702763683)" clip-path="url(#clip0)"><use href="#tex0"/></g>
-    <g transform="matrix(-140.6349942097749 10.400098075509774 -58.26306902976387 -59.42913186005579 99.44903161976939 -39.22322702763683)" clip-path="url(#clip1)"><use href="#tex0"/></g>
-    <g transform="matrix(-177.17605253436597 15.64459197683518 -6.909610137353695 -68.1296747378307 105.77674778171104 -39.78196245538093)" clip-path="url(#clip2)"><use href="#tex0"/></g>
-    <g transform="matrix(-149.70821964266358 11.071072144897485 -34.37744302905609 -63.556154905893 92.04283133585983 -37.49520253941208)" clip-path="url(#clip3)"><use href="#tex0"/></g>
-    <g transform="matrix(-140.6349942097749 10.400098075509774 -25.086242210392264 -46.37881574213809 82.86061821008359 -45.748385086595675)" clip-path="url(#clip4)"><use href="#tex0"/></g>
-    <g transform="matrix(-122.79055397718327 7.8111689670969895 -42.930682442983894 -43.7898866337253 91.78283832637939 -47.042849640802075)" clip-path="url(#clip5)"><use href="#tex0"/></g>
-    <g transform="matrix(-149.70821964266358 11.071072144897485 -4.990273988088774 -49.20476508843328 77.34924681537618 -44.67089744814194)" clip-path="url(#clip6)"><use href="#tex0"/></g>
-    <g transform="matrix(-129.61225142036008 8.245122798602296 -25.086242210392264 -46.37881574213809 77.34924681537618 -44.67089744814194)" clip-path="url(#clip7)"><use href="#tex0"/></g>
-    <polygon fill="gray" points="82,88 -58,108 -71,-24 99,-39" />
+    <polygon fill="rgba(85,85,85,1)" stroke="none" points="42,14 -77,-83 49,-91" />
+    <polygon fill="rgba(85,85,85,1)" stroke="none" points="42,14 -66,26 -77,-83" />
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="82,88 42,14 -66,26" />
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="82,88 -66,26 -58,108" />
+    <polygon fill="rgba(119,119,119,1)" stroke="none" points="-58,108 -66,26 -77,-83" />
+    <polygon fill="rgba(119,119,119,1)" stroke="none" points="-58,108 -77,-83 -71,-24" />
+    <polygon fill="rgba(119,119,119,1)" stroke="none" points="82,88 49,-91 99,-39" />
+    <polygon fill="rgba(119,119,119,1)" stroke="none" points="82,88 42,14 49,-91" />
+    <g transform="matrix(-140.63500302050767 10.400104016362121 -58.26306917641401 -59.42913094451097 99.44903720041661 -39.223229702301154)" clip-path="url(#clip1)"><use href="#tex0"/></g>
+    <g transform="matrix(-177.17605722640516 15.644596007221608 -6.909611391640681 -68.1296711887492 105.77675219225361 -39.78196471106017)" clip-path="url(#clip2)"><use href="#tex0"/></g>
+    <g transform="matrix(-149.7082236638553 11.071077736324824 -34.377444954190544 -63.55615291785242 92.0428354109787 -37.49520557561178)" clip-path="url(#clip3)"><use href="#tex0"/></g>
+    <g transform="matrix(-140.63500302050767 10.400104016362121 -25.086243048505704 -46.37881324367848 82.86062413646246 -45.748388552717415)" clip-path="url(#clip4)"><use href="#tex0"/></g>
+    <g transform="matrix(-122.79056488384833 7.8111753385838085 -42.93068118516506 -43.78988456590017 91.78284320479213 -47.04285289160656)" clip-path="url(#clip5)"><use href="#tex0"/></g>
+    <g transform="matrix(-149.7082236638553 11.071077736324824 -4.990266997672421 -49.204761932015586 77.34924643271962 -44.6709010685302)" clip-path="url(#clip6)"><use href="#tex0"/></g>
+    <g transform="matrix(-129.61224761302202 8.245129047987717 -25.086243048505704 -46.37881324367848 77.34924643271962 -44.6709010685302)" clip-path="url(#clip7)"><use href="#tex0"/></g>
+    <g transform="matrix(-164.52062724273114 14.52712598970357 -34.377444954190544 -63.55615291785242 99.44903720041661 -39.223229702301154)" clip-path="url(#clip0)"><use href="#tex0"/></g>
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="99,-39 -77,-83 -71,-24 -67,-25" />
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="99,-39 49,-91 -77,-83 99,-39" />
+    <polygon fill="rgba(85,85,85,1)" stroke="none" points="82,88 -58,108 -71,-24" />
+    <polygon fill="rgba(119,119,119,1)" stroke="none" points="82,88 99,-39 99,-39" />
+    <g transform="matrix(-140.63500302050767 10.400104016362121 -58.26306917641401 -59.42913094451097 99.44903720041661 -39.223229702301154)" clip-path="url(#clip1)"><use href="#tex0"/></g>
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="99,-39 99,-39 99,-39" />
+    <polygon fill="rgba(154,154,154,1)" stroke="none" points="99,-39 99,-39 -71,-24 -67,-25" />
+    <polygon fill="rgba(85,85,85,1)" stroke="none" points="82,88 -71,-24 99,-39" />
+    <g transform="matrix(-164.52062724273114 14.52712598970357 -34.377444954190544 -63.55615291785242 99.44903720041661 -39.223229702301154)" clip-path="url(#clip0)"><use href="#tex0"/></g>
   </g>
 </svg>

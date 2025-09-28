@@ -31,11 +31,17 @@
     <line x1="-327" y1="-81" x2="2939" y2="3960" />
   </g>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="gray" points="0,0 61,35 70,-40 0,-71" />
-    <polygon fill="gray" points="0,0 61,35 0,81 -61,35" />
-    <polygon fill="gray" points="0,0 0,-71 -70,-40 -61,35" />
-    <polygon fill="gray" points="61,35 70,-40 0,0 0,81" />
-    <polygon fill="gray" points="0,-71 70,-40 0,0 -70,-40" />
-    <polygon fill="gray" points="-61,35 -70,-40 0,0 0,81" />
+    <polygon fill="rgba(157,157,157,1)" stroke="none" points="0,0 70,-40 0,-71" />
+    <polygon fill="rgba(157,157,157,1)" stroke="none" points="0,0 61,35 70,-40" />
+    <polygon fill="rgba(157,157,157,1)" stroke="none" points="0,0 -61,35 0,81" />
+    <polygon fill="rgba(157,157,157,1)" stroke="none" points="0,0 0,81 61,35" />
+    <polygon fill="rgba(98,98,98,1)" stroke="none" points="0,0 -70,-40 0,-71" />
+    <polygon fill="rgba(98,98,98,1)" stroke="none" points="0,0 -61,35 -70,-40" />
+    <polygon fill="rgba(98,98,98,1)" stroke="none" points="61,35 0,0 70,-40" />
+    <polygon fill="rgba(98,98,98,1)" stroke="none" points="61,35 0,81 0,0" />
+    <polygon fill="rgba(157,157,157,1)" stroke="none" points="0,-71 -70,-40 0,0" />
+    <polygon fill="rgba(157,157,157,1)" stroke="none" points="0,-71 0,0 70,-40" />
+    <polygon fill="rgba(157,157,157,1)" stroke="none" points="-61,35 0,81 0,0" />
+    <polygon fill="rgba(157,157,157,1)" stroke="none" points="-61,35 0,0 -70,-40" />
   </g>
 </svg>
