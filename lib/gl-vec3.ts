@@ -54,9 +54,11 @@ export function createRotationMatrix(rotation?: Point3 | null): mat4 | null {
   if (!rotation) return null
   const matrix = mat4.create()
   mat4.identity(matrix)
-  if (rotation.x) mat4.rotateX(matrix, matrix, rotation.x)
-  if (rotation.y) mat4.rotateY(matrix, matrix, rotation.y)
+  // Apply in Z→Y→X order so the combined transform matches the legacy
+  // rotLocal implementation (which rotated vectors X, then Y, then Z).
   if (rotation.z) mat4.rotateZ(matrix, matrix, rotation.z)
+  if (rotation.y) mat4.rotateY(matrix, matrix, rotation.y)
+  if (rotation.x) mat4.rotateX(matrix, matrix, rotation.x)
   return matrix
 }
 
