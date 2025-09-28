@@ -44,24 +44,24 @@
     <line x1="327" y1="0" x2="0" y2="-113" />
   </g>
   <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -105,-45 -89,-51 -78,-45" />
-    <polygon fill="rgba(255,128,0,0.8)" points="94,-39 78,-45 89,-51 105,-45" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-78,-45 -81,-62 -91,-68 -89,-51" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-105,-45 -107,-62 -91,-68 -89,-51" />
     <polygon fill="rgba(255,128,0,0.8)" points="105,-45 107,-62 91,-68 89,-51" />
+    <polygon fill="rgba(255,128,0,0.8)" points="94,-39 78,-45 89,-51 105,-45" />
     <polygon fill="rgba(255,128,0,0.8)" points="78,-45 81,-62 91,-68 89,-51" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -105,-45 -107,-62 -97,-56" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-97,-56 -107,-62 -91,-68 -81,-62" />
-    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -97,-56 -81,-62 -78,-45" />
-    <polygon fill="rgba(255,128,0,0.8)" points="94,-39 78,-45 81,-62 97,-56" />
-    <polygon fill="rgba(255,128,0,0.8)" points="97,-56 81,-62 91,-68 107,-62" />
     <polygon fill="rgba(255,128,0,0.8)" points="94,-39 97,-56 107,-62 105,-45" />
+    <polygon fill="rgba(255,128,0,0.8)" points="97,-56 81,-62 91,-68 107,-62" />
+    <polygon fill="rgba(255,128,0,0.8)" points="94,-39 78,-45 81,-62 97,-56" />
     <polygon fill="rgba(0,128,255,0.8)" points="21,-156 22,-189 0,-193 0,-162" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-78,-45 -81,-62 -91,-68 -89,-51" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -105,-45 -89,-51 -78,-45" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-105,-45 -107,-62 -91,-68 -89,-51" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -97,-56 -81,-62 -78,-45" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-97,-56 -107,-62 -91,-68 -81,-62" />
     <polygon fill="rgba(0,128,255,0.8)" points="0,-151 -21,-156 0,-162 21,-156" />
     <polygon fill="rgba(0,128,255,0.8)" points="-21,-156 -22,-189 0,-193 0,-162" />
-    <polygon fill="rgba(0,128,255,0.8)" points="0,-151 -21,-156 -22,-189 0,-184" />
-    <polygon fill="rgba(0,128,255,0.8)" points="0,-184 -22,-189 0,-193 22,-189" />
     <polygon fill="rgba(0,128,255,0.8)" points="0,-151 0,-184 22,-189 21,-156" />
+    <polygon fill="rgba(0,128,255,0.8)" points="0,-184 -22,-189 0,-193 22,-189" />
+    <polygon fill="rgba(255,0,0,0.8)" points="-94,-39 -105,-45 -107,-62 -97,-56" />
+    <polygon fill="rgba(0,128,255,0.8)" points="0,-151 -21,-156 -22,-189 0,-184" />
   </g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.8650945499936691 -0.4994625713133217 0.9320238414410013 -0.3608463564421803 -93.98831875350639 -61.90997500447729)"><text x="0" y="0" fill="rgba(0,0,0,1)">X=7</text></g>
   <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.9799845782086478 -0.19737012559201522 0.9799845782086478 -0.19737012559201522 0 -188.46850707528625)"><text x="0" y="0" fill="rgba(0,0,0,1)">Y=7</text></g>

@@ -43,16 +43,8 @@ function proj(p: Point3, w: number, h: number, focal: number): Proj | null {
   const x = (p.x * s * w) / 2
   const y = (-p.y * s * h) / 2
 
-  // Cull polygons that are completely off-screen
-  const margin = Math.max(w, h) * 0.1 // 10% margin
-  if (
-    x < -w / 2 - margin ||
-    x > w / 2 + margin ||
-    y < -h / 2 - margin ||
-    y > h / 2 + margin
-  ) {
-    return null
-  }
+  // Disable culling for now to ensure all polygons are rendered
+  // TODO: Implement more conservative culling later
 
   return { x, y, z: p.z }
 }
@@ -447,28 +439,13 @@ export async function buildRenderElements(
     }
   }
 
-  // Optimized depth sorting - much faster than BSP for most cases
-  function sortFacesDepth(polys: Face[]): Face[] {
-    return polys.sort((a, b) => {
-      // Calculate average depth for each face
-      const depthA = a.cam.reduce((sum, v) => sum + v.z, 0) / a.cam.length
-      const depthB = b.cam.reduce((sum, v) => sum + v.z, 0) / b.cam.length
-      return depthB - depthA // Sort back to front
-    })
-  }
-
-  // Use BSP only for complex scenes with many overlapping faces
+  // BSP sort faces before merging with other elements
   function sortFacesBSP(
     polys: Face[],
     W: number,
     H: number,
     focal: number,
   ): Face[] {
-    // Use simple depth sorting for most cases (much faster)
-    if (polys.length < 50) {
-      return sortFacesDepth(polys)
-    }
-
     const EPS = 1e-6
     type Node = {
       face: Face
