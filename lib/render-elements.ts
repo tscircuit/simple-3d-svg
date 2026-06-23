@@ -1,18 +1,32 @@
-import type { Point3, Color, Box, Camera, Scene, STLMesh } from "./types"
-import { loadSTL } from "./loaders/stl"
-import { loadOBJ } from "./loaders/obj"
-import { load3MF } from "./loaders/threemf"
-import { add, sub, dot, cross, scale, len, norm, rotLocal } from "./vec3"
-import { colorToCss, shadeByNormal } from "./color"
-import { scaleAndPositionMesh } from "./mesh"
-import { FACES, EDGES, TOP, verts } from "./geometry"
 import { affineMatrix } from "./affine"
+import { colorToCss, shadeByNormal } from "./color"
+import { EDGES, FACES, TOP, verts } from "./geometry"
+import { loadOBJ } from "./loaders/obj"
+import { loadSTL } from "./loaders/stl"
+import { load3MF } from "./loaders/threemf"
+import { scaleAndPositionMesh } from "./mesh"
+import type { Box, Camera, Color, Point3, STLMesh, Scene } from "./types"
+import { add, cross, dot, len, norm, rotLocal, scale, sub } from "./vec3"
 
 function fmt(n: number): string {
   return Math.round(n).toString()
 }
 function fmtPrecise(n: number): string {
   return (Math.round(n * 100) / 100).toString()
+}
+
+function encodeBase64(value: string): string {
+  if (typeof btoa === "function") return btoa(value)
+  return Buffer.from(value).toString("base64")
+}
+
+function normalizeFaceImageHref(href: string): string {
+  const trimmedHref = href.trim()
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmedHref)) return trimmedHref
+  if (/^<svg[\s>]/i.test(trimmedHref)) {
+    return `data:image/svg+xml;base64,${encodeBase64(trimmedHref)}`
+  }
+  return `data:image/png;base64,${trimmedHref}`
 }
 
 /*────────────── Camera & Projection ─────────────*/
@@ -291,7 +305,7 @@ export async function buildRenderElements(
         if (pts.every(Boolean)) {
           const dst = pts as [Point3, Point3, Point3, Point3]
           const cz = Math.max(...TOP.map((i) => vc[i]!.z))
-          const href = box.faceImages.top
+          const href = normalizeFaceImageHref(box.faceImages.top)
 
           // Assign unique texture ID
           if (!texId.has(href)) {
@@ -462,8 +476,8 @@ export async function buildRenderElements(
       for (let k = 1; k < list.length; k++) {
         const f = list[k]!
         // classify each vertex
-        let pos = 0,
-          neg = 0
+        let pos = 0
+        let neg = 0
         const d: number[] = []
         for (const v of f.cam) {
           const dist = dot(normal, sub(v!, p0))
