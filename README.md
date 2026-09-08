@@ -27,6 +27,22 @@ renderScene({
       color: [0, 128, 255, 0.9],
     },
   ],
+  jscadObjects: [
+    {
+      jscad: {
+        type: "subtract",
+        shapes: [
+          { type: "cuboid", size: [1, 1, 1] },
+          {
+            type: "translate",
+            vector: [0.5, 0.35, 0.35],
+            shape: { type: "cuboid", size: [1, 1, 1] },
+          },
+        ],
+      },
+      color: "#4682b4",
+    },
+  ],
   camera: { position: { x: -3, y: 4, z: 0 }, lookAt: { x: 0, y: 0, z: 6 } },
 })
 // "<svg>...</svg>"
@@ -47,6 +63,7 @@ for visual snapshot testing.
 
 - To correctly transform text for 3D, you need a perspective transform. However, the SVG spec only provides affine transforms. As a result, the text on the top of boxes will always look slighly "off".
 - You can project an image onto the top face of a box by providing `faceImages.top` with a data URI. The renderer uses two clipped images to achieve a perspective-correct mapping.
+- `jscadObjects` accepts [jscad-planner](https://github.com/tscircuit/jscad-planner) operations (`cuboid`, `union`, `translate`, …). Coordinates are world-space, the same frame as `boxes` (Y-up). Each object is triangulated and shaded by its `color`.
 
 ## Advanced Configuration
 

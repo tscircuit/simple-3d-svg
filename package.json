@@ -30,7 +30,9 @@
     "vite": "^7.0.4"
   },
   "dependencies": {
+    "@jscad/modeling": "^2.13.0",
     "fast-xml-parser": "^5.2.5",
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "jscad-planner": "^0.0.14"
   }
 }

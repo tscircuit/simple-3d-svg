@@ -10,6 +10,7 @@ export type {
   Box,
   Camera,
   Scene,
+  JscadObject,
   Triangle,
   STLMesh,
 } from "./types"
@@ -23,3 +24,5 @@ export { loadSTL } from "./loaders/stl"
 export { loadOBJ } from "./loaders/obj"
 // Re-export 3MF loader
 export { load3MF } from "./loaders/threemf"
+// Re-export jscad-planner loader
+export { loadJscadOperation } from "./loaders/jscad"
