@@ -28,6 +28,12 @@ export function colorToCss(c: Color): string {
   return `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${a})`
 }
 
+/** True when a CSS fill would hide whatever is painted underneath it. */
+export function isOpaqueFill(fill: string): boolean {
+  if (!fill || fill === "none" || fill === "transparent") return false
+  return colorToRGBA(fill)[3] >= 1 - 1e-6
+}
+
 export function colorToRGBA(c: Color): RGBA {
   if (Array.isArray(c)) return c
   const s = c.trim().toLowerCase()

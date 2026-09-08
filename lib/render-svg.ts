@@ -16,6 +16,11 @@ export async function renderScene(
     showAxes?: boolean
     showOrigin?: boolean
     showGrid?: boolean
+    /**
+     * Drop 2D polygons completely hidden by closer opaque faces.
+     * Uses an RBush index plus boolean clipping. Off by default.
+     */
+    cullHiddenPolygons?: boolean
     grid?: {
       /** world-space grid cell size (default = 1)            */ cellSize?: number
       /** plane on which to draw the grid (default = "xz")   */ plane?:
@@ -36,6 +41,7 @@ export async function renderScene(
     width: opt.width,
     height: opt.height,
     backgroundColor: opt.backgroundColor,
+    cullHiddenPolygons: opt.cullHiddenPolygons,
   })
 
   const out: string[] = []

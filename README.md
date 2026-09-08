@@ -89,6 +89,24 @@ renderScene(
 )
 ```
 
+### `cullHiddenPolygons`
+
+Set `cullHiddenPolygons` to `true` to skip faces whose 2D projection is completely
+covered by closer opaque polygons. Coverage uses an [RBush](https://github.com/mourner/rbush)
+index plus a boolean clip (`isPolygonCoveredByOtherPolygons`). Off by default so
+dense meshes keep their current paint order.
+
+```ts
+renderScene(
+  {
+    /* ... scene definition ... */
+  },
+  {
+    cullHiddenPolygons: true,
+  },
+)
+```
+
 ### `showAxes`
 
 Set `showAxes` to `true` to draw a small XYZ axis guide (about 8% of the SVG size)

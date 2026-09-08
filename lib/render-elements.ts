@@ -3,10 +3,11 @@ import { loadSTL } from "./loaders/stl"
 import { loadOBJ } from "./loaders/obj"
 import { load3MF } from "./loaders/threemf"
 import { add, sub, dot, cross, scale, len, norm, rotLocal } from "./vec3"
-import { colorToCss, shadeByNormal } from "./color"
+import { colorToCss, isOpaqueFill, shadeByNormal } from "./color"
 import { scaleAndPositionMesh } from "./mesh"
 import { FACES, EDGES, TOP, verts } from "./geometry"
 import { affineMatrix } from "./affine"
+import { cullOccludedPolygons } from "./polygon-visibility"
 
 function fmt(n: number): string {
   return Math.round(n).toString()
@@ -67,7 +68,12 @@ type RenderElement =
 
 export async function buildRenderElements(
   scene: Scene,
-  opt: { width?: number; height?: number; backgroundColor?: Color } = {},
+  opt: {
+    width?: number
+    height?: number
+    backgroundColor?: Color
+    cullHiddenPolygons?: boolean
+  } = {},
 ): Promise<{
   width: number
   height: number
@@ -561,9 +567,17 @@ export async function buildRenderElements(
   }
 
   const orderedFaces = sortFacesBSP(faces, W, H, focal)
+  const visibleFaces =
+    opt.cullHiddenPolygons === true
+      ? cullOccludedPolygons(
+          orderedFaces,
+          (face) => face.pts,
+          (face) => isOpaqueFill(face.fill) || faceToImg.has(face),
+        )
+      : orderedFaces
 
   const elements: RenderElement[] = []
-  for (const f of orderedFaces) {
+  for (const f of visibleFaces) {
     const img = faceToImg.get(f)
     if (img) {
       elements.push({ type: "image", data: img })
