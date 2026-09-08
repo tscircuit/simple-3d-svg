@@ -19,6 +19,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
+    "@types/rbush": "^4.0.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "bun-match-svg": "^0.0.12",
@@ -31,6 +32,8 @@
   },
   "dependencies": {
     "fast-xml-parser": "^5.2.5",
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "polygon-clipping": "^0.15.7",
+    "rbush": "^4.0.1"
   }
 }
