@@ -23,15 +23,6 @@ export async function load3MF(url: string): Promise<STLMesh> {
 function parse3MF(xml: string): STLMesh {
   const parser = new XMLParser({ ignoreAttributes: false })
   const json = parser.parse(xml)
-  const vertexData =
-    json?.model?.resources?.object?.mesh?.vertices?.vertex ?? []
-  const verticesArr = Array.isArray(vertexData) ? vertexData : [vertexData]
-  const vertices: Point3[] = verticesArr.map((v: any) => ({
-    x: parseFloat(v["@_x"]),
-    y: parseFloat(v["@_y"]),
-    z: parseFloat(v["@_z"]),
-  }))
-
   const baseMaterials = json?.model?.resources?.basematerials
   const materialColors: Record<string, [number, number, number, number][]> = {}
   if (baseMaterials) {
@@ -46,32 +37,46 @@ function parse3MF(xml: string): STLMesh {
     }
   }
 
-  const triangleData =
-    json?.model?.resources?.object?.mesh?.triangles?.triangle ?? []
-  const trianglesArr = Array.isArray(triangleData)
-    ? triangleData
-    : [triangleData]
-  const triangles: Triangle[] = trianglesArr.map((t: any) => {
-    const v1 = vertices[parseInt(t["@_v1"])]!
-    const v2 = vertices[parseInt(t["@_v2"])]!
-    const v3 = vertices[parseInt(t["@_v3"])]!
-    const edge1 = { x: v2.x - v1.x, y: v2.y - v1.y, z: v2.z - v1.z }
-    const edge2 = { x: v3.x - v1.x, y: v3.y - v1.y, z: v3.z - v1.z }
-    const normal = {
-      x: edge1.y * edge2.z - edge1.z * edge2.y,
-      y: edge1.z * edge2.x - edge1.x * edge2.z,
-      z: -(edge1.x * edge2.y - edge1.y * edge2.x),
+  const objects = new Map<string, any>(
+    asArray(json?.model?.resources?.object).map((object) => [
+      String(object["@_id"]),
+      object,
+    ]),
+  )
+  const resolvedObjects = new Map<string, Triangle[]>()
+  const resolving = new Set<string>()
+
+  const resolveObject = (id: string): Triangle[] => {
+    const cached = resolvedObjects.get(id)
+    if (cached) return cached
+    if (resolving.has(id)) {
+      throw new Error(`Circular 3MF object reference: ${id}`)
     }
-    let color
-    const pid = t["@_pid"]
-    if (pid && materialColors[pid]) {
-      const idx = parseInt(t["@_p1"] ?? t["@_p2"] ?? t["@_p3"] ?? "0")
-      color = materialColors[pid][idx]
-    }
-    return color
-      ? { vertices: [v1, v2, v3], normal, color }
-      : { vertices: [v1, v2, v3], normal }
-  })
+    const object = objects.get(id)
+    if (!object) throw new Error(`3MF object ${id} not found`)
+
+    resolving.add(id)
+    const triangles = object.mesh
+      ? parseMesh(object.mesh, materialColors)
+      : asArray(object.components?.component).flatMap((component) =>
+          transformTriangles(
+            resolveObject(String(component["@_objectid"])),
+            component["@_transform"],
+          ),
+        )
+    resolving.delete(id)
+    resolvedObjects.set(id, triangles)
+    return triangles
+  }
+
+  // Resources are templates; only build items instantiate geometry. Resolve
+  // components in object space, then apply each enclosing placement transform.
+  const triangles = asArray(json?.model?.build?.item).flatMap((item) =>
+    transformTriangles(
+      resolveObject(String(item["@_objectid"])),
+      item["@_transform"],
+    ),
+  )
 
   const rotatedTriangles = triangles.map((tri) => ({
     ...tri,
@@ -91,6 +96,81 @@ function parse3MF(xml: string): STLMesh {
     triangles: rotatedTriangles,
     boundingBox: calculateBoundingBox(rotatedTriangles),
   }
+}
+
+function asArray(value: any): any[] {
+  return value == null ? [] : Array.isArray(value) ? value : [value]
+}
+
+function parseMesh(
+  mesh: any,
+  materialColors: Record<string, [number, number, number, number][]>,
+): Triangle[] {
+  const vertexData = mesh?.vertices?.vertex ?? []
+  const verticesArr = Array.isArray(vertexData) ? vertexData : [vertexData]
+  const vertices: Point3[] = verticesArr.map((v: any) => ({
+    x: parseFloat(v["@_x"]),
+    y: parseFloat(v["@_y"]),
+    z: parseFloat(v["@_z"]),
+  }))
+
+  const triangleData = mesh?.triangles?.triangle ?? []
+  const trianglesArr = Array.isArray(triangleData)
+    ? triangleData
+    : [triangleData]
+  const triangles: Triangle[] = trianglesArr.map((t: any) => {
+    const v1 = vertices[parseInt(t["@_v1"])]!
+    const v2 = vertices[parseInt(t["@_v2"])]!
+    const v3 = vertices[parseInt(t["@_v3"])]!
+    const normal = calculateNormal([v1, v2, v3])
+    let color
+    const pid = t["@_pid"]
+    if (pid && materialColors[pid]) {
+      const idx = parseInt(t["@_p1"] ?? t["@_p2"] ?? t["@_p3"] ?? "0")
+      color = materialColors[pid][idx]
+    }
+    return color
+      ? { vertices: [v1, v2, v3], normal, color }
+      : { vertices: [v1, v2, v3], normal }
+  })
+
+  return triangles
+}
+
+function calculateNormal([v1, v2, v3]: [Point3, Point3, Point3]): Point3 {
+  const edge1 = { x: v2.x - v1.x, y: v2.y - v1.y, z: v2.z - v1.z }
+  const edge2 = { x: v3.x - v1.x, y: v3.y - v1.y, z: v3.z - v1.z }
+  return {
+    x: edge1.y * edge2.z - edge1.z * edge2.y,
+    y: edge1.z * edge2.x - edge1.x * edge2.z,
+    z: -(edge1.x * edge2.y - edge1.y * edge2.x),
+  }
+}
+
+function transformTriangles(
+  triangles: Triangle[],
+  transform?: string,
+): Triangle[] {
+  if (transform === undefined) return triangles
+  const m = transform.trim().split(/\s+/).map(Number)
+  if (m.length !== 12 || !m.every(Number.isFinite)) {
+    throw new Error("Invalid 3MF transform: expected 12 finite numbers")
+  }
+  // 3MF uses row-vector affine transforms with translation in the last row.
+  const determinant =
+    m[0]! * (m[4]! * m[8]! - m[5]! * m[7]!) -
+    m[1]! * (m[3]! * m[8]! - m[5]! * m[6]!) +
+    m[2]! * (m[3]! * m[7]! - m[4]! * m[6]!)
+  return triangles.map((triangle) => {
+    const vertices = triangle.vertices.map((v) => ({
+      x: v.x * m[0]! + v.y * m[3]! + v.z * m[6]! + m[9]!,
+      y: v.x * m[1]! + v.y * m[4]! + v.z * m[7]! + m[10]!,
+      z: v.x * m[2]! + v.y * m[5]! + v.z * m[8]! + m[11]!,
+    })) as [Point3, Point3, Point3]
+    // Reflections must preserve the sign of the mesh's volume (Core §3.3).
+    if (determinant < 0) [vertices[1], vertices[2]] = [vertices[2], vertices[1]]
+    return { ...triangle, vertices, normal: calculateNormal(vertices) }
+  })
 }
 
 function parseDisplayColor(str: string): [number, number, number, number] {
