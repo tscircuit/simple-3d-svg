@@ -18,7 +18,14 @@ export async function loadSTL(url: string): Promise<STLMesh> {
 function parseSTL(buffer: ArrayBuffer): STLMesh {
   const view = new DataView(buffer)
 
-  // Check if it's binary STL (first 5 bytes should not be "solid")
+  // A binary header can start with "solid", so check its complete layout first.
+  if (buffer.byteLength >= 84) {
+    const numTriangles = view.getUint32(80, true)
+    if (84 + numTriangles * 50 === buffer.byteLength) {
+      return parseBinarySTL(view)
+    }
+  }
+
   const header = new TextDecoder().decode(buffer.slice(0, 5))
 
   if (header.toLowerCase() === "solid") {
