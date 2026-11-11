@@ -2,6 +2,7 @@ import type { Point3, Color, Box, Camera, Scene, STLMesh } from "./types"
 import { loadSTL } from "./loaders/stl"
 import { loadOBJ } from "./loaders/obj"
 import { load3MF } from "./loaders/threemf"
+import { loadJscadOperation } from "./loaders/jscad"
 import { add, sub, dot, cross, scale, len, norm, rotLocal } from "./vec3"
 import { colorToCss, shadeByNormal } from "./color"
 import { scaleAndPositionMesh } from "./mesh"
@@ -92,7 +93,8 @@ export async function buildRenderElements(
   const stlMeshes = new Map<string, STLMesh>()
   const objMeshes = new Map<string, STLMesh>()
   const threeMfMeshes = new Map<string, STLMesh>()
-  for (const box of scene.boxes) {
+  const boxes = scene.boxes ?? []
+  for (const box of boxes) {
     if (box.stlUrl && !stlMeshes.has(box.stlUrl)) {
       try {
         const mesh = await loadSTL(box.stlUrl)
@@ -119,7 +121,7 @@ export async function buildRenderElements(
     }
   }
 
-  for (const box of scene.boxes) {
+  for (const box of boxes) {
     const bw = verts(box)
     const bc = bw.map((v) => toCam(v, scene.camera))
     const bp = bc.map((v) => proj(v, W, H, focal))
@@ -430,6 +432,40 @@ export async function buildRenderElements(
           }
         }
       }
+    }
+  }
+
+  for (const jscadObj of scene.jscadObjects ?? []) {
+    try {
+      const mesh = loadJscadOperation(jscadObj.jscad)
+      for (const triangle of mesh.triangles) {
+        const [v0w, v1w, v2w] = triangle.vertices
+        const v0c = toCam(v0w, scene.camera)
+        const v1c = toCam(v1w, scene.camera)
+        const v2c = toCam(v2w, scene.camera)
+
+        const v0p = proj(v0c, W, H, focal)
+        const v1p = proj(v1c, W, H, focal)
+        const v2p = proj(v2c, W, H, focal)
+
+        if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const faceNormal = cross(edge1, edge2)
+
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            cam: [v0c, v1c, v2c],
+            fill: shadeByNormal(
+              jscadObj.color ?? triangle.color ?? "gray",
+              faceNormal,
+            ),
+            stroke: false,
+          })
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to evaluate jscadObject:", error)
     }
   }
 

@@ -12,6 +12,8 @@ export type {
   Scene,
   Triangle,
   STLMesh,
+  JscadOperation,
+  JscadObject,
 } from "./types"
 
 // Re-export the main render function
@@ -23,3 +25,5 @@ export { loadSTL } from "./loaders/stl"
 export { loadOBJ } from "./loaders/obj"
 // Re-export 3MF loader
 export { load3MF } from "./loaders/threemf"
+// Re-export JSCAD operation loader
+export { loadJscadOperation } from "./loaders/jscad"
