@@ -1,4 +1,13 @@
 // Types for simple-3d-svg
+import type { JscadOperation } from "jscad-planner"
+
+export type { JscadOperation }
+
+export interface JscadObject {
+  jscad: JscadOperation
+  color?: Color
+}
+
 export interface Point3 {
   x: number
   y: number
@@ -50,7 +59,8 @@ export interface Camera {
 }
 
 export interface Scene {
-  boxes: Box[]
+  boxes?: Box[]
+  jscadObjects?: JscadObject[]
   camera: Camera
 }
 
