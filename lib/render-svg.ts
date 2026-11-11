@@ -16,6 +16,8 @@ export async function renderScene(
     showAxes?: boolean
     showOrigin?: boolean
     showGrid?: boolean
+    cullHiddenPolygons?: boolean
+    minVisiblePolygonArea?: number
     grid?: {
       /** world-space grid cell size (default = 1)            */ cellSize?: number
       /** plane on which to draw the grid (default = "xz")   */ plane?:
@@ -36,6 +38,8 @@ export async function renderScene(
     width: opt.width,
     height: opt.height,
     backgroundColor: opt.backgroundColor,
+    cullHiddenPolygons: opt.cullHiddenPolygons,
+    minVisiblePolygonArea: opt.minVisiblePolygonArea,
   })
 
   const out: string[] = []

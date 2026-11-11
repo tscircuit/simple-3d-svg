@@ -17,6 +17,14 @@ export type {
 // Re-export the main render function
 export { renderScene } from "./render-svg"
 
+// Re-export polygon visibility utilities
+export {
+  type Point2D,
+  getPolygonArea,
+  areaOfPolygonCoveredByOtherPolygons,
+  isPolygonCoveredByOtherPolygons,
+} from "./polygon-visibility"
+
 // Re-export STL loader
 export { loadSTL } from "./loaders/stl"
 // Re-export OBJ loader
