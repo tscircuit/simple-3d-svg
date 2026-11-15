@@ -1,9 +1,69 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <script src="./dragrotate.ts" type="module"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SVG Drag Rotate (rAF + Cache)</title>
+
+    <!-- Prefetch/Preload the model resource -->
+    <link
+      rel="prefetch"
+      href="https://modelcdn.tscircuit.com/easyeda_models/download?uuid=6ef04b62f1e945518af209609f65fa6f&pn=C110153"
+      as="fetch"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://modelcdn.tscircuit.com/easyeda_models/download?uuid=6ef04b62f1e945518af209609f65fa6f&pn=C110153"
+      as="fetch"
+      crossorigin
+    />
+
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        background: #0b0b0c;
+        color: #ddd;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial;
+      }
+      #app {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+      }
+      #svg-container {
+        aspect-ratio: 1 / 1;
+        width: min(92vw, 92vh);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #0f1214;
+        box-shadow: 0 10px 40px rgba(0,0,0,.4), inset 0 0 12px rgba(255,255,255,.06);
+        touch-action: none;
+      }
+      .hint {
+        margin-top: 12px;
+        opacity: .7;
+        font-size: 12px;
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
-    <div id="svg-container"></div>
+    <div id="app">
+      <div>
+        <div id="svg-container"></div>
+        <div class="hint">Drag to rotate, release to render high quality</div>
+      </div>
+    </div>
+
+    <!-- Optional: register Service Worker for persistent cache -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(console.error);
+      }
+    </script>
+
+    <script type="module" src="/src/dragrotate.ts"></script>
   </body>
 </html>
