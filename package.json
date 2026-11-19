@@ -1,5 +1,6 @@
 {
   "name": "@tscircuit/simple-3d-svg",
+  "license": "MIT",
   "main": "./dist/index.js",
   "version": "0.0.41",
   "type": "module",
