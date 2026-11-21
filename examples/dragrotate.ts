@@ -1,59 +1,135 @@
 import { renderScene } from "../lib"
+import { getModelBlobURL, warmupModelIdle } from "./model-loader"
 
-const svgContainer = document.getElementById("svg-container")!
-function getDim() {
-  return Math.min(window.innerWidth, window.innerHeight)
-}
+const container = document.getElementById("svg-container") as HTMLDivElement
 
-const objUrl =
-  "https://modelcdn.tscircuit.com/easyeda_models/download?uuid=6ef04b62f1e945518af209609f65fa6f&pn=C110153&cachebust_origin="
+// Render into <img> instead of innerHTML to avoid parsing heavy SVG DOM
+const img = document.createElement("img")
+img.style.display = "block"
+img.style.width = "100%"
+img.style.height = "100%"
+container.appendChild(img)
 
+// Camera state
 let yaw = 0.6
 let pitch = 0.3
 const radius = 30
-let isDragging = false
+
+// Interaction state
+let dragging = false
 let lastX = 0
 let lastY = 0
 
-async function render() {
-  const dim = getDim()
-  const camPos = {
+// Render scheduling state
+let rAFId: number | null = null
+let pendingLowQ = false
+let needHighQ = false
+let rendering = false
+let renderToken = 0
+let currentBlobUrl: string | null = null
+let lastPixelSize = 0
+
+function getPixelSize(): number {
+  const rect = container.getBoundingClientRect()
+  return Math.max(1, Math.floor(rect.width))
+}
+
+function camPos() {
+  return {
     x: radius * Math.cos(pitch) * Math.cos(yaw),
     y: radius * Math.sin(pitch),
     z: radius * Math.cos(pitch) * Math.sin(yaw),
   }
-
-  const svg = await renderScene(
-    {
-      boxes: [
-        {
-          center: { x: 0, y: 0, z: 0 },
-          size: { x: 20, y: 20, z: 20 },
-          drawBoundingBox: true,
-          objUrl,
-        },
-      ],
-      camera: {
-        position: camPos,
-        lookAt: { x: 0, y: 0, z: 0 },
-      },
-    },
-    { width: dim, height: dim },
-  )
-
-  svgContainer.innerHTML = svg.replace(/<\?xml[^>]*\?>\s*/g, "")
-  svgContainer.style.width = `${dim}px`
-  svgContainer.style.height = `${dim}px`
 }
 
-svgContainer.addEventListener("mousedown", (ev) => {
-  isDragging = true
+function lowQualityOpts(dim: number) {
+  const d = Math.max(256, Math.floor(dim * 0.5))
+  return { width: d, height: d, quality: "low" as const }
+}
+
+function highQualityOpts(dim: number) {
+  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1))
+  const d = Math.floor(dim * dpr)
+  return { width: d, height: d, quality: "high" as const }
+}
+
+function scheduleRender({ high = false } = {}) {
+  if (high) needHighQ = true
+  else pendingLowQ = true
+  if (rAFId != null) return
+  rAFId = requestAnimationFrame(tick)
+}
+
+function tick() {
+  rAFId = null
+  if (pendingLowQ && !rendering) {
+    pendingLowQ = false
+    void renderOnce({ high: false })
+  }
+  if (needHighQ && !rendering) {
+    needHighQ = false
+    void renderOnce({ high: true })
+  }
+  if ((pendingLowQ || needHighQ) && rAFId == null) {
+    rAFId = requestAnimationFrame(tick)
+  }
+}
+
+async function renderOnce({ high }: { high: boolean }) {
+  rendering = true
+  const token = ++renderToken
+  const dim = getPixelSize()
+
+  if (!high && Math.abs(dim - lastPixelSize) <= 1 && !dragging) {
+    rendering = false
+    return
+  }
+
+  try {
+    const objUrl = await getModelBlobURL()
+    const opts = high ? highQualityOpts(dim) : lowQualityOpts(dim)
+
+    const svg = await renderScene(
+      {
+        boxes: [
+          {
+            center: { x: 0, y: 0, z: 0 },
+            size: { x: 20, y: 20, z: 20 },
+            drawBoundingBox: high ? true : false,
+            objUrl,
+          },
+        ],
+        camera: { position: camPos(), lookAt: { x: 0, y: 0, z: 0 } },
+      },
+      { width: opts.width, height: opts.height },
+    )
+
+    if (token !== renderToken) return
+
+    const blob = new Blob([svg], { type: "image/svg+xml" })
+    const url = URL.createObjectURL(blob)
+    if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl)
+    currentBlobUrl = url
+    img.src = url
+
+    if (high) lastPixelSize = dim
+  } catch (err) {
+    console.error(err)
+  } finally {
+    rendering = false
+  }
+}
+
+// Pointer interactions
+container.addEventListener("pointerdown", (ev) => {
+  dragging = true
+  container.setPointerCapture(ev.pointerId)
   lastX = ev.clientX
   lastY = ev.clientY
 })
 
-window.addEventListener("mousemove", (ev) => {
-  if (!isDragging) return
+container.addEventListener("pointermove", (ev) => {
+  if (!dragging) return
   const dx = ev.clientX - lastX
   const dy = ev.clientY - lastY
   lastX = ev.clientX
@@ -62,14 +138,25 @@ window.addEventListener("mousemove", (ev) => {
   pitch += dy * 0.01
   if (pitch > Math.PI / 2 - 0.01) pitch = Math.PI / 2 - 0.01
   if (pitch < -Math.PI / 2 + 0.01) pitch = -Math.PI / 2 + 0.01
-  render()
+  scheduleRender({ high: false })
 })
 
-window.addEventListener("mouseup", () => {
-  isDragging = false
+container.addEventListener("pointerup", (ev) => {
+  if (!dragging) return
+  dragging = false
+  container.releasePointerCapture(ev.pointerId)
+  scheduleRender({ high: true })
 })
 
-// keep SVG square on resize
-window.addEventListener("resize", render)
+// Resize observer to trigger high quality render
+const ro = new ResizeObserver(() => scheduleRender({ high: true }))
+ro.observe(container)
 
-render()
+// Warm up and initial render
+warmupModelIdle()
+scheduleRender({ high: true })
+
+// Cleanup Blob URLs on unload
+window.addEventListener("beforeunload", () => {
+  if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl)
+})
