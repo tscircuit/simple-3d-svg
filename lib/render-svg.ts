@@ -1,5 +1,6 @@
 import type { Scene, Color, Camera, Point3 } from "./types"
 import { colorToCss } from "./color"
+import { cullHiddenFaceElements } from "./polygon-culling"
 import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
@@ -16,6 +17,10 @@ export async function renderScene(
     showAxes?: boolean
     showOrigin?: boolean
     showGrid?: boolean
+    /** Cull faces completely hidden behind closer opaque faces using RBush. */
+    cullHiddenPolygons?: boolean
+    /** Minimum uncovered area (in sq px) to keep a face when culling (default: 1). */
+    minVisiblePolygonArea?: number
     grid?: {
       /** world-space grid cell size (default = 1)            */ cellSize?: number
       /** plane on which to draw the grid (default = "xz")   */ plane?:
@@ -29,7 +34,7 @@ export async function renderScene(
     width: W,
     height: H,
     backgroundColor,
-    elements,
+    elements: rawElements,
     images,
     texId,
   } = await buildRenderElements(scene, {
@@ -37,6 +42,11 @@ export async function renderScene(
     height: opt.height,
     backgroundColor: opt.backgroundColor,
   })
+  const elements = opt.cullHiddenPolygons
+    ? cullHiddenFaceElements(rawElements, {
+        minVisibleArea: opt.minVisiblePolygonArea,
+      })
+    : rawElements
 
   const out: string[] = []
   out.push(
