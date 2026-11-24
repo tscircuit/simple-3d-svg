@@ -17,6 +17,15 @@ export type {
 // Re-export the main render function
 export { renderScene } from "./render-svg"
 
+// Re-export polygon visibility / culling helpers
+export {
+  areaOfPolygonCoveredByOtherPolygons,
+  cullHiddenFaceElements,
+  isPolygonCoveredByOtherPolygons,
+  polygonArea,
+} from "./polygon-culling"
+export type { Point2, Polygon2D } from "./polygon-culling"
+
 // Re-export STL loader
 export { loadSTL } from "./loaders/stl"
 // Re-export OBJ loader
