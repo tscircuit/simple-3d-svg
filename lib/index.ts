@@ -8,11 +8,13 @@ export type {
   RGBA,
   Color,
   Box,
+  JscadObject,
   Camera,
   Scene,
   Triangle,
   STLMesh,
 } from "./types"
+export type { JscadOperation } from "jscad-planner"
 
 // Re-export the main render function
 export { renderScene } from "./render-svg"
@@ -23,3 +25,8 @@ export { loadSTL } from "./loaders/stl"
 export { loadOBJ } from "./loaders/obj"
 // Re-export 3MF loader
 export { load3MF } from "./loaders/threemf"
+// Re-export JSCAD converter
+export {
+  convertJscadObjectToMesh,
+  convertJscadOperationToMesh,
+} from "./loaders/jscad"

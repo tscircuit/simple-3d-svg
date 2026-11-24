@@ -1,3 +1,5 @@
+import type { JscadOperation } from "jscad-planner"
+
 // Types for simple-3d-svg
 export interface Point3 {
   x: number
@@ -49,8 +51,17 @@ export interface Camera {
   focalLength?: number
 }
 
+export interface JscadObject {
+  jscad: JscadOperation
+  color?: Color
+  center?: Point3
+  rotation?: Point3
+  scale?: number | Point3
+}
+
 export interface Scene {
-  boxes: Box[]
+  boxes?: Box[]
+  jscadObjects?: JscadObject[]
   camera: Camera
 }
 
