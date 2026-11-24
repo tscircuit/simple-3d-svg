@@ -301,38 +301,42 @@ function renderOrigin(cam: Camera, W: number, H: number): string {
     const end = add(origin, scale(dir, L))
     const startCam = toCam(origin)
     const endCam = toCam(end)
-    const start2d = project(startCam)!
-    const end2d1 = project(endCam)!
+    const start2d = project(startCam)
+    const end2d1 = project(endCam)
+    if (!start2d || !end2d1) return
+
     const dx = end2d1.x - start2d.x
     const dy = end2d1.y - start2d.y
     const len = Math.sqrt(dx * dx + dy * dy)
+    // An axis parallel to the view direction projects to a point, so there
+    // is no line direction to draw along.
+    if (!len) return
+
     const end2d2 = {
       x: start2d.x + (dx * minLineLengthPx) / len,
       y: start2d.y + (dy * minLineLengthPx) / len,
     }
-    if (start2d && end2d1) {
-      // Create a unique gradient id for each axis
-      const gradId = `axis-grad-${i}`
+    // Create a unique gradient id for each axis
+    const gradId = `axis-grad-${i}`
 
-      // Calculate gradient vector in SVG user space
-      const x1 = fmt(start2d.x)
-      const y1 = fmt(start2d.y)
-      const x2 = fmt(end2d2.x)
-      const y2 = fmt(end2d2.y)
+    // Calculate gradient vector in SVG user space
+    const x1 = fmt(start2d.x)
+    const y1 = fmt(start2d.y)
+    const x2 = fmt(end2d2.x)
+    const y2 = fmt(end2d2.y)
 
-      // Define the gradient: color at 0%, white at 50% and 100%
-      gradientDefs.push(
-        `    <linearGradient id="${gradId}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="userSpaceOnUse">` +
-          `      <stop offset="0%" stop-color="${color}"/>` +
-          `      <stop offset="${Math.min((len / minLineLengthPx) * 1000, 100)}%" stop-color="rgba(255,255,255,0)"/>` +
-          `      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>` +
-          `    </linearGradient>`,
-      )
+    // Define the gradient: color at 0%, white at 50% and 100%
+    gradientDefs.push(
+      `    <linearGradient id="${gradId}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="userSpaceOnUse">` +
+        `      <stop offset="0%" stop-color="${color}"/>` +
+        `      <stop offset="${Math.min((len / minLineLengthPx) * 1000, 100)}%" stop-color="rgba(255,255,255,0)"/>` +
+        `      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>` +
+        `    </linearGradient>`,
+    )
 
-      parts.push(
-        `    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="url(#${gradId})" />`,
-      )
-    }
+    parts.push(
+      `    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="url(#${gradId})" />`,
+    )
   })
 
   // Insert gradients into SVG <defs> if any
