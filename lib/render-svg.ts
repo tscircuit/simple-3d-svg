@@ -3,8 +3,19 @@ import { colorToCss } from "./color"
 import { buildRenderElements } from "./render-elements"
 import { sub, cross, dot, len, norm, add, scale } from "./vec3"
 
-function fmt(n: number) {
-  return Math.round(n) + ""
+const fmt = (n: number) => `${Math.round(n)}`
+
+function pointsToString(pts: ReadonlyArray<{ x: number; y: number }>): string {
+  if (!pts.length) return ""
+  let out = ""
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i]!
+    out += fmt(p.x)
+    out += ","
+    out += fmt(p.y)
+    if (i < pts.length - 1) out += " "
+  }
+  return out
 }
 
 export async function renderScene(
@@ -44,28 +55,28 @@ export async function renderScene(
   )
   if (backgroundColor) {
     out.push(
-      `  <rect x="${-W / 2}" y="${-H / 2}" width="${W}" height="${H}" fill="${colorToCss(backgroundColor)}" />\n`,
+      `<rect x="${-W / 2}" y="${-H / 2}" width="${W}" height="${H}" fill="${colorToCss(backgroundColor)}"/>`,
     )
   }
 
   // ---- defs section (identical to old code) ----
   if (images.length) {
-    out.push("  <defs>\n")
+    out.push("<defs>")
 
     // Write one <image> per unique texture
     for (const [href, id] of texId) {
       out.push(
-        `    <image id="${id}" href="${href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>\n`,
+        `<image id="${id}" href="${href}" width="1" height="1" preserveAspectRatio="none" style="image-rendering:pixelated"/>`,
       )
     }
 
     // Write clip paths
     for (const img of images) {
       out.push(
-        `    <clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}" /></clipPath>\n`,
+        `<clipPath id="${img.clip}" clipPathUnits="objectBoundingBox"><polygon points="${img.points}"/></clipPath>`,
       )
     }
-    out.push("  </defs>\n")
+    out.push("</defs>")
   }
 
   // ── grid plane ────────────────────────────────────────────
@@ -77,60 +88,55 @@ export async function renderScene(
 
   // ---- element rendering loop ----
   let inStrokeGroup = false
+  const openStrokeGroup = () => {
+    if (!inStrokeGroup) {
+      out.push(
+        '<g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">',
+      )
+      inStrokeGroup = true
+    }
+  }
+  const closeStrokeGroup = () => {
+    if (inStrokeGroup) {
+      out.push("</g>")
+      inStrokeGroup = false
+    }
+  }
 
   for (const element of elements) {
     if (element.type === "face" || element.type === "image") {
-      // Start stroke group if not already in one
-      if (!inStrokeGroup) {
-        out.push(
-          '  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">\n',
-        )
-        inStrokeGroup = true
-      }
+      openStrokeGroup()
 
       if (element.type === "face") {
         const f = element.data
         const strokeAttr = f.stroke ? "" : ' stroke="none"'
         out.push(
-          `    <polygon fill="${f.fill}"${strokeAttr} points="${f.pts
-            .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
-            .join(" ")}" />\n`,
+          `<polygon fill="${f.fill}"${strokeAttr} points="${pointsToString(f.pts)}"/>`,
         )
       } else {
         const img = element.data
         out.push(
-          `    <g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>\n`,
+          `<g transform="${img.matrix}" clip-path="url(#${img.clip})"><use href="#${img.sym}"/></g>`,
         )
       }
     } else if (element.type === "label") {
-      // Close stroke group if we're in one
-      if (inStrokeGroup) {
-        out.push("  </g>\n")
-        inStrokeGroup = false
-      }
+      closeStrokeGroup()
 
       const l = element.data
       out.push(
-        `  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>\n`,
+        `<g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="${l.matrix}"><text x="0" y="0" fill="${l.fill}">${l.text}</text></g>`,
       )
     } else if (element.type === "edge") {
-      if (inStrokeGroup) {
-        out.push("  </g>\n")
-        inStrokeGroup = false
-      }
+      closeStrokeGroup()
       const e = element.data
       out.push(
-        `  <polyline fill="none" stroke="${e.color}" points="${e.pts
-          .map((p) => `${p.x},${p.y}`)
-          .join(" ")}" />\n`,
+        `<polyline fill="none" stroke="${e.color}" points="${pointsToString(e.pts)}"/>`,
       )
     }
   }
 
   // Close stroke group if still open
-  if (inStrokeGroup) {
-    out.push("  </g>\n")
-  }
+  closeStrokeGroup()
 
   if (opt.showOrigin) {
     out.push(renderOrigin(scene.camera, W, H))

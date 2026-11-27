@@ -124,140 +124,7 @@ export async function buildRenderElements(
     const bc = bw.map((v) => toCam(v, scene.camera))
     const bp = bc.map((v) => proj(v, W, H, focal))
 
-    if (box.drawBoundingBox) {
-      for (const [a, b] of EDGES) {
-        const pa = bp[a]
-        const pb = bp[b]
-        if (pa && pb) {
-          const depth = Math.max(bc[a]!.z, bc[b]!.z)
-          edges.push({ pts: [pa, pb], depth, color: "rgba(0,0,0,0.5)" })
-        }
-      }
-    }
-
-    // Handle STL rendering
-    if (box.stlUrl && stlMeshes.has(box.stlUrl)) {
-      const mesh = stlMeshes.get(box.stlUrl)!
-      const transformedVertices = scaleAndPositionMesh(
-        mesh,
-        box,
-        box.scaleStlToBox ?? false,
-        "stl",
-      )
-
-      // Render STL triangles
-      for (let i = 0; i < mesh.triangles.length; i++) {
-        const triangle = mesh.triangles[i]
-        const vertexStart = i * 3
-
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
-
-        const v0c = toCam(v0w, scene.camera)
-        const v1c = toCam(v1w, scene.camera)
-        const v2c = toCam(v2w, scene.camera)
-
-        const v0p = proj(v0c, W, H, focal)
-        const v1p = proj(v1c, W, H, focal)
-        const v2p = proj(v2c, W, H, focal)
-
-        if (v0p && v1p && v2p) {
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const normal = cross(edge1, edge2)
-          const baseColor = box.color ?? "gray"
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            cam: [v0c, v1c, v2c],
-            fill: shadeByNormal(baseColor, normal),
-            stroke: false,
-          })
-        }
-      }
-    } else if (box.objUrl && objMeshes.has(box.objUrl)) {
-      const mesh = objMeshes.get(box.objUrl)!
-      const transformedVertices = scaleAndPositionMesh(
-        mesh,
-        box,
-        box.scaleObjToBox ?? false,
-        "obj",
-      )
-
-      for (let i = 0; i < mesh.triangles.length; i++) {
-        const vertexStart = i * 3
-        const triangle = mesh.triangles[i]!
-
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
-
-        const v0c = toCam(v0w, scene.camera)
-        const v1c = toCam(v1w, scene.camera)
-        const v2c = toCam(v2w, scene.camera)
-
-        const v0p = proj(v0c, W, H, focal)
-        const v1p = proj(v1c, W, H, focal)
-        const v2p = proj(v2c, W, H, focal)
-
-        if (v0p && v1p && v2p) {
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const faceNormal = cross(edge1, edge2)
-
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            cam: [v0c, v1c, v2c],
-            fill: shadeByNormal(
-              box.color ?? triangle.color ?? "gray",
-              faceNormal,
-            ),
-            stroke: false,
-          })
-        }
-      }
-    } else if (box.threeMfUrl && threeMfMeshes.has(box.threeMfUrl)) {
-      const mesh = threeMfMeshes.get(box.threeMfUrl)!
-      const transformedVertices = scaleAndPositionMesh(
-        mesh,
-        box,
-        box.scaleThreeMfToBox ?? false,
-        "3mf",
-      )
-
-      for (let i = 0; i < mesh.triangles.length; i++) {
-        const vertexStart = i * 3
-        const triangle = mesh.triangles[i]!
-
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
-
-        const v0c = toCam(v0w, scene.camera)
-        const v1c = toCam(v1w, scene.camera)
-        const v2c = toCam(v2w, scene.camera)
-
-        const v0p = proj(v0c, W, H, focal)
-        const v1p = proj(v1c, W, H, focal)
-        const v2p = proj(v2c, W, H, focal)
-
-        if (v0p && v1p && v2p) {
-          const edge1 = sub(v1c, v0c)
-          const edge2 = sub(v2c, v0c)
-          const faceNormal = cross(edge1, edge2)
-
-          faces.push({
-            pts: [v0p, v1p, v2p],
-            cam: [v0c, v1c, v2c],
-            fill: shadeByNormal(
-              box.color ?? triangle.color ?? "gray",
-              faceNormal,
-            ),
-            stroke: false,
-          })
-        }
-      }
-    } else {
+    const renderSimpleBox = () => {
       // Handle regular box rendering
       const vw = verts(box)
       const vc = vw.map((v) => toCam(v, scene.camera))
@@ -416,7 +283,7 @@ export async function buildRenderElements(
             const cx = pts.reduce((s, p) => s + (p as Proj).x, 0) / 4
             const cy = pts.reduce((s, p) => s + (p as Proj).y, 0) / 4
             // use furthest top-face vertex so the label follows the face order
-            const cz = Math.max(...TOP.map((i) => vc[i]!.z))
+            const cz = Math.max(...TOP.map((i) => bc[i]!.z))
             // SVG transform matrix: [a b c d e f] where
             // x' = a*x + c*y + e ; y' = b*x + d*y + f
             const m = `matrix(${uN.x} ${uN.y} ${vN.x} ${vN.y} ${cx} ${cy})`
@@ -431,6 +298,156 @@ export async function buildRenderElements(
         }
       }
     }
+
+    if (box.drawBoundingBox) {
+      for (const [a, b] of EDGES) {
+        const pa = bp[a]
+        const pb = bp[b]
+        if (pa && pb) {
+          const depth = Math.max(bc[a]!.z, bc[b]!.z)
+          edges.push({ pts: [pa, pb], depth, color: "rgba(0,0,0,0.5)" })
+        }
+      }
+    }
+
+    // Handle STL rendering
+    if (box.stlUrl && stlMeshes.has(box.stlUrl)) {
+      const mesh = stlMeshes.get(box.stlUrl)!
+      const transformedVertices = scaleAndPositionMesh(
+        mesh,
+        box,
+        box.scaleStlToBox ?? false,
+        "stl",
+      )
+
+      // Render STL triangles
+      const startCount = faces.length
+      for (let i = 0; i < mesh.triangles.length; i++) {
+        const triangle = mesh.triangles[i]
+        const vertexStart = i * 3
+
+        const v0w = transformedVertices[vertexStart]!
+        const v1w = transformedVertices[vertexStart + 1]!
+        const v2w = transformedVertices[vertexStart + 2]!
+
+        const v0c = toCam(v0w, scene.camera)
+        const v1c = toCam(v1w, scene.camera)
+        const v2c = toCam(v2w, scene.camera)
+
+        const v0p = proj(v0c, W, H, focal)
+        const v1p = proj(v1c, W, H, focal)
+        const v2p = proj(v2c, W, H, focal)
+
+        if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const normal = cross(edge1, edge2)
+          const baseColor = box.color ?? "gray"
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            cam: [v0c, v1c, v2c],
+            fill: shadeByNormal(baseColor, normal),
+            stroke: false,
+          })
+        }
+      }
+      if (faces.length === startCount) {
+        renderSimpleBox()
+      }
+    } else if (box.objUrl && objMeshes.has(box.objUrl)) {
+      const mesh = objMeshes.get(box.objUrl)!
+      const transformedVertices = scaleAndPositionMesh(
+        mesh,
+        box,
+        box.scaleObjToBox ?? false,
+        "obj",
+      )
+
+      const startCount = faces.length
+      for (let i = 0; i < mesh.triangles.length; i++) {
+        const vertexStart = i * 3
+        const triangle = mesh.triangles[i]!
+
+        const v0w = transformedVertices[vertexStart]!
+        const v1w = transformedVertices[vertexStart + 1]!
+        const v2w = transformedVertices[vertexStart + 2]!
+
+        const v0c = toCam(v0w, scene.camera)
+        const v1c = toCam(v1w, scene.camera)
+        const v2c = toCam(v2w, scene.camera)
+
+        const v0p = proj(v0c, W, H, focal)
+        const v1p = proj(v1c, W, H, focal)
+        const v2p = proj(v2c, W, H, focal)
+
+        if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const faceNormal = cross(edge1, edge2)
+
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            cam: [v0c, v1c, v2c],
+            fill: shadeByNormal(
+              box.color ?? triangle.color ?? "gray",
+              faceNormal,
+            ),
+            stroke: false,
+          })
+        }
+      }
+      if (faces.length === startCount) {
+        renderSimpleBox()
+      }
+    } else if (box.threeMfUrl && threeMfMeshes.has(box.threeMfUrl)) {
+      const mesh = threeMfMeshes.get(box.threeMfUrl)!
+      const transformedVertices = scaleAndPositionMesh(
+        mesh,
+        box,
+        box.scaleThreeMfToBox ?? false,
+        "3mf",
+      )
+
+      const startCount = faces.length
+      for (let i = 0; i < mesh.triangles.length; i++) {
+        const vertexStart = i * 3
+        const triangle = mesh.triangles[i]!
+
+        const v0w = transformedVertices[vertexStart]!
+        const v1w = transformedVertices[vertexStart + 1]!
+        const v2w = transformedVertices[vertexStart + 2]!
+
+        const v0c = toCam(v0w, scene.camera)
+        const v1c = toCam(v1w, scene.camera)
+        const v2c = toCam(v2w, scene.camera)
+
+        const v0p = proj(v0c, W, H, focal)
+        const v1p = proj(v1c, W, H, focal)
+        const v2p = proj(v2c, W, H, focal)
+
+        if (v0p && v1p && v2p) {
+          const edge1 = sub(v1c, v0c)
+          const edge2 = sub(v2c, v0c)
+          const faceNormal = cross(edge1, edge2)
+
+          faces.push({
+            pts: [v0p, v1p, v2p],
+            cam: [v0c, v1c, v2c],
+            fill: shadeByNormal(
+              box.color ?? triangle.color ?? "gray",
+              faceNormal,
+            ),
+            stroke: false,
+          })
+        }
+      }
+      if (faces.length === startCount) {
+        renderSimpleBox()
+      }
+    } else {
+      renderSimpleBox()
+    }
+
   }
 
   // BSP sort faces before merging with other elements
