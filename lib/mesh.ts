@@ -1,70 +1,108 @@
-import type { Point3, STLMesh, Box } from "./types"
-import { add, sub, scale, rotLocal } from "./vec3"
+import { vec3 } from "gl-matrix"
+import type { STLMesh, Box } from "./types"
+import {
+  add,
+  createRotationMatrix,
+  fromPoint,
+  scale,
+  subtract,
+  transformMat4,
+} from "./gl-vec3"
+
+function accumulateOptionalPosition(out: vec3, box: Box) {
+  if (box.stlPosition) add(out, out, fromPoint(box.stlPosition))
+  if (box.objPosition) add(out, out, fromPoint(box.objPosition))
+  if (box.threeMfPosition) add(out, out, fromPoint(box.threeMfPosition))
+}
 
 export function scaleAndPositionMesh(
   mesh: STLMesh,
   box: Box,
   scaleToBox: boolean,
   modelType: "stl" | "obj" | "3mf",
-): Point3[] {
+): Float32Array {
   const { boundingBox } = mesh
-  const meshCenter = scale(add(boundingBox.min, boundingBox.max), 0.5)
+  const meshCenter = vec3.create()
+  add(meshCenter, fromPoint(boundingBox.min), fromPoint(boundingBox.max))
+  scale(meshCenter, meshCenter, 0.5)
   const centerModel = box.centerModel !== false
 
-  // Rotate vertices around the mesh center
-  const rotatedVerts: Point3[] = []
+  const rotationMatrix =
+    modelType === "stl"
+      ? createRotationMatrix(box.stlRotation)
+      : modelType === "obj"
+        ? createRotationMatrix(box.objRotation)
+        : createRotationMatrix(box.threeMfRotation)
+
+  const rotatedVerts = new Float32Array(mesh.triangles.length * 9)
+  const local = vec3.create()
+  const rotated = vec3.create()
+  let cursor = 0
+
   for (const tri of mesh.triangles) {
-    for (const v of tri.vertices) {
-      let p = sub(v, meshCenter)
-      if (modelType === "stl" && box.stlRotation)
-        p = rotLocal(p, box.stlRotation)
-      if (modelType === "obj" && box.objRotation)
-        p = rotLocal(p, box.objRotation)
-      if (modelType === "3mf" && box.threeMfRotation)
-        p = rotLocal(p, box.threeMfRotation)
-      if (!centerModel) p = add(p, meshCenter)
-      rotatedVerts.push(p)
+    for (const vertex of tri.vertices) {
+      subtract(local, fromPoint(vertex), meshCenter)
+      transformMat4(rotated, local, rotationMatrix)
+      if (!centerModel) add(rotated, rotated, meshCenter)
+      rotatedVerts[cursor++] = rotated[0]!
+      rotatedVerts[cursor++] = rotated[1]!
+      rotatedVerts[cursor++] = rotated[2]!
     }
   }
 
   let uniformScale = 1
-  let rotatedCenter = { x: 0, y: 0, z: 0 }
+  const rotatedCenter = vec3.create()
 
   if (scaleToBox) {
-    // Compute bounding box after rotation
-    let min = { x: Infinity, y: Infinity, z: Infinity }
-    let max = { x: -Infinity, y: -Infinity, z: -Infinity }
-    for (const v of rotatedVerts) {
-      if (v.x < min.x) min.x = v.x
-      if (v.y < min.y) min.y = v.y
-      if (v.z < min.z) min.z = v.z
-      if (v.x > max.x) max.x = v.x
-      if (v.y > max.y) max.y = v.y
-      if (v.z > max.z) max.z = v.z
+    const min = vec3.fromValues(Infinity, Infinity, Infinity)
+    const max = vec3.fromValues(-Infinity, -Infinity, -Infinity)
+    for (let i = 0; i < rotatedVerts.length; i += 3) {
+      const x = rotatedVerts[i]!
+      const y = rotatedVerts[i + 1]!
+      const z = rotatedVerts[i + 2]!
+      if (x < min[0]!) min[0] = x
+      if (y < min[1]!) min[1] = y
+      if (z < min[2]!) min[2] = z
+      if (x > max[0]!) max[0] = x
+      if (y > max[1]!) max[1] = y
+      if (z > max[2]!) max[2] = z
     }
-    const rotatedSize = sub(max, min)
-    const boxSize = box.size
-    const scaleX = boxSize.x / rotatedSize.x
-    const scaleY = boxSize.y / rotatedSize.y
-    const scaleZ = boxSize.z / rotatedSize.z
+    const rotatedSize = vec3.create()
+    subtract(rotatedSize, max, min)
+    const boxSize = fromPoint(box.size)
+    const scaleX = rotatedSize[0]! ? boxSize[0]! / rotatedSize[0]! : 1
+    const scaleY = rotatedSize[1]! ? boxSize[1]! / rotatedSize[1]! : 1
+    const scaleZ = rotatedSize[2]! ? boxSize[2]! / rotatedSize[2]! : 1
     uniformScale = Math.min(scaleX, scaleY, scaleZ)
-    rotatedCenter = scale(add(min, max), 0.5)
+    add(rotatedCenter, min, max)
+    scale(rotatedCenter, rotatedCenter, 0.5)
   }
 
-  const transformedVertices: Point3[] = []
-  for (const p of rotatedVerts) {
-    let t = p
+  const transformedVertices = new Float32Array(rotatedVerts.length)
+  const translation = vec3.create()
+  accumulateOptionalPosition(translation, box)
+  const boxRotation = createRotationMatrix(box.rotation)
+  const boxCenter = fromPoint(box.center)
+
+  const transformed = vec3.create()
+  for (let i = 0; i < rotatedVerts.length; i += 3) {
+    vec3.set(
+      transformed,
+      rotatedVerts[i]!,
+      rotatedVerts[i + 1]!,
+      rotatedVerts[i + 2]!,
+    )
     if (scaleToBox) {
-      t = sub(t, rotatedCenter)
-      t = scale(t, uniformScale)
-      if (!centerModel) t = add(t, rotatedCenter)
+      subtract(transformed, transformed, rotatedCenter)
+      scale(transformed, transformed, uniformScale)
+      if (!centerModel) add(transformed, transformed, rotatedCenter)
     }
-    if (box.stlPosition) t = add(t, box.stlPosition)
-    if (box.objPosition) t = add(t, box.objPosition)
-    if (box.threeMfPosition) t = add(t, box.threeMfPosition)
-    if (box.rotation) t = rotLocal(t, box.rotation)
-    t = add(t, box.center)
-    transformedVertices.push(t)
+    add(transformed, transformed, translation)
+    transformMat4(transformed, transformed, boxRotation)
+    add(transformed, transformed, boxCenter)
+    transformedVertices[i] = transformed[0]!
+    transformedVertices[i + 1] = transformed[1]!
+    transformedVertices[i + 2] = transformed[2]!
   }
 
   return transformedVertices

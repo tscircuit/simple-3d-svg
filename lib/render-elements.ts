@@ -15,6 +15,15 @@ function fmtPrecise(n: number): string {
   return (Math.round(n * 100) / 100).toString()
 }
 
+function readVertex(buffer: Float32Array, vertexIndex: number): Point3 {
+  const base = vertexIndex * 3
+  return {
+    x: buffer[base]!,
+    y: buffer[base + 1]!,
+    z: buffer[base + 2]!,
+  }
+}
+
 /*────────────── Camera & Projection ─────────────*/
 const W_DEF = 400
 const H_DEF = 400
@@ -147,12 +156,10 @@ export async function buildRenderElements(
 
       // Render STL triangles
       for (let i = 0; i < mesh.triangles.length; i++) {
-        const triangle = mesh.triangles[i]
         const vertexStart = i * 3
-
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
+        const v0w = readVertex(transformedVertices, vertexStart)
+        const v1w = readVertex(transformedVertices, vertexStart + 1)
+        const v2w = readVertex(transformedVertices, vertexStart + 2)
 
         const v0c = toCam(v0w, scene.camera)
         const v1c = toCam(v1w, scene.camera)
@@ -188,9 +195,9 @@ export async function buildRenderElements(
         const vertexStart = i * 3
         const triangle = mesh.triangles[i]!
 
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
+        const v0w = readVertex(transformedVertices, vertexStart)
+        const v1w = readVertex(transformedVertices, vertexStart + 1)
+        const v2w = readVertex(transformedVertices, vertexStart + 2)
 
         const v0c = toCam(v0w, scene.camera)
         const v1c = toCam(v1w, scene.camera)
@@ -229,9 +236,9 @@ export async function buildRenderElements(
         const vertexStart = i * 3
         const triangle = mesh.triangles[i]!
 
-        const v0w = transformedVertices[vertexStart]!
-        const v1w = transformedVertices[vertexStart + 1]!
-        const v2w = transformedVertices[vertexStart + 2]!
+        const v0w = readVertex(transformedVertices, vertexStart)
+        const v1w = readVertex(transformedVertices, vertexStart + 1)
+        const v2w = readVertex(transformedVertices, vertexStart + 2)
 
         const v0c = toCam(v0w, scene.camera)
         const v1c = toCam(v1w, scene.camera)
