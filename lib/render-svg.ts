@@ -7,6 +7,11 @@ function fmt(n: number) {
   return Math.round(n) + ""
 }
 
+// Optimized coordinate formatting for performance
+function fmtFast(n: number) {
+  return (n | 0) + "" // Bitwise OR for faster integer conversion
+}
+
 export async function renderScene(
   scene: Scene,
   opt: {
@@ -121,7 +126,7 @@ export async function renderScene(
       const e = element.data
       out.push(
         `  <polyline fill="none" stroke="${e.color}" points="${e.pts
-          .map((p) => `${p.x},${p.y}`)
+          .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
           .join(" ")}" />\n`,
       )
     }

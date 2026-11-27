@@ -10,9 +10,7 @@
     <polygon fill="rgba(255, 0, 0, 0.9)" points="0,78 0,-18 45,-61 40,23" />
     <polygon fill="rgba(255, 0, 0, 0.9)" points="109,115 128,12 151,-42 132,48" />
     <polygon fill="rgba(255, 0, 0, 0.9)" points="128,12 0,-18 45,-61 151,-42" />
-  </g>
-  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.9731004363811854 -0.23030779902638726 0.3840538530036962 -0.9229404556777903 81.23755951143809 -27.17905889948105)"><text x="0" y="0" fill="white">Hello World</text></g>
-  <g stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
     <polygon fill="rgba(255, 0, 0, 0.9)" points="109,115 0,78 0,-18 128,12" />
   </g>
+  <g font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="central" transform="matrix(-0.9731004363811854 -0.23030779902638726 0.3840538530036962 -0.9229404556777903 81.23755951143809 -27.17905889948105)"><text x="0" y="0" fill="white">Hello World</text></g>
 </svg>
