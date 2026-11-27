@@ -13,6 +13,11 @@ export async function loadOBJ(url: string): Promise<STLMesh> {
   return mesh
 }
 
+function resolveOBJIndex(reference: string, count: number): number {
+  const index = parseInt(reference, 10)
+  return index < 0 ? count + index : index - 1
+}
+
 function parseOBJ(text: string): STLMesh {
   const lines = text.split(/\r?\n/)
   const vertices: Point3[] = []
@@ -73,8 +78,8 @@ function parseOBJ(text: string): STLMesh {
       const idxs = parts.map((p) => {
         const [vi, , ni] = p.split("/") as [string, string, string]
         return {
-          v: parseInt(vi) - 1,
-          n: ni ? parseInt(ni) - 1 : undefined,
+          v: resolveOBJIndex(vi, vertices.length),
+          n: ni ? resolveOBJIndex(ni, normals.length) : undefined,
         }
       })
       for (let i = 1; i < idxs.length - 1; i++) {
